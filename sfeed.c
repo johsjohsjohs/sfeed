@@ -91,7 +91,7 @@ typedef struct feedcontext {
 
 static long long  datetounix(long long, int, int, int, int, int);
 static enum TagId gettag(enum FeedType, const char *, size_t);
-static long long  gettzoffset(const char *);
+static long gettzoffset(const char *);
 static int  isattr(const char *, size_t, const char *, size_t);
 static int  istag(const char *, size_t, const char *, size_t);
 static int  parsetime(const char *, time_t *);
@@ -410,7 +410,7 @@ datetounix(long long year, int mon, int day, int hour, int min, int sec)
  * ambiguous anyway.
  * ANSI and military zones are defined wrong in RFC822 and are unsupported,
  * see note on RFC2822 4.3 page 32. */
-static long long
+static long
 gettzoffset(const char *s)
 {
 	static struct {
@@ -427,7 +427,7 @@ gettzoffset(const char *s)
 		{ "PST", -8 * 3600 },
 	};
 	const char *p;
-	int tzhour = 0, tzmin = 0;
+	long tzhour = 0, tzmin = 0;
 	size_t i;
 
 	for (; *s && isspace((unsigned char)*s); s++)
