@@ -109,6 +109,8 @@ static void xmlattrend(XMLParser *, const char *, size_t, const char *,
                        size_t);
 static void xmlattrstart(XMLParser *, const char *, size_t, const char *,
                          size_t);
+static void xmlattrentity(XMLParser *, const char *, size_t, const char *,
+                          size_t, const char *, size_t);
 static void xmlcdata(XMLParser *, const char *, size_t);
 static void xmldata(XMLParser *, const char *, size_t);
 static void xmldataentity(XMLParser *, const char *, size_t);
@@ -681,6 +683,26 @@ xmlattrstart(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl)
 }
 
 static void
+xmlattrentity(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
+              const char *data, size_t datalen)
+{
+	char buf[16];
+	ssize_t len;
+
+	/* handles transforming inline XML to data */
+	if (ISINCONTENT(ctx)) {
+		if (ctx.contenttype == ContentTypeHTML)
+			xmldata(p, data, datalen);
+		return;
+	}
+
+	if ((len = xml_entitytostr(data, buf, sizeof(buf))) > 0)
+		xmlattr(p, t, tl, n, nl, buf, (size_t)len);
+	else
+		xmlattr(p, t, tl, n, nl, data, datalen);
+}
+
+static void
 xmlcdata(XMLParser *p, const char *s, size_t len)
 {
 	if (!ctx.field)
@@ -883,6 +905,7 @@ main(int argc, char *argv[])
 	parser.xmlattr = xmlattr;
 	parser.xmlattrend = xmlattrend;
 	parser.xmlattrstart = xmlattrstart;
+	parser.xmlattrentity = xmlattrentity;
 	parser.xmlcdata = xmlcdata;
 	parser.xmldata = xmldata;
 	parser.xmldataentity = xmldataentity;
