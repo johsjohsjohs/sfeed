@@ -671,6 +671,11 @@ xmlattrentity(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 		return;
 	}
 
+	if (!ctx.tagid)
+		return;
+
+	/* try to translate entity, else just pass as data to
+	 * xmldata handler. */
 	if ((len = xml_entitytostr(data, buf, sizeof(buf))) > 0)
 		xmlattr(p, t, tl, n, nl, buf, (size_t)len);
 	else
@@ -735,7 +740,7 @@ xmldataentity(XMLParser *p, const char *data, size_t datalen)
 		return;
 
 	/* try to translate entity, else just pass as data to
-	 * xml_data_handler. */
+	 * xmldata handler. */
 	if ((len = xml_entitytostr(data, buf, sizeof(buf))) > 0)
 		xmldata(p, buf, (size_t)len);
 	else
