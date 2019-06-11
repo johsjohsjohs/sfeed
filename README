@@ -129,8 +129,7 @@ sfeed_opml_import - Generate a sfeedrc config file from an OPML XML file.
 sfeed_mbox        - Format feed data (TSV) to mbox.
 sfeed_plain       - Format feed data (TSV) to a plain-text list.
 sfeed_twtxt       - Format feed data (TSV) to a twtxt feed.
-sfeed_update      - Update feeds and merge with old feeds in the directory
-                    $HOME/.sfeed/feeds by default.
+sfeed_update      - Update feeds and merge items.
 sfeed_web         - Find urls to RSS/Atom feed from a webpage.
 sfeed_xmlenc      - Detect character-set encoding from XML stream.
 sfeedrc.example   - Example config file. Can be copied to $HOME/.sfeed/sfeedrc.
@@ -164,7 +163,7 @@ Files written at runtime by sfeed_update(1)
 
 feedname     - TAB-separated format containing all items per feed. The
                sfeed_update(1) script merges new items with this file.
-feedname.new - Temporary file used by sfeed_update(1) to merge items.
+               The format is documented in sfeed(5).
 
 
 File format
