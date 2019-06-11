@@ -126,7 +126,7 @@ xml_parsecomment(XMLParser *x)
 		x->xmlcommentstart(x);
 	while ((c = GETNEXT()) != EOF) {
 		if (c == '-' || c == '>') {
-			if (x->xmlcomment) {
+			if (x->xmlcomment && datalen) {
 				x->data[datalen] = '\0';
 				x->xmlcomment(x, x->data, datalen);
 				datalen = 0;
@@ -175,7 +175,7 @@ xml_parsecdata(XMLParser *x)
 		x->xmlcdatastart(x);
 	while ((c = GETNEXT()) != EOF) {
 		if (c == ']' || c == '>') {
-			if (x->xmlcdata) {
+			if (x->xmlcdata && datalen) {
 				x->data[datalen] = '\0';
 				x->xmlcdata(x, x->data, datalen);
 				datalen = 0;
