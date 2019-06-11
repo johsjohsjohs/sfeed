@@ -76,8 +76,8 @@ order() {
 # fetch and parse feed.
 # feed(name, feedurl, [basesiteurl], [encoding])
 feed() {
-	# wait until ${maxjobs} are finished: throughput using this logic is
-	# non-optimal, but it is simple and portable.
+	# wait until ${maxjobs} are finished: will stall the queue if an item
+	# is slow, but it is portable.
 	[ ${signo} -ne 0 ] && return
 	[ $((curjobs % maxjobs)) -eq 0 ] && wait
 	[ ${signo} -ne 0 ] && return
