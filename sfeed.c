@@ -609,7 +609,7 @@ xmlattr(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 		return;
 	}
 
-	if (ctx.feedtype == FeedTypeNone)
+	if (!ctx.tagid)
 		return;
 
 	/* content-type may be: Atom: text, xhtml, html or mime-type.
