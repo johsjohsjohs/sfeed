@@ -47,6 +47,7 @@ Caveats
 - The XML specification has no limits on tag and attribute names. For
   simplicity/sanity sake this XML parser takes some liberties. Tag and
   attribute names are truncated.
+- Entity expansions are not parsed aswell as DOCTYPE, ATTLIST etc.
 
 
 Files used
