@@ -15,12 +15,11 @@
 
 #include "util.h"
 
-static struct feed **feeds;
+static struct feed f;
 static char *prefixpath;
 static char *line;
 static size_t linesize;
 static time_t comparetime;
-static unsigned long totalnew;
 
 /* Escape characters in links in geomyidae .gph format */
 void
@@ -71,7 +70,6 @@ printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 			err(1, "localtime");
 
 		isnew = (parsedtime >= comparetime) ? 1 : 0;
-		totalnew += isnew;
 		f->totalnew += isnew;
 		f->total++;
 
@@ -97,17 +95,10 @@ main(int argc, char *argv[])
 {
 	FILE *fpitems, *fpindex, *fp;
 	char *name, path[PATH_MAX + 1];
-	int i;
-	struct feed *f;
+	int i, r;
 
-	if (pledge("stdio rpath wpath cpath", NULL) == -1)
+	if (pledge(argc == 1 ? "stdio" : "stdio rpath wpath cpath", NULL) == -1)
 		err(1, "pledge");
-
-	if (!(prefixpath = getenv("SFEED_GPH_PATH")))
-		prefixpath = "/";
-
-	if (!(feeds = calloc(argc, sizeof(struct feed *))))
-		err(1, "calloc");
 
 	if ((comparetime = time(NULL)) == -1)
 		err(1, "time");
@@ -115,31 +106,30 @@ main(int argc, char *argv[])
 	comparetime -= 86400;
 
 	if (argc == 1) {
-		if (pledge("stdio", NULL) == -1)
-			err(1, "pledge");
-		if (!(feeds[0] = calloc(1, sizeof(struct feed))))
-			err(1, "calloc");
-		feeds[0]->name = "";
-		printfeed(stdout, stdin, feeds[0]);
+		f.name = "";
+		printfeed(stdout, stdin, &f);
 	} else {
+		if (!(prefixpath = getenv("SFEED_GPH_PATH")))
+			prefixpath = "/";
+
 		/* write main index page */
 		if (!(fpindex = fopen("index.gph", "wb")))
 			err(1, "fopen: index.gph");
 
 		for (i = 1; i < argc; i++) {
-			if (!(feeds[i - 1] = calloc(1, sizeof(struct feed))))
-				err(1, "calloc");
-			f = feeds[i - 1];
+			memset(&f, 0, sizeof(f));
 			name = ((name = strrchr(argv[i], '/'))) ? name + 1 : argv[i];
-			f->name = name;
+			f.name = name;
 
 			if (!(fp = fopen(argv[i], "r")))
 				err(1, "fopen: %s", argv[i]);
 
-			snprintf(path, sizeof(path), "%s.gph", f->name);
+			r = snprintf(path, sizeof(path), "%s.gph", name);
+			if (r < 0 || (size_t)r >= sizeof(path))
+				errx(1, "path truncation: %s", path);
 			if (!(fpitems = fopen(path, "wb")))
 				err(1, "fopen");
-			printfeed(fpitems, fp, f);
+			printfeed(fpitems, fp, &f);
 			if (ferror(fp))
 				err(1, "ferror: %s", argv[i]);
 			fclose(fp);
@@ -147,10 +137,9 @@ main(int argc, char *argv[])
 
 			/* append directory item to index */
 			fprintf(fpindex, "[1|");
-			gphlink(fpindex, f->name, strlen(f->name));
+			gphlink(fpindex, name, strlen(name));
 			fprintf(fpindex, " (%lu/%lu)|%s",
-			        f->totalnew, f->total, prefixpath);
-			snprintf(path, sizeof(path), "%s.gph", f->name);
+			        f.totalnew, f.total, prefixpath);
 			gphlink(fpindex, path, strlen(path));
 			fputs("|server|port]\n", fpindex);
 		}
