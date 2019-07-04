@@ -14,11 +14,9 @@ size_t strlcpy(char *, const char *, size_t);
 
 /* feed info */
 struct feed {
-	char *        name;     /* feed name */
+	char         *name;     /* feed name */
 	unsigned long totalnew; /* amount of new items per feed */
 	unsigned long total;    /* total items */
-	time_t        timenewest;
-	char          timenewestformat[64];
 };
 
 /* uri */
