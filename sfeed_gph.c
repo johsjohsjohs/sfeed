@@ -138,8 +138,8 @@ main(int argc, char *argv[])
 			/* append directory item to index */
 			fprintf(fpindex, "[1|");
 			gphlink(fpindex, name, strlen(name));
-			fprintf(fpindex, " (%lu/%lu)|%s",
-			        f.totalnew, f.total, prefixpath);
+			fprintf(fpindex, " (%lu/%lu)|", f.totalnew, f.total);
+			gphlink(fpindex, prefixpath, strlen(prefixpath));
 			gphlink(fpindex, path, strlen(path));
 			fputs("|server|port]\n", fpindex);
 		}
