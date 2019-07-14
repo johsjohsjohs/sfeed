@@ -1,4 +1,4 @@
-.Dd July 7, 2019
+.Dd July 14, 2019
 .Dt SFEED_UPDATE 1
 .Os
 .Sh NAME
@@ -66,6 +66,7 @@ TAB-separated format containing all items per feed.
 The
 .Nm
 script merges new items with this file.
+The filename cannot contain '/' characters, they will be replaced with '_'.
 .El
 .Sh EXAMPLES
 To update your feeds and format them in various formats:

@@ -1,4 +1,4 @@
-.Dd January 25, 2019
+.Dd July 14, 2019
 .Dt SFEEDRC 5
 .Os
 .Sh NAME
@@ -29,6 +29,7 @@ Function to process the feed, its arguments are in the order:
 .It Fa name
 Name of the feed, this is also used as the filename for the TAB-separated
 feed file.
+The filename cannot contain '/' characters, they will be replaced with '_'.
 .It Fa feedurl
 Uri to fetch the RSS/Atom data from, usually a HTTP or HTTPS uri.
 .It Op Fa basesiteurl
