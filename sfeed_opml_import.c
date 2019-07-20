@@ -30,10 +30,9 @@ printsafe(const char *s)
 }
 
 static void
-xml_handler_end_element(XMLParser *p, const char *tag, size_t taglen,
-	int isshort)
+xmltagend(XMLParser *p, const char *t, size_t tl, int isshort)
 {
-	if (strcasecmp(tag, "outline"))
+	if (strcasecmp(t, "outline"))
 		return;
 
 	if (url[0]) {
@@ -52,33 +51,33 @@ xml_handler_end_element(XMLParser *p, const char *tag, size_t taglen,
 }
 
 static void
-xml_handler_attr(XMLParser *p, const char *tag, size_t taglen,
-	const char *name, size_t namelen, const char *value, size_t valuelen)
+xmlattr(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
+	const char *v, size_t vl)
 {
-	if (strcasecmp(tag, "outline"))
+	if (strcasecmp(t, "outline"))
 		return;
 
-	if (!strcasecmp(name, "title"))
-		strlcat(title, value, sizeof(title));
-	else if (!strcasecmp(name, "text"))
-		strlcat(text, value, sizeof(text));
-	else if (!strcasecmp(name, "xmlurl"))
-		strlcat(url, value, sizeof(url));
+	if (!strcasecmp(n, "title"))
+		strlcat(title, v, sizeof(title));
+	else if (!strcasecmp(n, "text"))
+		strlcat(text, v, sizeof(text));
+	else if (!strcasecmp(n, "xmlurl"))
+		strlcat(url, v, sizeof(url));
 }
 
 static void
-xml_handler_attrentity(XMLParser *p, const char *tag, size_t taglen,
-	const char *name, size_t namelen, const char *value, size_t valuelen)
+xmlattrentity(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
+	const char *v, size_t vl)
 {
 	char buf[16];
 	ssize_t len;
 
-	if ((len = xml_entitytostr(value, buf, sizeof(buf))) < 0)
+	if ((len = xml_entitytostr(v, buf, sizeof(buf))) < 0)
 		return;
 	if (len > 0)
-		xml_handler_attr(p, tag, taglen, name, namelen, buf, len);
+		xmlattr(p, t, tl, n, nl, buf, len);
 	else
-		xml_handler_attr(p, tag, taglen, name, namelen, value, valuelen);
+		xmlattr(p, t, tl, n, nl, v, vl);
 }
 
 int
@@ -87,9 +86,9 @@ main(void)
 	if (pledge("stdio", NULL) == -1)
 		err(1, "pledge");
 
-	parser.xmlattr = xml_handler_attr;
-	parser.xmlattrentity = xml_handler_attrentity;
-	parser.xmltagend = xml_handler_end_element;
+	parser.xmlattr = xmlattr;
+	parser.xmlattrentity = xmlattrentity;
+	parser.xmltagend = xmltagend;
 
 	fputs(
 	    "#sfeedpath=\"$HOME/.sfeed/feeds\"\n"

@@ -23,8 +23,8 @@ xmltagstart(XMLParser *p, const char *t, size_t tl)
 }
 
 static void
-xmlattr(XMLParser *p, const char *t, size_t tl, const char *n,
-	size_t nl, const char *v, size_t vl)
+xmlattr(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
+	const char *v, size_t vl)
 {
 	if (strcasecmp(t, "?xml") || strcasecmp(n, "encoding"))
 		return;
