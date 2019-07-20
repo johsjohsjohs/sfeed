@@ -86,7 +86,7 @@ main(int argc, char *argv[])
 		err(1, "calloc");
 	if ((comparetime = time(NULL)) == -1)
 		err(1, "time");
-	/* 1 day old is old news */
+	/* 1 day is old news */
 	comparetime -= 86400;
 
 	fputs("<!DOCTYPE HTML>\n"
