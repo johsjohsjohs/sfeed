@@ -212,12 +212,15 @@ View formatted output in your editor:
 
 - - -
 
-Example script to view feeds with dmenu(1), opens selected url in $BROWSER:
+Example script to view feed items in a vertical list/menu in dmenu(1). It opens
+the selected url in the browser set in $BROWSER:
 
 	#!/bin/sh
-	url=$(sfeed_plain $HOME/.sfeed/feeds/* | dmenu -l 35 -i |
-		sed 's@^.* \([a-zA-Z]*://\)\(.*\)$@\1\2@')
-	[ ! "$url" = "" ] && $BROWSER "$url"
+	url=$(sfeed_plain "$HOME/.sfeed/feeds/"* | dmenu -l 35 -i | \
+		sed -n 's@^.* \([a-zA-Z]*://\)\(.*\)$@\1\2@p')
+	test -n "${url}" && $BROWSER "${url}"
+
+dmenu can be found at: https://git.suckless.org/dmenu/
 
 - - -
 
