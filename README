@@ -334,8 +334,8 @@ to an Atom XML feed (again):
 
 - - -
 
-To have a FIFO stream filtering for new unique feed items and showing them as
-plain-text per line similar to sfeed_plain(1):
+To have a "tail(1) -f"-like FIFO stream filtering for new unique feed items and
+showing them as plain-text per line similar to sfeed_plain(1):
 
 Create a FIFO:
 
