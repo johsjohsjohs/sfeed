@@ -263,7 +263,7 @@ string_append(String *s, const char *data, size_t len)
 	if (!len)
 		return;
 	/* check if allocation is necessary, don't shrink buffer,
-	 * should be more than bufsiz ofcourse. */
+	 * should be more than bufsiz of course. */
 	if (s->len + len >= s->bufsiz)
 		string_buffer_realloc(s, s->len + len + 1);
 	memcpy(s->data + s->len, data, len);
