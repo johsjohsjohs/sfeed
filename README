@@ -468,13 +468,13 @@ fdm config file (~/.sfeed/fdm.conf):
 			}
 			continue
 
-			# If it is in the in cache, stop.
+			# If it is in the cache, stop.
 			match matched and in-cache "${cachepath}" key "%[msgid]"
 			action {
 				keep
 			}
 
-		# Not in cache, process it and add to cache.
+		# Not in the cache, process it and add to cache.
 		match case "^X-Feedname: (.*)" in headers
 		action {
 			# Store to local maildir.
@@ -512,13 +512,13 @@ fdm config file (~/.sfeed/fdm.conf):
 			}
 			continue
 
-			# If it is in the in cache, stop.
+			# If it is in the cache, stop.
 			match matched and in-cache "${cachepath}" key "%[msgid]"
 			action {
 				keep
 			}
 
-		# Not in cache, process it and add to cache.
+		# Not in the cache, process it and add to cache.
 		match case "^X-Feedname: (.*)" in headers
 		action {
 			# Connect to a SMTP server and attempt to deliver the
