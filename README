@@ -448,34 +448,84 @@ small.
 
 - - -
 
-Convert mbox to separate maildirs per feed and filter duplicate messages using
-fdm(1): https://github.com/nicm/fdm .
+Convert mbox to separate maildirs per feed and filter duplicate messages using the
+fdm program.
+fdm is available at: https://github.com/nicm/fdm
 
 fdm config file (~/.sfeed/fdm.conf):
 
 	set unmatched-mail keep
 
 	account "sfeed" mbox "%[home]/.sfeed/mbox"
-		$cachepath = "%[home]/.sfeed/mbox.cache"
+		$cachepath = "%[home]/.sfeed/fdm.cache"
 		cache "${cachepath}"
-		$feedsdir = "%[home]/feeds/"
+		$maildir = "%[home]/feeds/"
 
-		# check if in cache by message-id.
+		# Check if message is in in cache by Message-ID.
 		match case "^Message-ID: (.*)" in headers
 			action {
 				tag "msgid" value "%1"
 			}
 			continue
-			# if in cache, stop.
+
+			# If it is in the in cache, stop.
 			match matched and in-cache "${cachepath}" key "%[msgid]"
 			action {
 				keep
 			}
 
-		# not in cache, process it and add to cache.
+		# Not in cache, process it and add to cache.
 		match case "^X-Feedname: (.*)" in headers
 		action {
-			maildir "${feedsdir}%1"
+			# Store to local maildir.
+			maildir "${maildir}%1"
+
+			add-to-cache "${cachepath}" key "%[msgid]"
+			keep
+		}
+
+Now run:
+
+	$ sfeed_mbox ~/.sfeed/feeds/* > ~/.sfeed/mbox
+	$ fdm -f ~/.sfeed/fdm.conf fetch
+
+Now you can view feeds in mutt(1) for example.
+
+- - -
+
+Read from mbox and filter duplicate messages using the fdm program and deliver
+it to a SMTP server. This works similar to the rss2email program.
+fdm is available at: https://github.com/nicm/fdm
+
+fdm config file (~/.sfeed/fdm.conf):
+
+	set unmatched-mail keep
+
+	account "sfeed" mbox "%[home]/.sfeed/mbox"
+		$cachepath = "%[home]/.sfeed/fdm.cache"
+		cache "${cachepath}"
+
+		# Check if message is in in cache by Message-ID.
+		match case "^Message-ID: (.*)" in headers
+			action {
+				tag "msgid" value "%1"
+			}
+			continue
+
+			# If it is in the in cache, stop.
+			match matched and in-cache "${cachepath}" key "%[msgid]"
+			action {
+				keep
+			}
+
+		# Not in cache, process it and add to cache.
+		match case "^X-Feedname: (.*)" in headers
+		action {
+			# Connect to a SMTP server and attempt to deliver the
+			# mail to it.
+			# Of course change the server and e-mail below.
+			smtp server "codemadness.org" to "hiltjo@codemadness.org"
+
 			add-to-cache "${cachepath}" key "%[msgid]"
 			keep
 		}
