@@ -247,7 +247,7 @@ advertisements, strip tracking parameters and more.
 	filter() {
 		case "$1" in
 		"tweakers")
-			LC_LOCALE=C awk -F '\t' 'BEGIN { OFS = "\t"; }
+			awk -F '\t' 'BEGIN { OFS = "\t"; }
 			# skip ads.
 			$2 ~ /^ADV:/ {
 				next;
@@ -261,14 +261,14 @@ advertisements, strip tracking parameters and more.
 			}';;
 		"yt BSDNow")
 			# filter only BSD Now from channel.
-			LC_LOCALE=C awk -F '\t' '$2 ~ / \| BSD Now/';;
+			awk -F '\t' '$2 ~ / \| BSD Now/';;
 		*)
 			cat;;
 		esac | \
 			# replace youtube links with embed links.
 			sed 's@www.youtube.com/watch?v=@www.youtube.com/embed/@g' | \
 
-			LC_LOCALE=C awk -F '\t' 'BEGIN { OFS = "\t"; }
+			awk -F '\t' 'BEGIN { OFS = "\t"; }
 			function filterlink(s) {
 				# protocol must start with http, https or gopher.
 				if (match(s, /^(http|https|gopher):\/\//) == 0) {
@@ -319,7 +319,7 @@ to an Atom XML feed (again):
 	#!/bin/sh
 	cd ~/.sfeed/feeds/ || exit 1
 
-	LC_ALL=C awk -F '\t' -v "old=$(($(date -j +'%s') - 86400))" '
+	awk -F '\t' -v "old=$(($(date -j +'%s') - 86400))" '
 	BEGIN {
 		OFS = "\t";
 	}
@@ -355,7 +355,7 @@ On the writing side:
 	test -p "$fifo" || exit 1
 
 	# 1 day is old news, don't write older items.
-	LC_ALL=C awk -v "old=$(($(date -j +'%s') - 86400))" '
+	awk -v "old=$(($(date -j +'%s') - 86400))" '
 	BEGIN { FS = OFS = "\t"; }
 	{
 		if (int($1) >= old) {
@@ -371,7 +371,7 @@ cut -b is used to trim the "N " prefix of sfeed_plain(1).
 For some podcast feed the following code can be used to filter the latest
 enclosure url (probably some audio file):
 
-	LC_ALL=C awk -F "\t" 'BEGIN { latest = 0; }
+	awk -F "\t" 'BEGIN { latest = 0; }
 	length($8) {
 		ts = int($1);
 		if (ts > latest) {
