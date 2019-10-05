@@ -1,9 +1,19 @@
 .POSIX:
 
-include config.mk
-
 NAME = sfeed
 VERSION = 0.9.13
+
+# paths
+PREFIX = /usr/local
+MANPREFIX = ${PREFIX}/man
+DOCPREFIX = ${PREFIX}/share/doc/${NAME}
+
+RANLIB = ranlib
+
+# use system flags.
+SFEED_CFLAGS = ${CFLAGS}
+SFEED_LDFLAGS = ${LDFLAGS}
+SFEED_CPPFLAGS = -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -D_BSD_SOURCE
 
 BIN = \
 	sfeed\
@@ -61,7 +71,7 @@ ${BIN}: ${LIB} ${@:=.o}
 
 OBJ = ${SRC:.c=.o} ${LIBXMLOBJ} ${LIBUTILOBJ} ${COMPATOBJ}
 
-${OBJ}: config.mk ${HDR}
+${OBJ}: ${HDR}
 
 .o:
 	${CC} ${SFEED_LDFLAGS} -o $@ $< ${LIB}
@@ -82,7 +92,7 @@ dist:
 	mkdir -p "${NAME}-${VERSION}"
 	cp -f ${MAN1} ${MAN5} ${DOC} ${HDR} \
 		${SRC} ${LIBXMLSRC} ${LIBUTILSRC} ${COMPATSRC} ${SCRIPTS} \
-		Makefile config.mk \
+		Makefile \
 		sfeedrc.example style.css \
 		"${NAME}-${VERSION}"
 	# make tarball
