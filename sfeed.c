@@ -250,8 +250,12 @@ string_buffer_realloc(String *s, size_t newlen)
 {
 	size_t alloclen;
 
-	for (alloclen = 64; alloclen <= newlen; alloclen *= 2)
-		;
+	if (newlen > SIZE_MAX / 2) {
+		alloclen = SIZE_MAX;
+	} else {
+		for (alloclen = 64; alloclen <= newlen; alloclen *= 2)
+			;
+	}
 	if (!(s->data = realloc(s->data, alloclen)))
 		err(1, "realloc");
 	s->bufsiz = alloclen;
@@ -262,6 +266,12 @@ string_append(String *s, const char *data, size_t len)
 {
 	if (!len)
 		return;
+
+	if (s->len >= SIZE_MAX - len) {
+		errno = EOVERFLOW;
+		err(1, "realloc");
+	}
+
 	/* check if allocation is necessary, don't shrink buffer,
 	 * should be more than bufsiz of course. */
 	if (s->len + len >= s->bufsiz)
