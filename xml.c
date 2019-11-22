@@ -255,11 +255,6 @@ namedentitytostr(const char *e, char *buf, size_t bufsiz)
 		{ "gt;",   '>'  },
 		{ "apos;", '\'' },
 		{ "quot;", '"'  },
-		{ "AMP;",  '&'  },
-		{ "LT;",   '<'  },
-		{ "GT;",   '>'  },
-		{ "APOS;", '\'' },
-		{ "QUOT;", '"'  }
 	};
 	size_t i;
 
