@@ -39,6 +39,11 @@ for sfeed_update:
 
 	newsboat -e | sfeed_opml_import > "$HOME/.sfeed/sfeedrc"
 
+an example to export from an other RSS/Atom reader called rss2email (3.x+) and
+import for sfeed_update:
+
+	r2e opmlexport | sfeed_opml_import > "$HOME/.sfeed/sfeedrc"
+
 Update feeds, this script merges the new items, see sfeed_update(1) for more
 information what it can do:
 
