@@ -30,6 +30,12 @@ printsafe(const char *s)
 }
 
 static void
+xmltagstart(XMLParser *p, const char *t, size_t tl)
+{
+	url[0] = text[0] = title[0] = '\0';
+}
+
+static void
 xmltagend(XMLParser *p, const char *t, size_t tl, int isshort)
 {
 	if (strcasecmp(t, "outline"))
@@ -47,6 +53,7 @@ xmltagend(XMLParser *p, const char *t, size_t tl, int isshort)
 		printsafe(url);
 		fputs("'\n", stdout);
 	}
+
 	url[0] = text[0] = title[0] = '\0';
 }
 
@@ -88,6 +95,7 @@ main(void)
 
 	parser.xmlattr = xmlattr;
 	parser.xmlattrentity = xmlattrentity;
+	parser.xmltagstart = xmltagstart;
 	parser.xmltagend = xmltagend;
 
 	fputs(
