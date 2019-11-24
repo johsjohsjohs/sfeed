@@ -26,7 +26,7 @@ loadconfig() {
 # feed(name, feedurl, [basesiteurl], [encoding])
 feed() {
 	# NOTE: TABs in field values are unsupported, be sane.
-	echo "$1	$2	$3"
+	echo "$1	$2"
 }
 
 # load config file.
@@ -41,17 +41,14 @@ cat <<!
 <body>
 !
 
-feeds | LC_ALL=C awk 'BEGIN {
-	FS = OFS = "\t";
-}
-{
+feeds | awk -F '\t' '{
 	gsub("&", "\\&amp;");
 	gsub("\"", "\\&quot;");
 	gsub("'"'"'", "\\&#39;");
 	gsub("<", "\\&lt;");
 	gsub(">", "\\&gt;");
 
-	print "\t<outline title=\"" $1 "\" text=\"" $1 "\" xmlUrl=\"" $2 "\" htmlUrl=\"" $3 "\"/>";
+	print "\t<outline type=\"rss\" title=\"" $1 "\" text=\"" $1 "\" xmlUrl=\"" $2 "\"/>";
 }'
 
 cat <<!
