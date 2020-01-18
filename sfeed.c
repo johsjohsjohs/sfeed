@@ -672,7 +672,7 @@ xmlattrentity(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
               const char *data, size_t datalen)
 {
 	char buf[16];
-	ssize_t len;
+	int len;
 
 	/* handles transforming inline XML to data */
 	if (ISINCONTENT(ctx)) {
@@ -744,7 +744,7 @@ static void
 xmldataentity(XMLParser *p, const char *data, size_t datalen)
 {
 	char buf[16];
-	ssize_t len;
+	int len;
 
 	if (!ctx.field)
 		return;
