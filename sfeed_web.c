@@ -30,8 +30,6 @@ static void
 xmltagstart(XMLParser *p, const char *t, size_t tl)
 {
 	isbase = islink = isfeedlink = 0;
-	if (tl != 4) /* optimization */
-		return;
 
 	if (!strcasecmp(t, "base"))
 		isbase = 1;
@@ -59,9 +57,6 @@ static void
 xmlattr(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 	const char *v, size_t vl)
 {
-	if (nl != 4) /* optimization */
-		return;
-
 	if (isbase) {
 		if (!strcasecmp(n, "href"))
 			strlcpy(basehref, v, sizeof(basehref));
