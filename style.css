@@ -1,11 +1,11 @@
 body {
-	font-size: 9pt;
 	color: #333;
 	background-color: #fff;
-	padding: 0;
-	margin: 0;
 	font-family: monospace;
+	font-size: 9pt;
+	margin: 0;
 	overflow: hidden;
+	padding: 0;
 }
 body.frame {
 	overflow: hidden;
@@ -17,8 +17,8 @@ h2 {
 }
 #sidebar ul, #sidebar ul li {
 	list-style: none;
-	padding: 0;
 	margin: 0;
+	padding: 0;
 }
 #sidebar {
 	background-color: inherit;
@@ -36,22 +36,22 @@ div#items {
 	padding: 0 15px;
 }
 body.noframe div#sidebar {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 175px;
 	height: 100%;
+	left: 0;
 	overflow: hidden;
 	overflow-y: auto;
+	position: fixed;
+	top: 0;
+	width: 175px;
 	z-index: 999;
 }
 body.noframe div#items {
-	left: 175px;
-	position: absolute;
 	height: 100%;
-	top: 0;
-	right: 0;
+	left: 175px;
 	overflow: auto;
+	position: absolute;
+	right: 0;
+	top: 0;
 }
 body.noframe div#items.nosidebar {
 	left: 0px;
@@ -60,7 +60,7 @@ body.frame #sidebar br {
 	display: none;
 }
 body.frame .content {
-	padding: 0 1em;
 	font-family: sans;
 	font-size: medium;
+	padding: 0 1em;
 }
