@@ -269,7 +269,7 @@ namedentitytostr(const char *e, char *buf, size_t bufsiz)
 			return 1;
 		}
 	}
-	return 0;
+	return -1;
 }
 
 static int
@@ -286,12 +286,12 @@ numericentitytostr(const char *e, char *buf, size_t bufsiz)
 	errno = 0;
 	/* hex (16) or decimal (10) */
 	if (*e == 'x')
-		l = strtoul(e + 1, &end, 16);
+		l = strtol(++e, &end, 16);
 	else
-		l = strtoul(e, &end, 10);
-	/* invalid value or not a well-formed entity or too high codepoint */
-	if (errno || *end != ';' || l > 0x10FFFF)
-		return 0;
+		l = strtol(e, &end, 10);
+	/* invalid value or not a well-formed entity or invalid codepoint */
+	if (errno || e == end || *end != ';' || l < 0 || l > 0x10ffff)
+		return -1;
 	len = codepointtoutf8(l, buf);
 	buf[len] = '\0';
 
@@ -299,13 +299,13 @@ numericentitytostr(const char *e, char *buf, size_t bufsiz)
 }
 
 /* convert named- or numeric entity string to buffer string
- * returns byte-length of string. */
+ * returns byte-length of string or -1 on failure. */
 int
 xml_entitytostr(const char *e, char *buf, size_t bufsiz)
 {
 	/* doesn't start with & */
 	if (e[0] != '&')
-		return 0;
+		return -1;
 	/* numeric entity */
 	if (e[1] == '#')
 		return numericentitytostr(e + 2, buf, bufsiz);
