@@ -77,11 +77,9 @@ xmlattrentity(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 	const char *v, size_t vl)
 {
 	char buf[16];
-	ssize_t len;
+	int len;
 
-	if ((len = xml_entitytostr(v, buf, sizeof(buf))) < 0)
-		return;
-	if (len > 0)
+	if ((len = xml_entitytostr(v, buf, sizeof(buf))) > 0)
 		xmlattr(p, t, tl, n, nl, buf, len);
 	else
 		xmlattr(p, t, tl, n, nl, v, vl);
