@@ -1,4 +1,4 @@
-.Dd January 18, 2020
+.Dd January 22, 2020
 .Dt SFEED_GOPHER 1
 .Os
 .Sh NAME
@@ -21,8 +21,8 @@ are specified, the basename of the
 .Ar file
 is used as the feed name in the output.
 .Nm
-creates a index index file and for each feed creates a file in the
-format feedname.
+creates an index file named "index" and for each feed it creates a file with
+the same name as the feedname.
 .Pp
 If no
 .Ar file
@@ -31,6 +31,7 @@ written to stdout and no files are written.
 .Pp
 Items with a timestamp from the last day compared to the system time at the
 time of formatting are counted and marked as new.
+.Sh ENVIRONMENT
 .Bl -tag -width Ds
 .It Ev SFEED_GOPHER_PATH
 This environment variable can be used as the prefix for each path in the
