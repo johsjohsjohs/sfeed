@@ -1,6 +1,8 @@
 #ifndef _XML_H
 #define _XML_H
 
+#include <stdio.h>
+
 typedef struct xmlparser {
 	/* handlers */
 	void (*xmlattr)(struct xmlparser *, const char *, size_t,

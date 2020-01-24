@@ -1,5 +1,6 @@
-#include <stdint.h>
-#include <time.h>
+#include <sys/types.h>
+
+#include <stdio.h>
 
 #ifdef __OpenBSD__
 #include <unistd.h>
