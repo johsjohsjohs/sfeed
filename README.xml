@@ -46,6 +46,9 @@ Caveats
   called multiple times for the same tag if the data size is bigger than the
   internal buffer size (sizeof(XMLParser.data)). To differentiate between new
   calls for data you can use the xml*start and xml*end handlers.
+- It does not handle XML white-space rules for tag data. The raw values
+  including white-space is passed. This is useful in some cases, like for
+  HTML <pre> tags.
 - The XML specification has no limits on tag and attribute names. For
   simplicity/sanity sake this XML parser takes some liberties. Tag and
   attribute names are truncated.
