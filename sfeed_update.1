@@ -1,4 +1,4 @@
-.Dd July 20, 2019
+.Dd February 4, 2020
 .Dt SFEED_UPDATE 1
 .Os
 .Sh NAME
@@ -9,64 +9,40 @@
 .Op Ar sfeedrc
 .Sh DESCRIPTION
 .Nm
-updates feeds files and merges the new data with the previous files.
-These are the files in the directory
+writes TAB-separated feed files and merges new items with the items in any
+existing files.
+The items are stored in one file per feed in the directory
 .Pa $HOME/.sfeed/feeds
 by default.
+The directory can be changed in the
+.Xr sfeedrc 5
+file.
 .Sh OPTIONS
 .Bl -tag -width 17n
 .It Ar sfeedrc
-Config file, if not specified uses the path
-.Pa $HOME/.sfeed/sfeedrc
-by default.
-See the
-.Sx FILES READ
-section for more information.
+Config file.
+The default is
+.Pa $HOME/.sfeed/sfeedrc .
 .El
 .Sh FILES READ
 .Bl -tag -width 17n
 .It Ar sfeedrc
-Config file, see the sfeedrc.example file for an example.
 This file is evaluated as a shellscript in
 .Nm .
-.Pp
-Atleast the following functions can be overridden per feed:
-.Bl -tag -width 17n
-.It Fn fetch
-to use
-.Xr wget 1 ,
-OpenBSD
-.Xr ftp 1
-or an other download program.
-.It Fn merge
-to change the merge logic.
-.It Fn filter
-to filter on fields.
-.It Fn order
-to change the sort order.
-.El
-.Pp
-The
-.Fn feeds
-function is called to process the feeds.
-The default
-.Fn feed
-function is executed concurrently as a background job in your
+See also the
 .Xr sfeedrc 5
-config file to make updating faster.
-The variable
-.Va maxjobs
-can be changed to limit or increase the amount of concurrent jobs (8 by
-default).
+man page for a detailed description of the format and an example file.
 .El
 .Sh FILES WRITTEN
 .Bl -tag -width 17n
 .It feedname
-TAB-separated format containing all items per feed.
+TAB-separated
+.Xr sfeed 5
+format containing all items per feed.
 The
 .Nm
 script merges new items with this file.
-The filename cannot contain '/' characters, they will be replaced with '_'.
+The feedname cannot contain '/' characters, they will be replaced with '_'.
 .El
 .Sh EXAMPLES
 To update your feeds and format them in various formats:
@@ -82,6 +58,7 @@ mkdir -p somedir && cd somedir && sfeed_frames $HOME/.sfeed/feeds/*
 .Ed
 .Sh SEE ALSO
 .Xr sfeed 1 ,
+.Xr sfeed_frames 1 ,
 .Xr sfeed_html 1 ,
 .Xr sfeed_plain 1 ,
 .Xr sh 1 ,
