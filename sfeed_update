@@ -31,7 +31,7 @@ loadconfig() {
 	fi
 }
 
-# log(name,s)
+# log(name, s)
 log() {
 	printf '[%s] %-50.50s %s\n' "$(date +'%H:%M:%S')" "$1" "$2" >&2
 }
