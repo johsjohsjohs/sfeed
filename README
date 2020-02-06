@@ -326,15 +326,11 @@ to an Atom XML feed (again):
 	#!/bin/sh
 	cd ~/.sfeed/feeds/ || exit 1
 
-	awk -F '\t' -v "old=$(($(date -j +'%s') - 86400))" '
-	BEGIN {
-		OFS = "\t";
-	}
-	{
-		if (int($1) >= old) {
-			$2 = "[" FILENAME "] " $2;
-			print $0;
-		}
+	awk -F '\t' -v "old=$(($(date +'%s') - 86400))" '
+	BEGIN {	OFS = "\t"; }
+	int($1) >= old {
+		$2 = "[" FILENAME "] " $2;
+		print $0;
 	}' * | \
 	sort -k1,1rn | \
 	sfeed_atom
@@ -362,13 +358,11 @@ On the writing side:
 	test -p "$fifo" || exit 1
 
 	# 1 day is old news, don't write older items.
-	awk -v "old=$(($(date -j +'%s') - 86400))" '
-	BEGIN { FS = OFS = "\t"; }
-	{
-		if (int($1) >= old) {
-			$2 = "[" FILENAME "] " $2;
-			print $0;
-		}
+	awk -F '\t' -v "old=$(($(date +'%s') - 86400))" '
+	BEGIN { OFS = "\t"; }
+	int($1) >= old {
+		$2 = "[" FILENAME "] " $2;
+		print $0;
 	}' * | sort -k1,1n | sfeed_plain | cut -b 3- > "$fifo"
 
 cut -b is used to trim the "N " prefix of sfeed_plain(1).
@@ -378,7 +372,7 @@ cut -b is used to trim the "N " prefix of sfeed_plain(1).
 For some podcast feed the following code can be used to filter the latest
 enclosure url (probably some audio file):
 
-	awk -F "\t" 'BEGIN { latest = 0; }
+	awk -F '\t' 'BEGIN { latest = 0; }
 	length($8) {
 		ts = int($1);
 		if (ts > latest) {
@@ -390,64 +384,12 @@ enclosure url (probably some audio file):
 
 - - -
 
-Over time your feeds file might become quite big. You can archive items from a
-specific date by doing for example:
+Over time your feeds file might become quite big. You can archive items of a
+feed from (roughly) the last week by doing for example:
 
-File sfeed_archive.c:
-
-	#include <sys/types.h>
-
-	#include <err.h>
-	#include <stdio.h>
-	#include <stdlib.h>
-	#include <string.h>
-	#include <time.h>
-
-	#include "util.h"
-
-	int
-	main(int argc, char *argv[])
-	{
-		char *line = NULL, *p;
-		time_t parsedtime, comparetime;
-		struct tm tm;
-		size_t size = 0;
-		int r, c, y, m, d;
-
-		if (argc != 2 || strlen(argv[1]) != 8 ||
-		    sscanf(argv[1], "%4d%2d%2d", &y, &m, &d) != 3) {
-			fputs("usage: sfeed_archive yyyymmdd\n", stderr);
-			exit(1);
-		}
-
-		memset(&tm, 0, sizeof(tm));
-		tm.tm_isdst = -1; /* don't use DST */
-		tm.tm_year = y - 1900;
-		tm.tm_mon = m - 1;
-		tm.tm_mday = d;
-		if ((comparetime = mktime(&tm)) == -1)
-			err(1, "mktime");
-
-		while ((getline(&line, &size, stdin)) > 0) {
-			if (!(p = strchr(line, '\t')))
-				continue;
-			c = *p;
-			*p = '\0'; /* temporary null-terminate */
-			if ((r = strtotime(line, &parsedtime)) != -1 &&
-			    parsedtime >= comparetime) {
-				*p = c; /* restore */
-				fputs(line, stdout);
-			}
-		}
-		return 0;
-	}
-
-Now compile and run:
-
-	$ cc -std=c99 -o sfeed_archive util.c sfeed_archive.c
-	$ ./sfeed_archive 20150101 < feeds > feeds.new
-	$ mv feeds feeds.bak
-	$ mv feeds.new feeds
+	awk -F '\t' -v "old=$(($(date +'%s') - 604800))" 'int($1) > old' < feed > feed.new
+	mv feed feed.bak
+	mv feed.new feed
 
 This could also be run weekly in a crontab to archive the feeds. Like throwing
 away old newspapers. It keeps the feeds list tidy and the formatted output
