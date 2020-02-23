@@ -143,11 +143,12 @@ feed() {
 	fi
 	rm -f "${tmpfeedfile}.merge"
 
-	# atomic move.
-	if ! mv "${tmpfeedfile}.order" "${sfeedfile}"; then
-		log "${name}" "FAIL (MOVE)"
+	# copy
+	if ! cp "${tmpfeedfile}.order" "${sfeedfile}"; then
+		log "${name}" "FAIL (COPY)"
 		return
 	fi
+	rm -f "${tmpfeedfile}.order"
 
 	# OK
 	log "${name}" "OK"
