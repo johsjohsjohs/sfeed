@@ -33,6 +33,7 @@ printfeed(FILE *fp, struct feed *f)
 		xmlencode(f->name, stdout);
 		fputs("</a></h2>\n", stdout);
 	}
+	fputs("<pre>\n", stdout);
 
 	while ((linelen = getline(&line, &linesize, fp)) > 0) {
 		if (line[linelen - 1] == '\n')
@@ -69,6 +70,7 @@ printfeed(FILE *fp, struct feed *f)
 			fputs("</u></b>", stdout);
 		fputs("\n", stdout);
 	}
+	fputs("</pre>\n", stdout);
 }
 
 int
@@ -103,7 +105,6 @@ main(int argc, char *argv[])
 		fputs("\t\t<div id=\"items\">\n", stdout);
 	else
 		fputs("\t\t<div id=\"items\" class=\"nosidebar\">\n", stdout);
-	fputs("<pre>\n", stdout);
 
 	if (argc == 1) {
 		if (!(feeds[0] = calloc(1, sizeof(struct feed))))
@@ -126,7 +127,7 @@ main(int argc, char *argv[])
 			fclose(fp);
 		}
 	}
-	fputs("</pre>\n</div>\n", stdout); /* div items */
+	fputs("</div>\n", stdout); /* div items */
 
 	if (showsidebar) {
 		fputs("\t<div id=\"sidebar\">\n\t\t<ul>\n", stdout);

@@ -33,6 +33,7 @@ printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 		xmlencode(f->name, fpitems);
 		fputs("</a></h2>\n", fpitems);
 	}
+	fputs("<pre>\n", fpitems);
 
 	while ((linelen = getline(&line, &linesize, fpin)) > 0) {
 		if (line[linelen - 1] == '\n')
@@ -69,6 +70,7 @@ printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 			fputs("</u></b>", fpitems);
 		fputs("\n", fpitems);
 	}
+	fputs("</pre>\n", fpitems);
 }
 
 int
@@ -108,7 +110,7 @@ main(int argc, char *argv[])
 	      "\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n"
 	      "\t<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />\n"
 	      "</head>\n"
-	      "<body class=\"frame\"><div id=\"items\"><pre>\n", fpitems);
+	      "<body class=\"frame\"><div id=\"items\">", fpitems);
 
 	if (argc == 1) {
 		if (!(feeds[0] = calloc(1, sizeof(struct feed))))
@@ -130,7 +132,7 @@ main(int argc, char *argv[])
 			fclose(fp);
 		}
 	}
-	fputs("</pre>\n</div></body>\n</html>\n", fpitems); /* div items */
+	fputs("</div></body>\n</html>\n", fpitems); /* div items */
 
 	if (showsidebar) {
 		fputs("<!DOCTYPE HTML>\n"
