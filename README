@@ -108,10 +108,11 @@ Optional dependencies
 OS tested
 ---------
 
-- Linux (glibc+gcc, musl+gcc, clang).
-- OpenBSD (gcc, clang).
+- Linux (compilers: clang, gcc, pcc, tcc, libc: glibc, musl).
+- OpenBSD (clang, gcc).
 - NetBSD
 - FreeBSD
+- DragonFlyBSD
 - Windows (cygwin gcc, mingw).
 - HaikuOS (using libbsd).
 
