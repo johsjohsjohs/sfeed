@@ -55,19 +55,19 @@ printfeed(FILE *fp, struct feed *f)
 		fprintf(stdout, "%04d-%02d-%02d&nbsp;%02d:%02d ",
 		        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
 		        tm->tm_hour, tm->tm_min);
-		if (isnew)
-			fputs("<b><u>", stdout);
+
 		if (fields[FieldLink][0]) {
 			fputs("<a href=\"", stdout);
 			xmlencode(fields[FieldLink], stdout);
 			fputs("\">", stdout);
-			xmlencode(fields[FieldTitle], stdout);
-			fputs("</a>", stdout);
-		} else {
-			xmlencode(fields[FieldTitle], stdout);
 		}
 		if (isnew)
+			fputs("<b><u>", stdout);
+		xmlencode(fields[FieldTitle], stdout);
+		if (isnew)
 			fputs("</u></b>", stdout);
+		if (fields[FieldLink][0])
+			fputs("</a>", stdout);
 		fputs("\n", stdout);
 	}
 	fputs("</pre>\n", stdout);
