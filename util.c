@@ -247,10 +247,15 @@ printutf8pad(FILE *fp, const char *s, size_t len, int pad)
 
 	slen = strlen(s);
 	for (i = 0; i < slen; i += rl) {
-		if ((rl = mbtowc(&wc, s + i, slen - i < 4 ? slen - i : 4)) <= 0)
-			break;
-		if ((w = wcwidth(wc)) == -1)
+		rl = w = 1;
+		if ((unsigned char)s[i] < 32)
 			continue;
+		if ((unsigned char)s[i] >= 127) {
+			if ((rl = mbtowc(&wc, s + i, slen - i < 4 ? slen - i : 4)) <= 0)
+				break;
+			if ((w = wcwidth(wc)) == -1)
+				continue;
+		}
 		if (col + w > len || (col + w == len && s[i + rl])) {
 			fputs("\xe2\x80\xa6", fp);
 			col++;
