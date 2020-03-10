@@ -10,7 +10,7 @@
 #define STRP(s) s,sizeof(s)-1
 
 static XMLParser parser;
-static unsigned int isbase, islink, isfeedlink, found;
+static int isbase, islink, isfeedlink;
 static char abslink[4096], feedlink[4096], basehref[4096], feedtype[256];
 
 static void
@@ -45,7 +45,6 @@ xmltagstartparsed(XMLParser *p, const char *t, size_t tl, int isshort)
 	putchar('\t');
 	printfeedtype(feedtype, stdout);
 	putchar('\n');
-	found++;
 }
 
 static void
@@ -85,5 +84,5 @@ main(int argc, char *argv[])
 	/* NOTE: getnext is defined in xml.h for inline optimization */
 	xml_parse(&parser);
 
-	return found > 0 ? 0 : 1;
+	return 0;
 }
