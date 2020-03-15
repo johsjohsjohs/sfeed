@@ -24,8 +24,8 @@ djb2(unsigned char *s, unsigned long hash)
 static void
 printfeed(FILE *fp, const char *feedname)
 {
-	struct tm tm;
 	char *fields[FieldLast], timebuf[32];
+	struct tm *tm;
 	time_t parsedtime;
 	unsigned long hash;
 	ssize_t linelen;
@@ -36,20 +36,18 @@ printfeed(FILE *fp, const char *feedname)
 		hash = djb2((unsigned char *)line, 5381UL);
 		if (!parseline(line, fields))
 			break;
+
 		parsedtime = 0;
 		if (strtotime(fields[FieldUnixTimestamp], &parsedtime))
 			continue;
+		if (!(tm = gmtime(&parsedtime)))
+			err(1, "gmtime");
+		if (!strftime(timebuf, sizeof(timebuf), "%a, %d %b %Y %H:%M:%S +0000", tm))
+			errx(1, "strftime");
 
 		/* mbox + mail header */
 		printf("From MAILER-DAEMON %s\n", mtimebuf);
-		/* can't convert: default to formatted time for time_t 0. */
-		if (gmtime_r(&parsedtime, &tm) &&
-		    strftime(timebuf, sizeof(timebuf),
-		             "%a, %d %b %Y %H:%M:%S +0000", &tm))
-			printf("Date: %s\n", timebuf);
-		else
-			printf("Date: Thu, 01 Jan 1970 00:00:00 +0000\n");
-
+		printf("Date: %s\n", timebuf);
 		printf("From: %s <sfeed@>\n", fields[FieldAuthor][0] ? fields[FieldAuthor] : "unknown");
 		printf("To: %s <%s@%s>\n", user, user, host);
 		if (feedname[0])
