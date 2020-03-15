@@ -90,7 +90,7 @@ main(int argc, char *argv[])
 	if ((t = time(NULL)) == -1)
 		err(1, "time");
 	if (!gmtime_r(&t, &tm))
-		errx(1, "gmtime_r: can't get current time");
+		err(1, "gmtime_r: can't get current time");
 	if (!strftime(mtimebuf, sizeof(mtimebuf), "%a %b %d %H:%M:%S %Y", &tm))
 		errx(1, "strftime: can't format current time");
 
