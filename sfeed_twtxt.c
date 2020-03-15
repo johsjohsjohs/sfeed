@@ -28,7 +28,7 @@ printfeed(FILE *fp, const char *feedname)
 		if (strtotime(fields[FieldUnixTimestamp], &parsedtime))
 			continue;
 		if (!(tm = gmtime(&parsedtime)))
-			err(1, "localtime");
+			err(1, "gmtime");
 
 		fprintf(stdout, "%04d-%02d-%02dT%02d:%02d:%02dZ\t",
 		        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
