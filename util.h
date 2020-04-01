@@ -33,9 +33,9 @@ enum {
 	FieldContentType, FieldId, FieldAuthor, FieldEnclosure, FieldLast
 };
 
-int     absuri(char *, size_t, const char *, const char *);
-size_t  parseline(char *, char *[FieldLast]);
-int     parseuri(const char *, struct uri *, int);
-void    printutf8pad(FILE *, const char *, size_t, int);
-int     strtotime(const char *, time_t *);
-void    xmlencode(const char *, FILE *);
+int  absuri(char *, size_t, const char *, const char *);
+void parseline(char *, char *[FieldLast]);
+int  parseuri(const char *, struct uri *, int);
+void printutf8pad(FILE *, const char *, size_t, int);
+int  strtotime(const char *, time_t *);
+void xmlencode(const char *, FILE *);

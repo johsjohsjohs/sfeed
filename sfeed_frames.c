@@ -38,8 +38,7 @@ printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 	while ((linelen = getline(&line, &linesize, fpin)) > 0) {
 		if (line[linelen - 1] == '\n')
 			line[--linelen] = '\0';
-		if (!parseline(line, fields))
-			break;
+		parseline(line, fields);
 
 		parsedtime = 0;
 		if (strtotime(fields[FieldUnixTimestamp], &parsedtime))

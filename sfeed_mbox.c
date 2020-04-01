@@ -34,8 +34,7 @@ printfeed(FILE *fp, const char *feedname)
 		if (line[linelen - 1] == '\n')
 			line[--linelen] = '\0';
 		hash = djb2((unsigned char *)line, 5381UL);
-		if (!parseline(line, fields))
-			break;
+		parseline(line, fields);
 
 		parsedtime = 0;
 		if (strtotime(fields[FieldUnixTimestamp], &parsedtime))

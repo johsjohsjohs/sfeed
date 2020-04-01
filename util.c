@@ -171,13 +171,10 @@ absuri(char *buf, size_t bufsiz, const char *link, const char *base)
 	return encodeuri(buf, bufsiz, tmp);
 }
 
-/* Read a field-separated line from 'fp',
- * separated by a character 'separator',
- * 'fields' is a list of pointers with a size of FieldLast (must be >0).
- * 'line' buffer is allocated using malloc, 'size' will contain the allocated
- * buffer size.
- * returns: amount of fields read (>0) or -1 on error. */
-size_t
+/* Splits fields in the line buffer by replacing TAB separators with NUL ('\0')
+ * terminators and assign these fields as pointers. If there are less fields
+ * than expected then the field is an empty string constant. */
+void
 parseline(char *line, char *fields[FieldLast])
 {
 	char *prev, *s;
@@ -194,8 +191,6 @@ parseline(char *line, char *fields[FieldLast])
 	/* make non-parsed fields empty. */
 	for (; i < FieldLast; i++)
 		fields[i] = "";
-
-	return i;
 }
 
 /* Parse time to time_t, assumes time_t is signed, ignores fractions. */
