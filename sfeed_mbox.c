@@ -49,10 +49,7 @@ printfeed(FILE *fp, const char *feedname)
 		printf("Date: %s\n", timebuf);
 		printf("From: %s <sfeed@>\n", fields[FieldAuthor][0] ? fields[FieldAuthor] : "unknown");
 		printf("To: %s <%s@%s>\n", user, user, host);
-		if (feedname[0])
-			printf("Subject: [%s] %s\n", feedname, fields[FieldTitle]);
-		else
-			printf("Subject: %s\n", fields[FieldTitle]);
+		printf("Subject: %s\n", fields[FieldTitle]);
 		printf("Message-ID: <%s%s%lu@%s>\n",
 		       fields[FieldUnixTimestamp],
 		       fields[FieldUnixTimestamp][0] ? "." : "",
