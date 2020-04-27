@@ -47,7 +47,7 @@ printfeed(FILE *fp, const char *feedname)
 		/* mbox + mail header */
 		printf("From MAILER-DAEMON %s\n", mtimebuf);
 		printf("Date: %s\n", timebuf);
-		printf("From: %s <sfeed@>\n", fields[FieldAuthor][0] ? fields[FieldAuthor] : "unknown");
+		printf("From: %s <sfeed@>\n", fields[FieldAuthor][0] ? fields[FieldAuthor] : feedname);
 		printf("To: %s <%s@%s>\n", user, user, host);
 		printf("Subject: %s\n", fields[FieldTitle]);
 		printf("Message-ID: <%s%s%lu@%s>\n",
