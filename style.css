@@ -7,10 +7,6 @@ body {
 	overflow: hidden;
 	padding: 0;
 }
-body.frame {
-	overflow: hidden;
-	overflow-y: auto;
-}
 h2 {
 	font-size: 14pt;
 	margin: 0.5em 0;
@@ -38,16 +34,15 @@ div#items {
 body.noframe div#sidebar {
 	height: 100%;
 	left: 0;
-	overflow: hidden;
-	overflow-y: auto;
+	overflow: auto;
 	position: fixed;
 	top: 0;
-	width: 175px;
+	width: 250px;
 	z-index: 999;
 }
 body.noframe div#items {
 	height: 100%;
-	left: 175px;
+	left: 250px;
 	overflow: auto;
 	position: absolute;
 	right: 0;
@@ -56,11 +51,9 @@ body.noframe div#items {
 body.noframe div#items.nosidebar {
 	left: 0px;
 }
+body.frame {
+	overflow: auto;
+}
 body.frame #sidebar br {
 	display: none;
-}
-body.frame .content {
-	font-family: sans;
-	font-size: medium;
-	padding: 0 1em;
 }
