@@ -72,9 +72,8 @@ printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 
 		if (fields[FieldLink][0]) {
 			itemtype = 'h';
-			if (!strncmp(fields[FieldLink], "gopher://", 9)) {
-				if (parseuri(fields[FieldLink], &u, 0) == -1)
-					continue;
+			if (!strncmp(fields[FieldLink], "gopher://", 9) &&
+			    parseuri(fields[FieldLink], &u, 0) != -1) {
 				itemhost = u.host;
 				itemport = u.port[0] ? u.port : "70";
 				itemtype = '1';
