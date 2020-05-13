@@ -37,11 +37,13 @@ gophertext(FILE *fp, const char *s)
 static void
 printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 {
-	char *fields[FieldLast];
+	struct uri u;
+	char *fields[FieldLast], *itemhost, *itemport, *itempath;
 	ssize_t linelen;
 	unsigned int isnew;
 	struct tm *tm;
 	time_t parsedtime;
+	int itemtype;
 
 	if (f->name[0]) {
 		fprintf(fpitems, "i%s\t\t%s\t%s\r\n", f->name, host, port);
@@ -63,25 +65,42 @@ printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 		f->totalnew += isnew;
 		f->total++;
 
-		if (fields[FieldLink][0]) {
-			fputs("h", fpitems);
-			fprintf(fpitems, "%c %04d-%02d-%02d %02d:%02d ",
-			        isnew ? 'N' : ' ',
-			        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-			        tm->tm_hour, tm->tm_min);
-			gophertext(fpitems, fields[FieldTitle]);
-			fputs("\tURL:", fpitems);
-			gophertext(fpitems, fields[FieldLink]);
+		itemhost = host;
+		itemport = port;
+		itemtype = 'i';
+		itempath = fields[FieldLink];
 
-		} else {
-			fprintf(fpitems, "i%c %04d-%02d-%02d %02d:%02d ",
-			        isnew ? 'N' : ' ',
-			        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-			        tm->tm_hour, tm->tm_min);
-			gophertext(fpitems, fields[FieldTitle]);
-			fputs("\t", fpitems);
+		if (fields[FieldLink][0]) {
+			itemtype = 'h';
+			if (!strncmp(fields[FieldLink], "gopher://", 9)) {
+				if (parseuri(fields[FieldLink], &u, 0) == -1)
+					continue;
+				itemhost = u.host;
+				itemport = u.port[0] ? u.port : "70";
+				itemtype = '1';
+				itempath = u.path;
+
+				if (itempath[0] == '/') {
+					itempath++;
+					if (*itempath) {
+						itemtype = *itempath;
+						itempath++;
+					}
+				}
+			}
 		}
-		fprintf(fpitems, "\t%s\t%s\r\n", host, port);
+
+		fprintf(fpitems, "%c%c %04d-%02d-%02d %02d:%02d ",
+		        itemtype,
+		        isnew ? 'N' : ' ',
+		        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+	                tm->tm_hour, tm->tm_min);
+		gophertext(fpitems, fields[FieldTitle]);
+		fputs("\t", fpitems);
+		if (itemtype == 'h' && fields[FieldLink] == itempath)
+			fputs("URL:", fpitems);
+		gophertext(fpitems, itempath);
+		fprintf(fpitems, "\t%s\t%s\r\n", itemhost, itemport);
 	}
 	fputs(".\r\n", fpitems);
 }
