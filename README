@@ -419,21 +419,21 @@ fdm config file (~/.sfeed/fdm.conf):
 			}
 			continue
 
-			# If it is in the cache, stop.
-			match matched and in-cache "${cachepath}" key "%[msgid]"
+		# If it is in the cache, stop.
+		match matched and in-cache "${cachepath}" key "%[msgid]"
 			action {
 				keep
 			}
 
 		# Not in the cache, process it and add to cache.
 		match case "^X-Feedname: (.*)" in headers
-		action {
-			# Store to local maildir.
-			maildir "${maildir}%1"
+			action {
+				# Store to local maildir.
+				maildir "${maildir}%1"
 
-			add-to-cache "${cachepath}" key "%[msgid]"
-			keep
-		}
+				add-to-cache "${cachepath}" key "%[msgid]"
+				keep
+			}
 
 Now run:
 
@@ -463,23 +463,23 @@ fdm config file (~/.sfeed/fdm.conf):
 			}
 			continue
 
-			# If it is in the cache, stop.
-			match matched and in-cache "${cachepath}" key "%[msgid]"
+		# If it is in the cache, stop.
+		match matched and in-cache "${cachepath}" key "%[msgid]"
 			action {
 				keep
 			}
 
 		# Not in the cache, process it and add to cache.
 		match case "^X-Feedname: (.*)" in headers
-		action {
-			# Connect to a SMTP server and attempt to deliver the
-			# mail to it.
-			# Of course change the server and e-mail below.
-			smtp server "codemadness.org" to "hiltjo@codemadness.org"
+			action {
+				# Connect to a SMTP server and attempt to deliver the
+				# mail to it.
+				# Of course change the server and e-mail below.
+				smtp server "codemadness.org" to "hiltjo@codemadness.org"
 
-			add-to-cache "${cachepath}" key "%[msgid]"
-			keep
-		}
+				add-to-cache "${cachepath}" key "%[msgid]"
+				keep
+			}
 
 Now run:
 
