@@ -93,9 +93,8 @@ encodeuri(char *buf, size_t bufsiz, const char *s)
 	size_t i, b;
 
 	for (i = 0, b = 0; s[i]; i++) {
-		if (s[i] == ' ' ||
-		    (unsigned char)s[i] > 127 ||
-		    iscntrl((unsigned char)s[i])) {
+		if ((unsigned char)s[i] <= ' ' ||
+		    (unsigned char)s[i] >= 127) {
 			if (b + 3 >= bufsiz)
 				return -1;
 			buf[b++] = '%';
