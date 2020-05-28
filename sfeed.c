@@ -79,18 +79,18 @@ enum {
 };
 
 typedef struct feedcontext {
-	String          *field;             /* current FeedItem field String */
+	String          *field;        /* current FeedItem field String */
 	FeedField        fields[FeedFieldLast]; /* data for current item */
-	enum TagId       tagid;             /* unique number for parsed tag */
-	int              iscontent;         /* in content data */
-	int              iscontenttag;      /* in content tag */
-	enum ContentType contenttype;       /* content-type for item */
+	FeedTag          *tag;         /* unique current parsed tag */
+	int              iscontent;    /* in content data */
+	int              iscontenttag; /* in content tag */
+	enum ContentType contenttype;  /* content-type for item */
 	enum FeedType    feedtype;
 	int              attrcount; /* count item HTML element attributes */
 } FeedContext;
 
-static long long  datetounix(long long, int, int, int, int, int);
-static enum TagId gettag(enum FeedType, const char *, size_t);
+static long long datetounix(long long, int, int, int, int, int);
+static FeedTag * gettag(enum FeedType, const char *, size_t);
 static long gettzoffset(const char *);
 static int  isattr(const char *, size_t, const char *, size_t);
 static int  istag(const char *, size_t, const char *, size_t);
@@ -148,6 +148,7 @@ static FeedTag atomtags[] = {
 	{ STRP("title"),             AtomTagTitle            },
 	{ STRP("updated"),           AtomTagUpdated          }
 };
+static FeedTag notag = { STRP(""), TagUnknown };
 
 /* map TagId type to RSS/Atom field, all tags must be defined */
 static int fieldmap[TagLast] = {
@@ -181,7 +182,7 @@ static int fieldmap[TagLast] = {
 static const int FieldSeparator = '\t';
 static const char *baseurl = "";
 
-static FeedContext ctx;
+static FeedContext ctx = { .tag = &notag };
 static XMLParser parser; /* XML parser state */
 
 static String atomlink;
@@ -195,7 +196,7 @@ tagcmp(const void *v1, const void *v2)
 }
 
 /* Unique tagid for parsed tag name. */
-static enum TagId
+static FeedTag *
 gettag(enum FeedType feedtype, const char *name, size_t namelen)
 {
 	FeedTag f, *r = NULL;
@@ -215,7 +216,7 @@ gettag(enum FeedType feedtype, const char *name, size_t namelen)
 		break;
 	}
 
-	return r ? r->id : TagUnknown;
+	return r;
 }
 
 static char *
@@ -619,7 +620,7 @@ xmlattr(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 		return;
 	}
 
-	if (!ctx.tagid)
+	if (!ctx.tag->id)
 		return;
 
 	/* content-type may be: Atom: text, xhtml, html or mime-type.
@@ -641,16 +642,16 @@ xmlattr(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 	}
 
 	if (ctx.feedtype == FeedTypeRSS) {
-		if (ctx.tagid == RSSTagEnclosure &&
+		if (ctx.tag->id == RSSTagEnclosure &&
 		    isattr(n, nl, STRP("url")) && ctx.field) {
 			string_append(ctx.field, v, vl);
-		} else if (ctx.tagid == RSSTagGuid &&
+		} else if (ctx.tag->id == RSSTagGuid &&
 		           isattr(n, nl, STRP("ispermalink")) &&
 		           !isattr(v, vl, STRP("true"))) {
 			rssidpermalink = 0;
 		}
 	} else if (ctx.feedtype == FeedTypeAtom) {
-		if (ctx.tagid == AtomTagLink &&
+		if (ctx.tag->id == AtomTagLink &&
 		           isattr(n, nl, STRP("rel"))) {
 			/* empty or "alternate": other types could be
 			   "enclosure", "related", "self" or "via" */
@@ -660,7 +661,7 @@ xmlattr(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 				atomlinktype = AtomTagLinkEnclosure;
 			else
 				atomlinktype = TagUnknown;
-		} else if (ctx.tagid == AtomTagLink &&
+		} else if (ctx.tag->id == AtomTagLink &&
 		           isattr(n, nl, STRP("href"))) {
 			string_append(&atomlink, v, vl);
 		}
@@ -681,7 +682,7 @@ xmlattrentity(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 		return;
 	}
 
-	if (!ctx.tagid)
+	if (!ctx.tag->id)
 		return;
 
 	/* try to translate entity, else just pass as data to
@@ -736,7 +737,7 @@ xmldata(XMLParser *p, const char *s, size_t len)
 
 	/* add only data from <name> inside <author> tag
 	 * or any other non-<author> tag */
-	if (ctx.tagid != AtomTagAuthor || istag(p->tag, p->taglen, STRP("name")))
+	if (ctx.tag->id != AtomTagAuthor || istag(p->tag, p->taglen, STRP("name")))
 		string_append(ctx.field, s, len);
 }
 
@@ -781,12 +782,13 @@ xmltagstart(XMLParser *p, const char *t, size_t tl)
 	}
 
 	/* field tagid already set, nested tags are not allowed: return */
-	if (ctx.tagid)
+	if (ctx.tag->id)
 		return;
 
 	/* in item */
-	tagid = gettag(ctx.feedtype, t, tl);
-	ctx.tagid = tagid;
+	if (!(ctx.tag = gettag(ctx.feedtype, t, tl)))
+		ctx.tag = &notag;
+	tagid = ctx.tag->id;
 
 	/* without a rel attribute the default link type is "alternate" */
 	if (tagid == AtomTagLink) {
@@ -799,12 +801,13 @@ xmltagstart(XMLParser *p, const char *t, size_t tl)
 
 	/* map tag type to field: unknown or lesser priority is ignored,
 	   when tags of the same type are repeated only the first is used. */
-	if (fieldmap[tagid] == -1 || tagid <= ctx.fields[fieldmap[tagid]].tagid) {
+	if (fieldmap[tagid] == -1 ||
+	    tagid <= ctx.fields[fieldmap[tagid]].tagid) {
 		ctx.field = NULL;
 		return;
 	}
 
-	if (fieldmap[ctx.tagid] == FeedFieldContent) {
+	if (fieldmap[tagid] == FeedFieldContent) {
 		/* handle default content-type per tag, Atom, RSS, MRSS. */
 		switch (tagid) {
 		case RSSTagContentEncoded:
@@ -819,8 +822,8 @@ xmltagstart(XMLParser *p, const char *t, size_t tl)
 		ctx.iscontenttag = 0;
 	}
 
-	ctx.field = &(ctx.fields[fieldmap[ctx.tagid]].str);
-	ctx.fields[fieldmap[ctx.tagid]].tagid = tagid;
+	ctx.field = &(ctx.fields[fieldmap[tagid]].str);
+	ctx.fields[fieldmap[tagid]].tagid = tagid;
 	/* clear field */
 	string_clear(ctx.field);
 }
@@ -835,7 +838,7 @@ xmltagstartparsed(XMLParser *p, const char *tag, size_t taglen, int isshort)
 	}
 
 	/* don't read field value in Atom <link> tag */
-	if (ctx.tagid == AtomTagLink)
+	if (ctx.tag->id == AtomTagLink)
 		ctx.field = NULL;
 
 	if (!ISINCONTENT(ctx) || ctx.contenttype != ContentTypeHTML)
@@ -857,7 +860,7 @@ xmltagend(XMLParser *p, const char *t, size_t tl, int isshort)
 
 	if (ISINCONTENT(ctx)) {
 		/* not close content field */
-		if (gettag(ctx.feedtype, t, tl) != ctx.tagid) {
+		if (!istag(ctx.tag->name, ctx.tag->len, t, tl)) {
 			if (!isshort && ctx.contenttype == ContentTypeHTML) {
 				xmldata(p, "</", 2);
 				xmldata(p, t, tl);
@@ -865,7 +868,7 @@ xmltagend(XMLParser *p, const char *t, size_t tl, int isshort)
 			}
 			return;
 		}
-	} else if (ctx.tagid == AtomTagLink) {
+	} else if (ctx.tag->id == AtomTagLink) {
 		/* map tag type to field: unknown or lesser priority is ignored,
 		   when tags of the same type are repeated only the first is used. */
 		if (atomlinktype && atomlinktype > ctx.fields[fieldmap[atomlinktype]].tagid) {
@@ -873,15 +876,15 @@ xmltagend(XMLParser *p, const char *t, size_t tl, int isshort)
 			              atomlink.data, atomlink.len);
 			ctx.fields[fieldmap[atomlinktype]].tagid = atomlinktype;
 		}
-	} else if (ctx.tagid == RSSTagGuid && rssidpermalink) {
-		if (ctx.tagid > ctx.fields[FeedFieldLink].tagid) {
+	} else if (ctx.tag->id == RSSTagGuid && rssidpermalink) {
+		if (ctx.tag->id > ctx.fields[FeedFieldLink].tagid) {
 			string_clear(&ctx.fields[FeedFieldLink].str);
 			string_append(&ctx.fields[FeedFieldLink].str,
 			             ctx.fields[FeedFieldId].str.data,
 			             ctx.fields[FeedFieldId].str.len);
-			ctx.fields[FeedFieldLink].tagid = ctx.tagid;
+			ctx.fields[FeedFieldLink].tagid = ctx.tag->id;
 		}
-	} else if (!ctx.tagid && ((ctx.feedtype == FeedTypeAtom &&
+	} else if (!ctx.tag->id && ((ctx.feedtype == FeedTypeAtom &&
 	   istag(t, tl, STRP("entry"))) || /* Atom */
 	   (ctx.feedtype == FeedTypeRSS &&
 	   istag(t, tl, STRP("item"))))) /* RSS */
@@ -897,14 +900,14 @@ xmltagend(XMLParser *p, const char *t, size_t tl, int isshort)
 		ctx.contenttype = ContentTypeNone;
 		/* allow parsing of Atom and RSS concatenated in one XML stream. */
 		ctx.feedtype = FeedTypeNone;
-	} else if (!ctx.tagid ||
-	           gettag(ctx.feedtype, t, tl) != ctx.tagid) {
+	} else if (!ctx.tag->id ||
+	           !istag(ctx.tag->name, ctx.tag->len, t, tl)) {
 		/* not end of field */
 		return;
 	}
 	/* close field */
 	ctx.iscontent = 0;
-	ctx.tagid = TagUnknown;
+	ctx.tag = &notag;
 	ctx.field = NULL;
 }
 
