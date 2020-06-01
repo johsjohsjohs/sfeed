@@ -286,7 +286,7 @@ numericentitytostr(const char *e, char *buf, size_t bufsiz)
 		l = strtol(++e, &end, 16);
 	else
 		l = strtol(e, &end, 10);
-	/* invalid value or not a well-formed entity or invalid codepoint */
+	/* invalid value or not a well-formed entity or invalid code point */
 	if (errno || e == end || *end != ';' || l < 0 || l > 0x10ffff)
 		return -1;
 	len = codepointtoutf8(l, buf);
