@@ -7,6 +7,7 @@
 
 #include "util.h"
 
+static time_t now;
 static char *line;
 static size_t linesize;
 
@@ -65,12 +66,19 @@ printfeed(FILE *fp, const char *feedname)
 			xmlencode(fields[FieldLink], stdout);
 			fputs("\" />\n", stdout);
 		}
+		/* prefer link over id for Atom <id>. */
+		fputs("\t<id>", stdout);
+		if (fields[FieldLink][0])
+			xmlencode(fields[FieldLink], stdout);
+		else if (fields[FieldId][0])
+			xmlencode(fields[FieldId], stdout);
+		fputs("</id>\n", stdout);
 		if (fields[FieldEnclosure][0]) {
 			fputs("\t<link rel=\"enclosure\" href=\"", stdout);
 			xmlencode(fields[FieldEnclosure], stdout);
 			fputs("\" />\n", stdout);
 		}
-		fprintf(stdout, "\t<published>%04d-%02d-%02dT%02d:%02d:%02dZ</published>\n",
+		fprintf(stdout, "\t<updated>%04d-%02d-%02dT%02d:%02d:%02dZ</updated>\n",
 		        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
 		        tm->tm_hour, tm->tm_min, tm->tm_sec);
 		if (fields[FieldAuthor][0]) {
@@ -97,6 +105,7 @@ printfeed(FILE *fp, const char *feedname)
 int
 main(int argc, char *argv[])
 {
+	struct tm *tm;
 	FILE *fp;
 	char *name;
 	int i;
@@ -109,9 +118,20 @@ main(int argc, char *argv[])
 			err(1, "pledge");
 	}
 
+	if ((now = time(NULL)) == -1)
+		err(1, "time");
+	if (!(tm = gmtime(&now)))
+		err(1, "gmtime");
+
 	fputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-	      "<feed xmlns=\"http://www.w3.org/2005/Atom\" xml:lang=\"en\">\n",
-	      stdout);
+	      "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n"
+	      "\t<title type=\"text\">Newsfeed</title>\n"
+	      "\t<author><name>sfeed</name></author>\n", stdout);
+	printf("\t<id>urn:newsfeed:%lld</id>\n"
+	       "\t<updated>%04d-%02d-%02dT%02d:%02d:%02dZ</updated>\n",
+	       (long long)now,
+	       tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+	       tm->tm_hour, tm->tm_min, tm->tm_sec);
 
 	if (argc == 1) {
 		printfeed(stdin, "");
