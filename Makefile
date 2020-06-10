@@ -80,7 +80,7 @@ ${OBJ}: ${HDR}
 	${CC} ${SFEED_CFLAGS} ${SFEED_CPPFLAGS} -o $@ -c $<
 
 ${LIBUTIL}: ${LIBUTILOBJ}
-	${AR} rc $@ $?
+	${AR} -rc $@ $?
 	${RANLIB} $@
 
 ${LIBXML}: ${LIBXMLOBJ}
