@@ -96,7 +96,7 @@ dist:
 		sfeedrc.example style.css \
 		"${NAME}-${VERSION}"
 	# make tarball
-	tar -cf - "${NAME}-${VERSION}" | \
+	tar cf - "${NAME}-${VERSION}" | \
 		gzip -c > "${NAME}-${VERSION}.tar.gz"
 	rm -rf "${NAME}-${VERSION}"
 
