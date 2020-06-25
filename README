@@ -115,7 +115,7 @@ OS tested
 - DragonFlyBSD
 - Windows (cygwin gcc, mingw).
 - HaikuOS (using libbsd).
-- FreeDOS (djgpp)
+- FreeDOS (djgpp).
 
 
 Architectures tested
@@ -140,7 +140,7 @@ sfeed_plain       - Format feed data (TSV) to a plain-text list.
 sfeed_twtxt       - Format feed data (TSV) to a twtxt feed.
 sfeed_update      - Update feeds and merge items.
 sfeed_web         - Find urls to RSS/Atom feed from a webpage.
-sfeed_xmlenc      - Detect character-set encoding from XML stream.
+sfeed_xmlenc      - Detect character-set encoding from a XML stream.
 sfeedrc.example   - Example config file. Can be copied to $HOME/.sfeed/sfeedrc.
 style.css         - Example stylesheet to use with sfeed_html(1) and
                     sfeed_frames(1).
@@ -302,6 +302,9 @@ advertisements, strip tracking parameters and more.
 			{
 				$3 = filterlink($3); # link
 				$8 = filterlink($8); # enclosure
+
+				# try to remove tracking pixels: <img/> tags with 1px width or height.
+				gsub("<img[^>]*(width|height)[\s]*=[\s]*[\"'"'"' ]?1[\"'"'"' ]?[^0-9>]+[^>]*>", "", $4);
 
 				print $0;
 			}'
