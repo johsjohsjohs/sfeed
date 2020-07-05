@@ -47,12 +47,6 @@ printfeed(FILE *fp, const char *feedname)
 			line[--linelen] = '\0';
 		parseline(line, fields);
 
-		parsedtime = 0;
-		if (strtotime(fields[FieldUnixTimestamp], &parsedtime))
-			continue;
-		if (!(tm = localtime(&parsedtime)))
-			err(1, "localtime");
-
 		fputs("<entry>\n\t<title>", stdout);
 		if (feedname[0]) {
 			fputs("[", stdout);
@@ -78,9 +72,15 @@ printfeed(FILE *fp, const char *feedname)
 			xmlencode(fields[FieldEnclosure], stdout);
 			fputs("\" />\n", stdout);
 		}
-		fprintf(stdout, "\t<updated>%04d-%02d-%02dT%02d:%02d:%02dZ</updated>\n",
-		        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-		        tm->tm_hour, tm->tm_min, tm->tm_sec);
+
+		parsedtime = 0;
+		if (!strtotime(fields[FieldUnixTimestamp], &parsedtime) &&
+		    (tm = gmtime(&parsedtime))) {
+			fprintf(stdout, "\t<updated>%04d-%02d-%02dT%02d:%02d:%02dZ</updated>\n",
+			        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+			        tm->tm_hour, tm->tm_min, tm->tm_sec);
+		}
+
 		if (fields[FieldAuthor][0]) {
 			fputs("\t<author><name>", stdout);
 			xmlencode(fields[FieldAuthor], stdout);
