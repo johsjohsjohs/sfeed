@@ -79,6 +79,9 @@ Gopher, SSH, etc.
 See the section "Usage and examples" below and the man-pages for more
 information how to use sfeed(1) and the additional tools.
 
+A separate curses UI front-end called sfeed_curses is available at:
+https://codemadness.org/sfeed_curses.html
+
 
 Dependencies
 ------------
