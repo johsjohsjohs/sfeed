@@ -546,6 +546,113 @@ Now run:
 
 Now you can view feeds in mutt(1) for example.
 
+- - -
+
+Incremental data updates
+
+For servers that support it some incremental updates and bandwidth-saving can
+be done by using the "If-Modified-Since" HTTP header.
+
+The curl -z option can be used to send the modification date of the local feed
+file so the server can make the decision to respond with incremental data.
+
+You can do this by overriding the fetch() function in the sfeedrc file and
+adding the -z option:
+
+	# fetch(name, url, feedfile)
+	fetch() {
+		curl -z "$3" "$2"
+	}
+
+This comes at a cost of some privacy. For example there can be a fingerprinting
+vector of the local modification date of the feed file.
+
+- - -
+
+CDN's blocking requests due to missing User-Agent
+
+sfeed_update will not send the "User-Agent" header by default for privacy
+reasons.  Some CDNs like Cloudflare don't like this and will block such HTTP
+requests.
+
+A custom User-Agent can be set by using the curl -H option, like so:
+
+	curl -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0'
+
+The above example string pretends to be a Windows 10 (x86-64) machine running
+Firefox 78.
+
+- - -
+
+Shellscript to export existing newsboat cached items from sqlite3 to the sfeed
+TSV format.
+	
+	#!/bin/sh
+	# Export newsbeuter/newsboat cached items from sqlite3 to the sfeed TSV format.
+	# The data is split per file per feed with the name of the newsboat title/url.
+	# Dependencies: sqlite3, awk.
+	#
+	# Usage: create some directory to store the feeds, run this script.
+	#
+	# Assumes "html" for content-type (Newsboat only handles HTML content).
+	# Assumes feednames are unique and a feed title is set.
+	
+	# newsboat cache.db file.
+	cachefile="$HOME/.newsboat/cache.db"
+	test -n "$1" && cachefile="$1"
+	
+	# dump data.
+	# .mode ascii: Columns/rows delimited by 0x1F and 0x1E
+	# get the first fields in the order of the sfeed(5) format.
+	sqlite3 "$cachefile" <<!EOF |
+	.headers off
+	.mode ascii
+	.output
+	SELECT
+		i.pubDate, i.title, i.url, i.content, i.guid, i.author,
+		i.enclosure_url,
+		f.rssurl AS rssurl, f.title AS feedtitle --,
+		-- i.id, i.unread, i.enclosure_type, i.enqueued, i.flags, i.deleted,
+		-- i.base
+	FROM rss_feed f
+	INNER JOIN rss_item i ON i.feedurl = f.rssurl
+	ORDER BY
+		i.feedurl ASC, i.pubDate DESC;
+	.quit
+	!EOF
+	# convert to sfeed(5) TSV format.
+	awk '
+	BEGIN {
+		FS = "\x1f";
+		RS = "\x1e";
+	}
+	# strip all control-chars for normal fields.
+	function strip(s) {
+		gsub("[[:cntrl:]]", "", s);
+		return s;
+	}
+	# escape chars in content field.
+	function escape(s) {
+		gsub("\\\\", "\\\\", s);
+		gsub("\n", "\\n", s);
+		gsub("\t", "\\t", s);
+		return s;
+	}
+	function feedname(url, title) {
+		gsub("/", "_", title);
+		return title;
+	}
+	{
+		fname = feedname($8, $9);
+		if (!feed[fname]++) {
+			print "Writing file: \"" fname "\" (title: " $9 ", url: " $8 ")" > "/dev/stderr";
+		}
+	
+		print $1 "\t" strip($2) "\t" strip($3) "\t" escape($4) "\t" \
+			"html" "\t" strip($5) "\t" strip($6) "\t" strip($7) \
+			> fname;
+	}'
+
 
 License
 -------
