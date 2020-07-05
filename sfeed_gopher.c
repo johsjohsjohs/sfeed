@@ -55,16 +55,6 @@ printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 			line[--linelen] = '\0';
 		parseline(line, fields);
 
-		parsedtime = 0;
-		if (strtotime(fields[FieldUnixTimestamp], &parsedtime))
-			continue;
-		if (!(tm = localtime(&parsedtime)))
-			err(1, "localtime");
-
-		isnew = (parsedtime >= comparetime) ? 1 : 0;
-		f->totalnew += isnew;
-		f->total++;
-
 		itemhost = host;
 		itemport = port;
 		itemtype = 'i';
@@ -89,11 +79,22 @@ printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 			}
 		}
 
-		fprintf(fpitems, "%c%c %04d-%02d-%02d %02d:%02d ",
-		        itemtype,
-		        isnew ? 'N' : ' ',
-		        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-	                tm->tm_hour, tm->tm_min);
+		parsedtime = 0;
+		if (!strtotime(fields[FieldUnixTimestamp], &parsedtime) &&
+		    (tm = localtime(&parsedtime))) {
+			isnew = (parsedtime >= comparetime) ? 1 : 0;
+			f->totalnew += isnew;
+
+			fprintf(fpitems, "%c%c %04d-%02d-%02d %02d:%02d ",
+			        itemtype,
+			        isnew ? 'N' : ' ',
+			        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+			        tm->tm_hour, tm->tm_min);
+		} else {
+			fprintf(fpitems, "%c                   ", itemtype);
+		}
+		f->total++;
+
 		gophertext(fpitems, fields[FieldTitle]);
 		fputs("\t", fpitems);
 		if (itemtype == 'h' && fields[FieldLink] == itempath)

@@ -24,14 +24,14 @@ printfeed(FILE *fp, const char *feedname)
 		parseline(line, fields);
 
 		parsedtime = 0;
-		if (strtotime(fields[FieldUnixTimestamp], &parsedtime))
-			continue;
-		if (!(tm = gmtime(&parsedtime)))
-			err(1, "gmtime");
-
-		fprintf(stdout, "%04d-%02d-%02dT%02d:%02d:%02dZ\t",
-		        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-		        tm->tm_hour, tm->tm_min, tm->tm_sec);
+		if (!strtotime(fields[FieldUnixTimestamp], &parsedtime) &&
+		    (tm = gmtime(&parsedtime))) {
+			fprintf(stdout, "%04d-%02d-%02dT%02d:%02d:%02dZ\t",
+			        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+			        tm->tm_hour, tm->tm_min, tm->tm_sec);
+		} else {
+			fputs("\t", stdout);
+		}
 		if (feedname[0])
 			printf("[%s] ", feedname);
 		fputs(fields[FieldTitle], stdout);

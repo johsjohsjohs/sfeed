@@ -41,19 +41,19 @@ printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 		parseline(line, fields);
 
 		parsedtime = 0;
-		if (strtotime(fields[FieldUnixTimestamp], &parsedtime))
-			continue;
-		if (!(tm = localtime(&parsedtime)))
-			err(1, "localtime");
-
-		isnew = (parsedtime >= comparetime) ? 1 : 0;
-		totalnew += isnew;
-		f->totalnew += isnew;
+		if (!strtotime(fields[FieldUnixTimestamp], &parsedtime) &&
+		    (tm = localtime(&parsedtime))) {
+			isnew = (parsedtime >= comparetime) ? 1 : 0;
+			totalnew += isnew;
+			f->totalnew += isnew;
+			fprintf(fpitems, "%04d-%02d-%02d&nbsp;%02d:%02d ",
+			        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+			        tm->tm_hour, tm->tm_min);
+		} else {
+			fputs("                 ", fpitems);
+		}
 		f->total++;
 
-		fprintf(fpitems, "%04d-%02d-%02d&nbsp;%02d:%02d ",
-		        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-		        tm->tm_hour, tm->tm_min);
 		if (fields[FieldLink][0]) {
 			fputs("<a href=\"", fpitems);
 			xmlencode(fields[FieldLink], fpitems);

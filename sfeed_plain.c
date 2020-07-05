@@ -26,19 +26,19 @@ printfeed(FILE *fp, const char *feedname)
 		parseline(line, fields);
 
 		parsedtime = 0;
-		if (strtotime(fields[FieldUnixTimestamp], &parsedtime))
-			continue;
-		if (!(tm = localtime(&parsedtime)))
-			err(1, "localtime");
+		if (!strtotime(fields[FieldUnixTimestamp], &parsedtime) &&
+		    (tm = localtime(&parsedtime))) {
+			if (parsedtime >= comparetime)
+				fputs("N ", stdout);
+			else
+				fputs("  ", stdout);
+			fprintf(stdout, "%04d-%02d-%02d %02d:%02d  ",
+			        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+			        tm->tm_hour, tm->tm_min);
+		} else {
+			fputs("                    ", stdout);
+		}
 
-		if (parsedtime >= comparetime)
-			fputs("N ", stdout);
-		else
-			fputs("  ", stdout);
-
-		fprintf(stdout, "%04d-%02d-%02d %02d:%02d  ",
-		        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-		        tm->tm_hour, tm->tm_min);
 		if (feedname[0]) {
 			printutf8pad(stdout, feedname, 15, ' ');
 			fputs("  ", stdout);
