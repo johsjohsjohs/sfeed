@@ -39,7 +39,7 @@ static void
 printfeed(FILE *fp, const char *feedname)
 {
 	char *fields[FieldLast];
-	struct tm tmitem, *tm;
+	struct tm *tm;
 	time_t parsedtime;
 	ssize_t linelen;
 
@@ -76,7 +76,7 @@ printfeed(FILE *fp, const char *feedname)
 
 		parsedtime = 0;
 		if (strtotime(fields[FieldUnixTimestamp], &parsedtime) ||
-		    !(tm = gmtime_r(&parsedtime, &tmitem)))
+		    !(tm = gmtime(&parsedtime)))
 			tm = &tmnow;
 		fprintf(stdout, "\t<updated>%04d-%02d-%02dT%02d:%02d:%02dZ</updated>\n",
 		        tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
