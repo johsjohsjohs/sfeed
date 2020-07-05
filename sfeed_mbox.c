@@ -9,7 +9,7 @@
 
 static char *line;
 static size_t linesize;
-static char host[256], *user, mtimebuf[32];
+static char host[256], *user, dtimebuf[32], mtimebuf[32];
 
 static unsigned long
 djb2(unsigned char *s, unsigned long hash)
@@ -36,17 +36,18 @@ printfeed(FILE *fp, const char *feedname)
 		hash = djb2((unsigned char *)line, 5381UL);
 		parseline(line, fields);
 
-		parsedtime = 0;
-		if (strtotime(fields[FieldUnixTimestamp], &parsedtime))
-			continue;
-		if (!(tm = gmtime(&parsedtime)))
-			err(1, "gmtime");
-		if (!strftime(timebuf, sizeof(timebuf), "%a, %d %b %Y %H:%M:%S +0000", tm))
-			errx(1, "strftime");
-
 		/* mbox + mail header */
 		printf("From MAILER-DAEMON %s\n", mtimebuf);
-		printf("Date: %s\n", timebuf);
+
+		parsedtime = 0;
+		if (!strtotime(fields[FieldUnixTimestamp], &parsedtime) &&
+		    (tm = gmtime(&parsedtime)) &&
+		    strftime(timebuf, sizeof(timebuf), "%a, %d %b %Y %H:%M:%S +0000", tm)) {
+			printf("Date: %s\n", timebuf);
+		} else {
+			printf("Date: %s\n", dtimebuf); /* invalid/missing: use current time */
+		}
+
 		printf("From: %s <sfeed@>\n", fields[FieldAuthor][0] ? fields[FieldAuthor] : feedname);
 		printf("To: %s <%s@%s>\n", user, user, host);
 		printf("Subject: %s\n", fields[FieldTitle]);
@@ -68,8 +69,8 @@ printfeed(FILE *fp, const char *feedname)
 int
 main(int argc, char *argv[])
 {
-	struct tm tm;
-	time_t t;
+	struct tm tmnow;
+	time_t now;
 	FILE *fp;
 	char *name;
 	int i;
@@ -81,11 +82,13 @@ main(int argc, char *argv[])
 		user = "you";
 	if (gethostname(host, sizeof(host)) == -1)
 		err(1, "gethostname");
-	if ((t = time(NULL)) == -1)
+	if ((now = time(NULL)) == -1)
 		err(1, "time");
-	if (!gmtime_r(&t, &tm))
+	if (!gmtime_r(&now, &tmnow))
 		err(1, "gmtime_r: can't get current time");
-	if (!strftime(mtimebuf, sizeof(mtimebuf), "%a %b %d %H:%M:%S %Y", &tm))
+	if (!strftime(mtimebuf, sizeof(mtimebuf), "%a %b %d %H:%M:%S %Y", &tmnow))
+		errx(1, "strftime: can't format current time");
+	if (!strftime(dtimebuf, sizeof(dtimebuf), "%a, %d %b %Y %H:%M:%S +0000", &tmnow))
 		errx(1, "strftime: can't format current time");
 
 	if (argc == 1) {
