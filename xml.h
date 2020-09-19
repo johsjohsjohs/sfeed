@@ -1,5 +1,5 @@
-#ifndef _XML_H
-#define _XML_H
+#ifndef _XML_H_
+#define _XML_H_
 
 #include <stdio.h>
 
