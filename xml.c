@@ -116,48 +116,18 @@ startvalue:
 static void
 xml_parsecomment(XMLParser *x)
 {
-	size_t datalen = 0, i = 0;
+	size_t i = 0;
 	int c;
 
-	if (x->xmlcommentstart)
-		x->xmlcommentstart(x);
 	while ((c = GETNEXT()) != EOF) {
-		if (c == '-' || c == '>') {
-			if (x->xmlcomment && datalen) {
-				x->data[datalen] = '\0';
-				x->xmlcomment(x, x->data, datalen);
-				datalen = 0;
-			}
-		}
-
 		if (c == '-') {
-			if (++i > 2) {
-				if (x->xmlcomment)
-					for (; i > 2; i--)
-						x->xmlcomment(x, "-", 1);
+			if (++i > 2)
 				i = 2;
-			}
 			continue;
 		} else if (c == '>' && i == 2) {
-			if (x->xmlcommentend)
-				x->xmlcommentend(x);
 			return;
 		} else if (i) {
-			if (x->xmlcomment) {
-				for (; i > 0; i--)
-					x->xmlcomment(x, "-", 1);
-			}
 			i = 0;
-		}
-
-		if (datalen < sizeof(x->data) - 1) {
-			x->data[datalen++] = c;
-		} else {
-			x->data[datalen] = '\0';
-			if (x->xmlcomment)
-				x->xmlcomment(x, x->data, datalen);
-			x->data[0] = c;
-			datalen = 1;
 		}
 	}
 }
