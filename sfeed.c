@@ -111,7 +111,6 @@ static void xmlattrend(XMLParser *, const char *, size_t, const char *,
                        size_t);
 static void xmlattrstart(XMLParser *, const char *, size_t, const char *,
                          size_t);
-static void xmlcdata(XMLParser *, const char *, size_t);
 static void xmldata(XMLParser *, const char *, size_t);
 static void xmldataentity(XMLParser *, const char *, size_t);
 static void xmltagend(XMLParser *, const char *, size_t, int);
@@ -718,15 +717,6 @@ xmlattrstart(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl)
 	xmldata(p, "=\"", 2);
 }
 
-static void
-xmlcdata(XMLParser *p, const char *s, size_t len)
-{
-	if (!ctx.field)
-		return;
-
-	string_append(ctx.field, s, len);
-}
-
 /* NOTE: this handler can be called multiple times if the data in this
  *       block is bigger than the buffer. */
 static void
@@ -924,7 +914,7 @@ main(int argc, char *argv[])
 	parser.xmlattrentity = xmlattrentity;
 	parser.xmlattrend = xmlattrend;
 	parser.xmlattrstart = xmlattrstart;
-	parser.xmlcdata = xmlcdata;
+	parser.xmlcdata = xmldata;
 	parser.xmldata = xmldata;
 	parser.xmldataentity = xmldataentity;
 	parser.xmltagend = xmltagend;
