@@ -496,8 +496,8 @@ parsetime(const char *s, time_t *tp)
 	if (!isdigit((unsigned char)*s) && !isalpha((unsigned char)*s))
 		return -1;
 
-	if (strspn(s, "0123456789") == 4) {
-		/* format "%Y-%m-%d %H:%M:%S" or "%Y-%m-%dT%H:%M:%S" */
+	if (strspn(s, "0123456789") >= 4) {
+		/* formats "%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S" or "%Y%m%d%H%M%S" */
 		vi = 0;
 	} else {
 		/* format: "[%a, ]%d %b %Y %H:%M:%S" */
@@ -543,11 +543,14 @@ parsetime(const char *s, time_t *tp)
 		vi = 3;
 	}
 
-	/* parse time part */
+	/* parse time parts (and possibly remaining date parts) */
 	for (; *s && vi < 6; vi++) {
-		for (i = 0, v = 0; *s && i < 4 && isdigit((unsigned char)*s); s++, i++)
+		for (i = 0, v = 0; *s && i < ((vi == 0) ? 4 : 2) &&
+		                   isdigit((unsigned char)*s); s++, i++) {
 			v = (v * 10) + (*s - '0');
+		}
 		va[vi] = v;
+
 		if ((vi < 2 && *s == '-') ||
 		    (vi == 2 && (*s == 'T' || isspace((unsigned char)*s))) ||
 		    (vi > 2 && *s == ':'))
