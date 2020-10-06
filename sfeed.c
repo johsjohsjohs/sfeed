@@ -510,7 +510,7 @@ parsetime(const char *s, time_t *tp)
 			s++;
 		for (; *s && isspace((unsigned char)*s); s++)
 			;
-		for (v = 0, i = 0; *s && i < 4 && isdigit((unsigned char)*s); s++, i++)
+		for (v = 0, i = 0; *s && i < 2 && isdigit((unsigned char)*s); s++, i++)
 			v = (v * 10) + (*s - '0');
 		va[2] = v; /* day */
 		for (; *s && isspace((unsigned char)*s); s++)
