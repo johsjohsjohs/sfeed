@@ -14,6 +14,10 @@
 
 #define ISINCONTENT(ctx)  ((ctx).iscontent && !((ctx).iscontenttag))
 #define ISCONTENTTAG(ctx) (!((ctx).iscontent) && (ctx).iscontenttag)
+
+/* these feed fields support multiple separated values */
+#define ISFEEDFIELDMULTI(t) ((t) == FeedFieldCategory)
+
 /* string and byte-length */
 #define STRP(s)           s,sizeof(s)-1
 
@@ -46,10 +50,13 @@ enum TagId {
 	RSSTagTitle,
 	RSSTagMediaDescription, RSSTagDescription, RSSTagContentEncoded,
 	RSSTagGuid,
+	RSSTagGuidPermalinkFalse,
+	RSSTagGuidPermalinkTrue,
 	/* must be defined after GUID, because it can be a link (isPermaLink) */
 	RSSTagLink,
 	RSSTagEnclosure,
 	RSSTagAuthor, RSSTagDccreator,
+	RSSTagCategory,
 	/* Atom */
 	AtomTagUpdated, AtomTagPublished,
 	AtomTagTitle,
@@ -58,7 +65,8 @@ enum TagId {
 	AtomTagLink,
 	AtomTagLinkAlternate,
 	AtomTagLinkEnclosure,
-	AtomTagAuthor,
+	AtomTagAuthor, AtomTagAuthorName,
+	AtomTagCategory,
 	TagLast
 };
 
@@ -75,7 +83,8 @@ typedef struct field {
 
 enum {
 	FeedFieldTime = 0, FeedFieldTitle, FeedFieldLink, FeedFieldContent,
-	FeedFieldId, FeedFieldAuthor, FeedFieldEnclosure, FeedFieldLast
+	FeedFieldId, FeedFieldAuthor, FeedFieldEnclosure, FeedFieldCategory,
+	FeedFieldLast
 };
 
 typedef struct feedcontext {
@@ -86,7 +95,7 @@ typedef struct feedcontext {
 	int              iscontenttag; /* in content tag */
 	enum ContentType contenttype;  /* content-type for item */
 	enum FeedType    feedtype;
-	int              attrcount; /* count item HTML element attributes */
+	int              attrcount;    /* count item HTML element attributes */
 } FeedContext;
 
 static long long datetounix(long long, int, int, int, int, int);
@@ -102,6 +111,7 @@ static void string_clear(String *);
 static void string_print_encoded(String *);
 static void string_print_timestamp(String *);
 static void string_print_trimmed(String *);
+static void string_print_trimmed_multi(String *);
 static void string_print_uri(String *);
 static void xmlattr(XMLParser *, const char *, size_t, const char *, size_t,
                     const char *, size_t);
@@ -121,6 +131,7 @@ static void xmltagstartparsed(XMLParser *, const char *, size_t, int);
 /* RSS, must be alphabetical order */
 static FeedTag rsstags[] = {
 	{ STRP("author"),            RSSTagAuthor            },
+	{ STRP("category"),          RSSTagCategory          },
 	{ STRP("content:encoded"),   RSSTagContentEncoded    },
 	{ STRP("dc:creator"),        RSSTagDccreator         },
 	{ STRP("dc:date"),           RSSTagDcdate            },
@@ -133,10 +144,11 @@ static FeedTag rsstags[] = {
 	{ STRP("pubdate"),           RSSTagPubdate           },
 	{ STRP("title"),             RSSTagTitle             }
 };
+
 /* Atom, must be alphabetical order */
 static FeedTag atomtags[] = {
-	/* <author><name></name></author> */
 	{ STRP("author"),            AtomTagAuthor           },
+	{ STRP("category"),          AtomTagCategory         },
 	{ STRP("content"),           AtomTagContent          },
 	{ STRP("id"),                AtomTagId               },
 	/* Atom: <link href="" />, RSS has <link></link> */
@@ -147,46 +159,57 @@ static FeedTag atomtags[] = {
 	{ STRP("title"),             AtomTagTitle            },
 	{ STRP("updated"),           AtomTagUpdated          }
 };
+
+/* special case: nested <author><name> */
+static FeedTag atomtagauthor = { STRP("author"), AtomTagAuthor };
+static FeedTag atomtagauthorname = { STRP("name"), AtomTagAuthorName };
+
+/* reference to no / unknown tag */
 static FeedTag notag = { STRP(""), TagUnknown };
 
 /* map TagId type to RSS/Atom field, all tags must be defined */
 static int fieldmap[TagLast] = {
-	[TagUnknown]              = -1,
+	[TagUnknown]               = -1,
 	/* RSS */
-	[RSSTagDcdate]            = FeedFieldTime,
-	[RSSTagPubdate]           = FeedFieldTime,
-	[RSSTagTitle]             = FeedFieldTitle,
-	[RSSTagMediaDescription]  = FeedFieldContent,
-	[RSSTagDescription]       = FeedFieldContent,
-	[RSSTagContentEncoded]    = FeedFieldContent,
-	[RSSTagGuid]              = FeedFieldId,
-	[RSSTagLink]              = FeedFieldLink,
-	[RSSTagEnclosure]         = FeedFieldEnclosure,
-	[RSSTagAuthor]            = FeedFieldAuthor,
-	[RSSTagDccreator]         = FeedFieldAuthor,
+	[RSSTagDcdate]             = FeedFieldTime,
+	[RSSTagPubdate]            = FeedFieldTime,
+	[RSSTagTitle]              = FeedFieldTitle,
+	[RSSTagMediaDescription]   = FeedFieldContent,
+	[RSSTagDescription]        = FeedFieldContent,
+	[RSSTagContentEncoded]     = FeedFieldContent,
+	[RSSTagGuid]               = -1,
+	[RSSTagGuidPermalinkTrue]  = FeedFieldId, /* special-case: both a link and an id */
+	[RSSTagGuidPermalinkFalse] = FeedFieldId,
+	[RSSTagLink]               = FeedFieldLink,
+	[RSSTagEnclosure]          = FeedFieldEnclosure,
+	[RSSTagAuthor]             = FeedFieldAuthor,
+	[RSSTagDccreator]          = FeedFieldAuthor,
+	[RSSTagCategory]           = FeedFieldCategory,
 	/* Atom */
-	[AtomTagUpdated]          = FeedFieldTime,
-	[AtomTagPublished]        = FeedFieldTime,
-	[AtomTagTitle]            = FeedFieldTitle,
-	[AtomTagMediaDescription] = FeedFieldContent,
-	[AtomTagSummary]          = FeedFieldContent,
-	[AtomTagContent]          = FeedFieldContent,
-	[AtomTagId]               = FeedFieldId,
-	[AtomTagLink]             = -1,
-	[AtomTagLinkAlternate]    = FeedFieldLink,
-	[AtomTagLinkEnclosure]    = FeedFieldEnclosure,
-	[AtomTagAuthor]           = FeedFieldAuthor
+	[AtomTagUpdated]           = FeedFieldTime,
+	[AtomTagPublished]         = FeedFieldTime,
+	[AtomTagTitle]             = FeedFieldTitle,
+	[AtomTagMediaDescription]  = FeedFieldContent,
+	[AtomTagSummary]           = FeedFieldContent,
+	[AtomTagContent]           = FeedFieldContent,
+	[AtomTagId]                = FeedFieldId,
+	[AtomTagLink]              = -1,
+	[AtomTagLinkAlternate]     = FeedFieldLink,
+	[AtomTagLinkEnclosure]     = FeedFieldEnclosure,
+	[AtomTagAuthor]            = -1,
+	[AtomTagAuthorName]        = FeedFieldAuthor,
+	[AtomTagCategory]          = FeedFieldCategory
 };
 
 static const int FieldSeparator = '\t';
+/* separator for multiple values in a field, separator should be 1 byte */
+static const char *FieldMultiSeparator = "|";
 static const char *baseurl = "";
 
 static FeedContext ctx = { .tag = &notag };
 static XMLParser parser; /* XML parser state */
-
-static String atomlink;
-static enum TagId atomlinktype;
-static int rssidpermalink;
+static String tmpstr;
+static enum ContentType tmpcontenttype; /* content-type for item */
 
 int
 tagcmp(const void *v1, const void *v2)
@@ -308,19 +331,13 @@ string_print_encoded(String *s)
 	}
 }
 
-/* Print text, replace TABs, carriage return and other whitespace with ' '.
- * Other control chars are removed. Remove leading and trailing whitespace. */
 static void
-string_print_trimmed(String *s)
+printtrimmed(char *s)
 {
 	char *p, *e;
 
-	if (!s->data || !s->len)
-		return;
-
-	p = ltrim(s->data);
+	p = ltrim(s);
 	e = rtrim(p);
-
 	for (; *p && p != e; p++) {
 		if (isspace((unsigned char)*p))
 			putchar(' '); /* any whitespace to space */
@@ -330,23 +347,64 @@ string_print_trimmed(String *s)
 	}
 }
 
-/* always print absolute urls (using global baseurl) */
-void
-string_print_uri(String *s)
+/* Print text, replace TABs, carriage return and other whitespace with ' '.
+ * Other control chars are removed. Remove leading and trailing whitespace. */
+static void
+string_print_trimmed(String *s)
 {
-	char link[4096], *p, *e;
+	if (!s->data || !s->len)
+		return;
+
+	printtrimmed(s->data);
+}
+
+void
+string_print_trimmed_multi(String *s)
+{
+	char *p, *e;
 	int c;
 
 	if (!s->data || !s->len)
 		return;
 
-	p = ltrim(s->data);
+	for (p = s->data; ; p = e + 1) {
+		if ((e = strstr(p, FieldMultiSeparator))) {
+			c = *e;
+			*e = '\0';
+			printtrimmed(p);
+			*e = c; /* restore NUL byte to original character */
+			fputs(FieldMultiSeparator, stdout);
+		} else {
+			printtrimmed(p);
+			break;
+		}
+	}
+}
+
+/* always print absolute urls (using global baseurl) */
+void
+printuri(char *s)
+{
+	char link[4096], *p, *e;
+	int c;
+
+	p = ltrim(s);
 	e = rtrim(p);
 	c = *e;
 	*e = '\0';
 	if (absuri(link, sizeof(link), p, baseurl) != -1)
 		fputs(link, stdout);
-	*e = c; /* restore */
+	*e = c; /* restore NUL byte to original character */
+}
+
+/* always print absolute urls (using global baseurl) */
+void
+string_print_uri(String *s)
+{
+	if (!s->data || !s->len)
+		return;
+
+	printuri(s->data);
 }
 
 /* print as UNIX timestamp, print nothing if the parsed time is invalid */
@@ -596,6 +654,8 @@ printfields(void)
 	string_print_trimmed(&ctx.fields[FeedFieldAuthor].str);
 	putchar(FieldSeparator);
 	string_print_uri(&ctx.fields[FeedFieldEnclosure].str);
+	putchar(FieldSeparator);
+	string_print_trimmed_multi(&ctx.fields[FeedFieldCategory].str);
 	putchar('\n');
 }
 
@@ -633,11 +693,11 @@ xmlattr(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 			    isattr(v, vl, STRP("xhtml")) ||
 			    isattr(v, vl, STRP("text/html")) ||
 			    isattr(v, vl, STRP("text/xhtml"))) {
-				ctx.contenttype = ContentTypeHTML;
+				tmpcontenttype = ContentTypeHTML;
 			} else if (isattr(v, vl, STRP("text")) ||
 			           isattr(v, vl, STRP("plain")) ||
 				   isattr(v, vl, STRP("text/plain"))) {
-				ctx.contenttype = ContentTypePlain;
+				tmpcontenttype = ContentTypePlain;
 			}
 		}
 		return;
@@ -645,27 +705,37 @@ xmlattr(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 
 	if (ctx.feedtype == FeedTypeRSS) {
 		if (ctx.tag->id == RSSTagEnclosure &&
-		    isattr(n, nl, STRP("url")) && ctx.field) {
-			string_append(ctx.field, v, vl);
-		} else if (ctx.tag->id == RSSTagGuid &&
-		           isattr(n, nl, STRP("ispermalink")) &&
-		           !isattr(v, vl, STRP("true"))) {
-			rssidpermalink = 0;
+		    isattr(n, nl, STRP("url"))) {
+			string_append(&tmpstr, v, vl);
+		} else if ((ctx.tag->id == RSSTagGuid ||
+		            ctx.tag->id == RSSTagGuidPermalinkFalse ||
+			    ctx.tag->id == RSSTagGuidPermalinkTrue) &&
+		           isattr(n, nl, STRP("ispermalink"))) {
+			if (isattr(v, vl, STRP("true")))
+				ctx.tag->id = RSSTagGuidPermalinkTrue;
+			else
+				ctx.tag->id = RSSTagGuidPermalinkFalse;
 		}
 	} else if (ctx.feedtype == FeedTypeAtom) {
-		if (ctx.tag->id == AtomTagLink &&
-		           isattr(n, nl, STRP("rel"))) {
-			/* empty or "alternate": other types could be
-			   "enclosure", "related", "self" or "via" */
-			if (!vl || isattr(v, vl, STRP("alternate")))
-				atomlinktype = AtomTagLinkAlternate;
-			else if (isattr(v, vl, STRP("enclosure")))
-				atomlinktype = AtomTagLinkEnclosure;
-			else
-				atomlinktype = TagUnknown;
-		} else if (ctx.tag->id == AtomTagLink &&
-		           isattr(n, nl, STRP("href"))) {
-			string_append(&atomlink, v, vl);
+		if (ctx.tag->id == AtomTagLink ||
+		    ctx.tag->id == AtomTagLinkAlternate ||
+		    ctx.tag->id == AtomTagLinkEnclosure) {
+			if (isattr(n, nl, STRP("rel"))) {
+				/* empty or "alternate": other types could be
+				   "enclosure", "related", "self" or "via" */
+				if (!vl || isattr(v, vl, STRP("alternate")))
+					ctx.tag->id = AtomTagLinkAlternate;
+				else if (isattr(v, vl, STRP("enclosure")))
+					ctx.tag->id = AtomTagLinkEnclosure;
+				else
+					ctx.tag->id = AtomTagLink; /* unknown */
+			} else if (ctx.tag->id != AtomTagLink &&
+			           isattr(n, nl, STRP("href"))) {
+				string_append(&tmpstr, v, vl);
+			}
+		} else if (ctx.tag->id == AtomTagCategory &&
+			   isattr(n, nl, STRP("term"))) {
+			string_append(&tmpstr, v, vl);
 		}
 	}
 }
@@ -698,26 +768,30 @@ xmlattrentity(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 static void
 xmlattrend(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl)
 {
-	if (!ISINCONTENT(ctx) || ctx.contenttype != ContentTypeHTML)
+	if (ISINCONTENT(ctx)) {
+		if (ctx.contenttype == ContentTypeHTML) {
+			/* handles transforming inline XML to data */
+			xmldata(p, "\"", 1);
+			ctx.attrcount = 0;
+		}
 		return;
-
-	/* handles transforming inline XML to data */
-	xmldata(p, "\"", 1);
-	ctx.attrcount = 0;
+	}
 }
 
 static void
 xmlattrstart(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl)
 {
-	if (!ISINCONTENT(ctx) || ctx.contenttype != ContentTypeHTML)
+	if (ISINCONTENT(ctx)) {
+		if (ctx.contenttype == ContentTypeHTML) {
+			/* handles transforming inline XML to data */
+			if (!ctx.attrcount)
+				xmldata(p, " ", 1);
+			ctx.attrcount++;
+			xmldata(p, n, nl);
+			xmldata(p, "=\"", 2);
+		}
 		return;
-
-	/* handles transforming inline XML to data */
-	if (!ctx.attrcount)
-		xmldata(p, " ", 1);
-	ctx.attrcount++;
-	xmldata(p, n, nl);
-	xmldata(p, "=\"", 2);
+	}
 }
 
 /* NOTE: this handler can be called multiple times if the data in this
@@ -728,9 +802,9 @@ xmldata(XMLParser *p, const char *s, size_t len)
 	if (!ctx.field)
 		return;
 
-	/* add only data from <name> inside <author> tag
-	 * or any other non-<author> tag */
-	if (ctx.tag->id != AtomTagAuthor || istag(p->tag, p->taglen, STRP("name")))
+	if (ISFEEDFIELDMULTI(fieldmap[ctx.tag->id]))
+		string_append(&tmpstr, s, len);
+	else
 		string_append(ctx.field, s, len);
 }
 
@@ -754,11 +828,9 @@ xmldataentity(XMLParser *p, const char *data, size_t datalen)
 static void
 xmltagstart(XMLParser *p, const char *t, size_t tl)
 {
-	enum TagId tagid;
-
 	if (ISINCONTENT(ctx)) {
-		ctx.attrcount = 0;
 		if (ctx.contenttype == ContentTypeHTML) {
+			ctx.attrcount = 0;
 			xmldata(p, "<", 1);
 			xmldata(p, t, tl);
 		}
@@ -774,73 +846,85 @@ xmltagstart(XMLParser *p, const char *t, size_t tl)
 		return;
 	}
 
-	/* field tagid already set, nested tags are not allowed: return */
-	if (ctx.tag->id)
-		return;
+	/* field tagid already set or nested tags. */
+	if (ctx.tag->id) {
+		/* nested <author><name> for Atom */
+		if (ctx.tag->id == AtomTagAuthor &&
+		    istag(t, tl, STRP("name"))) {
+			ctx.tag = &atomtagauthorname;
+		} else {
+			return; /* other nested tags are not allowed: return */
+		}
+	}
 
 	/* in item */
-	if (!(ctx.tag = gettag(ctx.feedtype, t, tl)))
+	if (ctx.tag->id == TagUnknown && !(ctx.tag = gettag(ctx.feedtype, t, tl)))
 		ctx.tag = &notag;
-	tagid = ctx.tag->id;
 
-	/* without a rel attribute the default link type is "alternate" */
-	if (tagid == AtomTagLink) {
-		atomlinktype = AtomTagLinkAlternate;
-		string_clear(&atomlink); /* reuse and clear temporary link */
-	} else if (tagid == RSSTagGuid) {
+	switch (ctx.tag->id) {
+	case AtomTagLink:
+		/* without a rel attribute the default link type is "alternate" */
+		ctx.tag->id = AtomTagLinkAlternate;
+		break;
+	case RSSTagGuid:
 		/* without a ispermalink attribute the default value is "true" */
-		rssidpermalink = 1;
+		ctx.tag->id = RSSTagGuidPermalinkTrue;
+		break;
+	case RSSTagContentEncoded:
+	case RSSTagDescription:
+		tmpcontenttype = ContentTypeHTML; /* default content-type */
+		ctx.iscontenttag = 1;
+		break;
+	case RSSTagMediaDescription:
+	case AtomTagContent:
+	case AtomTagMediaDescription:
+	case AtomTagSummary:
+		tmpcontenttype = ContentTypePlain; /* default content-type */
+		ctx.iscontenttag = 1;
+		break;
+	default:
+		break;
 	}
+}
+
+static void
+xmltagstartparsed(XMLParser *p, const char *t, size_t tl, int isshort)
+{
+	enum TagId tagid;
+
+	if (ISINCONTENT(ctx)) {
+		if (ctx.contenttype == ContentTypeHTML) {
+			if (isshort)
+				xmldata(p, "/>", 2);
+			else
+				xmldata(p, ">", 1);
+		}
+		return;
+	}
+
+	tagid = ctx.tag->id;
 
 	/* map tag type to field: unknown or lesser priority is ignored,
 	   when tags of the same type are repeated only the first is used. */
 	if (fieldmap[tagid] == -1 ||
-	    tagid <= ctx.fields[fieldmap[tagid]].tagid) {
-		ctx.field = NULL;
+	    (!ISFEEDFIELDMULTI(fieldmap[tagid]) &&
+	     tagid <= ctx.fields[fieldmap[tagid]].tagid)) {
 		return;
 	}
 
-	if (fieldmap[tagid] == FeedFieldContent) {
-		/* handle default content-type per tag, Atom, RSS, MRSS. */
-		switch (tagid) {
-		case RSSTagContentEncoded:
-		case RSSTagDescription:
-			ctx.contenttype = ContentTypeHTML;
-			break;
-		default:
-			ctx.contenttype = ContentTypePlain;
-		}
-		ctx.iscontenttag = 1;
-	} else {
+	if (ctx.iscontenttag) {
+		ctx.iscontent = 1;
 		ctx.iscontenttag = 0;
+		ctx.contenttype = tmpcontenttype;
 	}
 
 	ctx.field = &(ctx.fields[fieldmap[tagid]].str);
 	ctx.fields[fieldmap[tagid]].tagid = tagid;
-	/* clear field */
-	string_clear(ctx.field);
-}
 
-static void
-xmltagstartparsed(XMLParser *p, const char *tag, size_t taglen, int isshort)
-{
-	if (ctx.iscontenttag) {
-		ctx.iscontent = 1;
-		ctx.iscontenttag = 0;
-		return;
-	}
-
-	/* don't read field value in Atom <link> tag */
-	if (ctx.tag->id == AtomTagLink)
-		ctx.field = NULL;
-
-	if (!ISINCONTENT(ctx) || ctx.contenttype != ContentTypeHTML)
-		return;
-
-	if (isshort)
-		xmldata(p, "/>", 2);
-	else
-		xmldata(p, ">", 1);
+	/* clear field if it is overwritten (with a priority order) for the new
+	   value, if the field can have multiple values then do not clear it. */
+	if (!ISFEEDFIELDMULTI(fieldmap[ctx.tag->id]))
+		string_clear(ctx.field);
 }
 
 static void
@@ -861,20 +945,15 @@ xmltagend(XMLParser *p, const char *t, size_t tl, int isshort)
 			}
 			return;
 		}
-	} else if (ctx.tag->id == AtomTagLink) {
-		/* map tag type to field: unknown or lesser priority is ignored,
-		   when tags of the same type are repeated only the first is used. */
-		if (atomlinktype && atomlinktype > ctx.fields[fieldmap[atomlinktype]].tagid) {
-			string_append(&ctx.fields[fieldmap[atomlinktype]].str,
-			              atomlink.data, atomlink.len);
-			ctx.fields[fieldmap[atomlinktype]].tagid = atomlinktype;
-		}
-	} else if (ctx.tag->id == RSSTagGuid && rssidpermalink) {
-		if (ctx.tag->id > ctx.fields[FeedFieldLink].tagid) {
+	} else if (ctx.tag->id && istag(ctx.tag->name, ctx.tag->len, t, tl)) {
+		/* matched tag end: close it */
+		/* copy also to the link field if the attribute isPermaLink="true"
+		    and it is not set by a tag with higher prio. */
+		if (ctx.tag->id == RSSTagGuidPermalinkTrue && ctx.field &&
+		    ctx.tag->id > ctx.fields[FeedFieldLink].tagid) {
 			string_clear(&ctx.fields[FeedFieldLink].str);
 			string_append(&ctx.fields[FeedFieldLink].str,
-			             ctx.fields[FeedFieldId].str.data,
-			             ctx.fields[FeedFieldId].str.len);
+			              ctx.field->data, ctx.field->len);
 			ctx.fields[FeedFieldLink].tagid = ctx.tag->id;
 		}
 	} else if (!ctx.tag->id && ((ctx.feedtype == FeedTypeAtom &&
@@ -893,14 +972,33 @@ xmltagend(XMLParser *p, const char *t, size_t tl, int isshort)
 		ctx.contenttype = ContentTypeNone;
 		/* allow parsing of Atom and RSS concatenated in one XML stream. */
 		ctx.feedtype = FeedTypeNone;
-	} else if (!ctx.tag->id ||
-	           !istag(ctx.tag->name, ctx.tag->len, t, tl)) {
-		/* not end of field */
-		return;
+	} else {
+		return; /* not end of field */
 	}
+
+	/* temporary string: for fields that cannot be processed
+	   directly and need more context, for example by it's tag
+	   attributes, like the Atom link rel="alternate|enclosure". */
+	if (tmpstr.len && ctx.field) {
+		if (ISFEEDFIELDMULTI(fieldmap[ctx.tag->id])) {
+			if (ctx.field->len)
+				string_append(ctx.field, FieldMultiSeparator, 1);
+			string_append(ctx.field, tmpstr.data, tmpstr.len);
+		} else {
+			string_clear(ctx.field);
+			string_append(ctx.field, tmpstr.data, tmpstr.len);
+		}
+	}
+
 	/* close field */
+	string_clear(&tmpstr); /* reuse and clear temporary string */
+
+	if (ctx.tag->id == AtomTagAuthorName)
+		ctx.tag = &atomtagauthor; /* outer tag */
+	else
+		ctx.tag = &notag;
+
 	ctx.iscontent = 0;
-	ctx.tag = &notag;
 	ctx.field = NULL;
 }
 
