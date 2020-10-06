@@ -26,8 +26,8 @@ typedef struct xmlparser {
 	      size_t, int);
 
 #ifndef GETNEXT
-	/* GETNEXT overridden for sfeed to reduce function call overhead and
-	   further context optimizations. */
+	/* GETNEXT overridden to reduce function call overhead and further
+	   context optimizations. */
 	#define GETNEXT getchar
 #endif
 
