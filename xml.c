@@ -116,8 +116,7 @@ startvalue:
 static void
 xml_parsecomment(XMLParser *x)
 {
-	size_t i = 0;
-	int c;
+	int c, i;
 
 	while ((c = GETNEXT()) != EOF) {
 		if (c == '-') {
@@ -138,8 +137,6 @@ xml_parsecdata(XMLParser *x)
 	size_t datalen = 0, i = 0;
 	int c;
 
-	if (x->xmlcdatastart)
-		x->xmlcdatastart(x);
 	while ((c = GETNEXT()) != EOF) {
 		if (c == ']' || c == '>') {
 			if (x->xmlcdata && datalen) {
@@ -158,8 +155,6 @@ xml_parsecdata(XMLParser *x)
 			}
 			continue;
 		} else if (c == '>' && i == 2) {
-			if (x->xmlcdataend)
-				x->xmlcdataend(x);
 			return;
 		} else if (i) {
 			if (x->xmlcdata)
@@ -363,8 +358,6 @@ xml_parse(XMLParser *x)
 		} else {
 			/* parse tag data */
 			datalen = 0;
-			if (x->xmldatastart)
-				x->xmldatastart(x);
 			while ((c = GETNEXT()) != EOF) {
 				if (c == '&') {
 					if (datalen) {
@@ -411,8 +404,6 @@ xml_parse(XMLParser *x)
 					x->data[datalen] = '\0';
 					if (x->xmldata && datalen)
 						x->xmldata(x, x->data, datalen);
-					if (x->xmldataend)
-						x->xmldataend(x);
 					break;
 				}
 			}

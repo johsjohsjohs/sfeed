@@ -13,13 +13,9 @@ typedef struct xmlparser {
 	      const char *, size_t);
 	void (*xmlattrentity)(struct xmlparser *, const char *, size_t,
 	      const char *, size_t, const char *, size_t);
-	void (*xmlcdatastart)(struct xmlparser *);
 	void (*xmlcdata)(struct xmlparser *, const char *, size_t);
-	void (*xmlcdataend)(struct xmlparser *);
 	void (*xmldata)(struct xmlparser *, const char *, size_t);
-	void (*xmldataend)(struct xmlparser *);
 	void (*xmldataentity)(struct xmlparser *, const char *, size_t);
-	void (*xmldatastart)(struct xmlparser *);
 	void (*xmltagend)(struct xmlparser *, const char *, size_t, int);
 	void (*xmltagstart)(struct xmlparser *, const char *, size_t);
 	void (*xmltagstartparsed)(struct xmlparser *, const char *,
