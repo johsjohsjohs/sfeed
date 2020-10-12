@@ -46,7 +46,7 @@ typedef struct string {
 enum TagId {
 	TagUnknown = 0,
 	/* RSS */
-	RSSTagDcdate, RSSTagPubdate,
+	RSSTagDcdate, RSSTagPubdate, /* creation date has higher priority */
 	RSSTagTitle,
 	RSSTagMediaDescription, RSSTagDescription, RSSTagContentEncoded,
 	RSSTagGuid,
@@ -58,7 +58,7 @@ enum TagId {
 	RSSTagAuthor, RSSTagDccreator,
 	RSSTagCategory,
 	/* Atom */
-	AtomTagUpdated, AtomTagPublished,
+	AtomTagUpdated, AtomTagPublished, /* creation date has higher priority */
 	AtomTagTitle,
 	AtomTagMediaDescription, AtomTagSummary, AtomTagContent,
 	AtomTagId,
