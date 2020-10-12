@@ -554,9 +554,15 @@ parsetime(const char *s, time_t *tp)
 	if (!isdigit((unsigned char)*s) && !isalpha((unsigned char)*s))
 		return -1;
 
-	if (strspn(s, "0123456789") >= 4) {
+	if (isdigit((unsigned char)s[0]) &&
+	    isdigit((unsigned char)s[1]) &&
+	    isdigit((unsigned char)s[2]) &&
+	    isdigit((unsigned char)s[3])) {
 		/* formats "%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S" or "%Y%m%d%H%M%S" */
-		vi = 0;
+		va[0] = ((s[0] - '0') * 1000) + ((s[1] - '0') * 100) +
+		         ((s[2] - '0') * 10) + (s[3] - '0');
+		vi = 1;
+		s += 4;
 	} else {
 		/* format: "[%a, ]%d %b %Y %H:%M:%S" */
 		/* parse "[%a, ]%d %b %Y " part, then use time parsing as above */
@@ -602,17 +608,16 @@ parsetime(const char *s, time_t *tp)
 	}
 
 	/* parse time parts (and possibly remaining date parts) */
-	for (; *s && vi < 6; vi++) {
-		for (i = 0, v = 0; i < ((vi == 0) ? 4 : 2) &&
-		                   isdigit((unsigned char)*s); s++, i++) {
-			v = (v * 10) + (*s - '0');
-		}
-		va[vi] = v;
-
-		if ((vi < 2 && *s == '-') ||
-		    (vi == 2 && (*s == 'T' || isspace((unsigned char)*s))) ||
-		    (vi > 2 && *s == ':'))
+	for (; *s && vi < 6; ) {
+		if (isdigit((unsigned char)s[0]) && isdigit((unsigned char)s[1])) {
+			va[vi++] = ((s[0] - '0') * 10) + (s[1] - '0');
+			s += 2;
+		} else if (vi > 2 && (*s == '-' || *s == '+' || *s == '.' ||
+		           isspace((unsigned char)*s))) {
+			break;
+		} else {
 			s++;
+		}
 	}
 
 	/* skip milliseconds in for example: "%Y-%m-%dT%H:%M:%S.000Z" */
