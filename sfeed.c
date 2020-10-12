@@ -244,7 +244,7 @@ gettag(enum FeedType feedtype, const char *name, size_t namelen)
 static char *
 ltrim(const char *s)
 {
-	for (; *s && isspace((unsigned char)*s); s++)
+	for (; isspace((unsigned char)*s); s++)
 		;
 	return (char *)s;
 }
@@ -500,20 +500,20 @@ gettzoffset(const char *s)
 	long tzhour = 0, tzmin = 0;
 	size_t i;
 
-	for (; *s && isspace((unsigned char)*s); s++)
+	for (; isspace((unsigned char)*s); s++)
 		;
 	switch (*s) {
 	case '-': /* offset */
 	case '+':
-		for (i = 0, p = s + 1; i < 2 && *p && isdigit((unsigned char)*p); i++, p++)
+		for (i = 0, p = s + 1; i < 2 && isdigit((unsigned char)*p); i++, p++)
 			tzhour = (tzhour * 10) + (*p - '0');
 		if (*p == ':')
 			p++;
-		for (i = 0; i < 2 && *p && isdigit((unsigned char)*p); i++, p++)
+		for (i = 0; i < 2 && isdigit((unsigned char)*p); i++, p++)
 			tzmin = (tzmin * 10) + (*p - '0');
 		return ((tzhour * 3600) + (tzmin * 60)) * (s[0] == '-' ? -1 : 1);
 	default: /* timezone name */
-		for (i = 0; *s && isalpha((unsigned char)s[i]); i++)
+		for (i = 0; isalpha((unsigned char)s[i]); i++)
 			;
 		if (i != 3)
 			return 0;
@@ -549,7 +549,7 @@ parsetime(const char *s, time_t *tp)
 	int va[6] = { 0 }, i, j, v, vi;
 	size_t m;
 
-	for (; *s && isspace((unsigned char)*s); s++)
+	for (; isspace((unsigned char)*s); s++)
 		;
 	if (!isdigit((unsigned char)*s) && !isalpha((unsigned char)*s))
 		return -1;
@@ -560,21 +560,21 @@ parsetime(const char *s, time_t *tp)
 	} else {
 		/* format: "[%a, ]%d %b %Y %H:%M:%S" */
 		/* parse "[%a, ]%d %b %Y " part, then use time parsing as above */
-		for (; *s && isalpha((unsigned char)*s); s++)
+		for (; isalpha((unsigned char)*s); s++)
 			;
-		for (; *s && isspace((unsigned char)*s); s++)
+		for (; isspace((unsigned char)*s); s++)
 			;
 		if (*s == ',')
 			s++;
-		for (; *s && isspace((unsigned char)*s); s++)
+		for (; isspace((unsigned char)*s); s++)
 			;
-		for (v = 0, i = 0; *s && i < 2 && isdigit((unsigned char)*s); s++, i++)
+		for (v = 0, i = 0; i < 2 && isdigit((unsigned char)*s); s++, i++)
 			v = (v * 10) + (*s - '0');
 		va[2] = v; /* day */
-		for (; *s && isspace((unsigned char)*s); s++)
+		for (; isspace((unsigned char)*s); s++)
 			;
 		/* end of word month */
-		for (j = 0; *s && isalpha((unsigned char)s[j]); j++)
+		for (j = 0; isalpha((unsigned char)s[j]); j++)
 			;
 		/* check month name */
 		if (j < 3 || j > 9)
@@ -590,12 +590,12 @@ parsetime(const char *s, time_t *tp)
 		}
 		if (m >= 12)
 			return -1; /* no month found */
-		for (; *s && isspace((unsigned char)*s); s++)
+		for (; isspace((unsigned char)*s); s++)
 			;
-		for (v = 0, i = 0; *s && i < 4 && isdigit((unsigned char)*s); s++, i++)
+		for (v = 0, i = 0; i < 4 && isdigit((unsigned char)*s); s++, i++)
 			v = (v * 10) + (*s - '0');
 		va[0] = v; /* year */
-		for (; *s && isspace((unsigned char)*s); s++)
+		for (; isspace((unsigned char)*s); s++)
 			;
 		/* parse only regular time part, see below */
 		vi = 3;
@@ -603,7 +603,7 @@ parsetime(const char *s, time_t *tp)
 
 	/* parse time parts (and possibly remaining date parts) */
 	for (; *s && vi < 6; vi++) {
-		for (i = 0, v = 0; *s && i < ((vi == 0) ? 4 : 2) &&
+		for (i = 0, v = 0; i < ((vi == 0) ? 4 : 2) &&
 		                   isdigit((unsigned char)*s); s++, i++) {
 			v = (v * 10) + (*s - '0');
 		}
@@ -617,7 +617,7 @@ parsetime(const char *s, time_t *tp)
 
 	/* skip milliseconds in for example: "%Y-%m-%dT%H:%M:%S.000Z" */
 	if (*s == '.') {
-		for (s++; *s && isdigit((unsigned char)*s); s++)
+		for (s++; isdigit((unsigned char)*s); s++)
 			;
 	}
 
