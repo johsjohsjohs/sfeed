@@ -289,7 +289,7 @@ advertisements, strip tracking parameters and more.
 				}
 
 				# shorten feedburner links.
-				if (match(s, /^(http|https):\/\/[^/]+\/~r\/.*\/~3\/[^\/]+\//)) {
+				if (match(s, /^(http|https):\/\/[^\/]+\/~r\/.*\/~3\/[^\/]+\//)) {
 					s = substr($3, RSTART, RLENGTH);
 				}
 
