@@ -116,7 +116,7 @@ startvalue:
 static void
 xml_parsecomment(XMLParser *x)
 {
-	int c, i;
+	int c, i = 0;
 
 	while ((c = GETNEXT()) != EOF) {
 		if (c == '-') {
