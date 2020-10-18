@@ -588,7 +588,7 @@ the --etag-save and --etag-compare options:
 
 	# fetch(name, url, feedfile)
 	fetch() {
-		etag="$HOME/.sfeed/etags/$1"
+		etag="$HOME/.sfeed/etags/$(basename "$3")"
 		curl --etag-save "${etag}" --etag-compare "${etag}" "$2"
 	}
 
