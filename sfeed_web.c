@@ -25,6 +25,7 @@ static void
 xmltagstart(XMLParser *p, const char *t, size_t tl)
 {
 	isbase = islink = isfeedlink = 0;
+	feedlink[0] = '\0';
 
 	if (!strcasecmp(t, "base"))
 		isbase = 1;
