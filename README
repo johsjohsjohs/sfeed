@@ -295,8 +295,8 @@ advertisements, strip tracking parameters and more.
 
 				# strip tracking parameters
 				# urchin, facebook, piwik, webtrekk and generic.
-				gsub(/\?(ad|campaign|fbclid|pk|tm|wt)_([^&]+)/, "?", s);
-				gsub(/&(ad|campaign|fbclid|pk|tm|wt)_([^&]+)/, "", s);
+				gsub(/\?(ad|campaign|fbclid|pk|tm|utm|wt)_([^&]+)/, "?", s);
+				gsub(/&(ad|campaign|fbclid|pk|tm|utm|wt)_([^&]+)/, "", s);
 
 				gsub(/\?&/, "?", s);
 				gsub(/[\?&]+$/, "", s);
