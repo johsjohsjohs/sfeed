@@ -90,7 +90,7 @@ enum {
 typedef struct feedcontext {
 	String          *field;        /* current FeedItem field String */
 	FeedField        fields[FeedFieldLast]; /* data for current item */
-	FeedTag          *tag;         /* unique current parsed tag */
+	FeedTag          tag;          /* unique current parsed tag */
 	int              iscontent;    /* in content data */
 	int              iscontenttag; /* in content tag */
 	enum ContentType contenttype;  /* content-type for item */
@@ -206,7 +206,7 @@ static const int FieldSeparator = '\t';
 static const char *FieldMultiSeparator = "|";
 static const char *baseurl = "";
 
-static FeedContext ctx = { .tag = &notag };
+static FeedContext ctx;
 static XMLParser parser; /* XML parser state */
 static String tmpstr;
 static enum ContentType tmpcontenttype; /* content-type for item */
@@ -687,7 +687,7 @@ xmlattr(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 		return;
 	}
 
-	if (!ctx.tag->id)
+	if (!ctx.tag.id)
 		return;
 
 	/* content-type may be: Atom: text, xhtml, html or mime-type.
@@ -709,36 +709,36 @@ xmlattr(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 	}
 
 	if (ctx.feedtype == FeedTypeRSS) {
-		if (ctx.tag->id == RSSTagEnclosure &&
+		if (ctx.tag.id == RSSTagEnclosure &&
 		    isattr(n, nl, STRP("url"))) {
 			string_append(&tmpstr, v, vl);
-		} else if ((ctx.tag->id == RSSTagGuid ||
-		            ctx.tag->id == RSSTagGuidPermalinkFalse ||
-			    ctx.tag->id == RSSTagGuidPermalinkTrue) &&
+		} else if ((ctx.tag.id == RSSTagGuid ||
+		            ctx.tag.id == RSSTagGuidPermalinkFalse ||
+			    ctx.tag.id == RSSTagGuidPermalinkTrue) &&
 		           isattr(n, nl, STRP("ispermalink"))) {
 			if (isattr(v, vl, STRP("true")))
-				ctx.tag->id = RSSTagGuidPermalinkTrue;
+				ctx.tag.id = RSSTagGuidPermalinkTrue;
 			else
-				ctx.tag->id = RSSTagGuidPermalinkFalse;
+				ctx.tag.id = RSSTagGuidPermalinkFalse;
 		}
 	} else if (ctx.feedtype == FeedTypeAtom) {
-		if (ctx.tag->id == AtomTagLink ||
-		    ctx.tag->id == AtomTagLinkAlternate ||
-		    ctx.tag->id == AtomTagLinkEnclosure) {
+		if (ctx.tag.id == AtomTagLink ||
+		    ctx.tag.id == AtomTagLinkAlternate ||
+		    ctx.tag.id == AtomTagLinkEnclosure) {
 			if (isattr(n, nl, STRP("rel"))) {
 				/* empty or "alternate": other types could be
 				   "enclosure", "related", "self" or "via" */
 				if (!vl || isattr(v, vl, STRP("alternate")))
-					ctx.tag->id = AtomTagLinkAlternate;
+					ctx.tag.id = AtomTagLinkAlternate;
 				else if (isattr(v, vl, STRP("enclosure")))
-					ctx.tag->id = AtomTagLinkEnclosure;
+					ctx.tag.id = AtomTagLinkEnclosure;
 				else
-					ctx.tag->id = AtomTagLink; /* unknown */
-			} else if (ctx.tag->id != AtomTagLink &&
+					ctx.tag.id = AtomTagLink; /* unknown */
+			} else if (ctx.tag.id != AtomTagLink &&
 			           isattr(n, nl, STRP("href"))) {
 				string_append(&tmpstr, v, vl);
 			}
-		} else if (ctx.tag->id == AtomTagCategory &&
+		} else if (ctx.tag.id == AtomTagCategory &&
 			   isattr(n, nl, STRP("term"))) {
 			string_append(&tmpstr, v, vl);
 		}
@@ -759,7 +759,7 @@ xmlattrentity(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 		return;
 	}
 
-	if (!ctx.tag->id)
+	if (!ctx.tag.id)
 		return;
 
 	/* try to translate entity, else just pass as data to
@@ -807,7 +807,7 @@ xmldata(XMLParser *p, const char *s, size_t len)
 	if (!ctx.field)
 		return;
 
-	if (ISFEEDFIELDMULTI(fieldmap[ctx.tag->id]))
+	if (ISFEEDFIELDMULTI(fieldmap[ctx.tag.id]))
 		string_append(&tmpstr, s, len);
 	else
 		string_append(ctx.field, s, len);
@@ -833,6 +833,8 @@ xmldataentity(XMLParser *p, const char *data, size_t datalen)
 static void
 xmltagstart(XMLParser *p, const char *t, size_t tl)
 {
+	FeedTag *f;
+
 	if (ISINCONTENT(ctx)) {
 		if (ctx.contenttype == ContentTypeHTML) {
 			ctx.attrcount = 0;
@@ -852,28 +854,31 @@ xmltagstart(XMLParser *p, const char *t, size_t tl)
 	}
 
 	/* field tagid already set or nested tags. */
-	if (ctx.tag->id) {
+	if (ctx.tag.id) {
 		/* nested <author><name> for Atom */
-		if (ctx.tag->id == AtomTagAuthor &&
+		if (ctx.tag.id == AtomTagAuthor &&
 		    istag(t, tl, STRP("name"))) {
-			ctx.tag = &atomtagauthorname;
+			memcpy(&(ctx.tag), &atomtagauthorname, sizeof(ctx.tag));
 		} else {
 			return; /* other nested tags are not allowed: return */
 		}
 	}
 
 	/* in item */
-	if (ctx.tag->id == TagUnknown && !(ctx.tag = gettag(ctx.feedtype, t, tl)))
-		ctx.tag = &notag;
+	if (ctx.tag.id == TagUnknown) {
+		if (!(f = gettag(ctx.feedtype, t, tl)))
+			f = &notag;
+		memcpy(&(ctx.tag), f, sizeof(ctx.tag));
+	}
 
-	switch (ctx.tag->id) {
+	switch (ctx.tag.id) {
 	case AtomTagLink:
 		/* without a rel attribute the default link type is "alternate" */
-		ctx.tag->id = AtomTagLinkAlternate;
+		ctx.tag.id = AtomTagLinkAlternate;
 		break;
 	case RSSTagGuid:
 		/* without a ispermalink attribute the default value is "true" */
-		ctx.tag->id = RSSTagGuidPermalinkTrue;
+		ctx.tag.id = RSSTagGuidPermalinkTrue;
 		break;
 	case RSSTagContentEncoded:
 	case RSSTagDescription:
@@ -907,7 +912,7 @@ xmltagstartparsed(XMLParser *p, const char *t, size_t tl, int isshort)
 		return;
 	}
 
-	tagid = ctx.tag->id;
+	tagid = ctx.tag.id;
 
 	/* map tag type to field: unknown or lesser priority is ignored,
 	   when tags of the same type are repeated only the first is used. */
@@ -928,7 +933,7 @@ xmltagstartparsed(XMLParser *p, const char *t, size_t tl, int isshort)
 
 	/* clear field if it is overwritten (with a priority order) for the new
 	   value, if the field can have multiple values then do not clear it. */
-	if (!ISFEEDFIELDMULTI(fieldmap[ctx.tag->id]))
+	if (!ISFEEDFIELDMULTI(fieldmap[ctx.tag.id]))
 		string_clear(ctx.field);
 }
 
@@ -942,7 +947,7 @@ xmltagend(XMLParser *p, const char *t, size_t tl, int isshort)
 
 	if (ISINCONTENT(ctx)) {
 		/* not close content field */
-		if (!istag(ctx.tag->name, ctx.tag->len, t, tl)) {
+		if (!istag(ctx.tag.name, ctx.tag.len, t, tl)) {
 			if (!isshort && ctx.contenttype == ContentTypeHTML) {
 				xmldata(p, "</", 2);
 				xmldata(p, t, tl);
@@ -950,18 +955,18 @@ xmltagend(XMLParser *p, const char *t, size_t tl, int isshort)
 			}
 			return;
 		}
-	} else if (ctx.tag->id && istag(ctx.tag->name, ctx.tag->len, t, tl)) {
+	} else if (ctx.tag.id && istag(ctx.tag.name, ctx.tag.len, t, tl)) {
 		/* matched tag end: close it */
 		/* copy also to the link field if the attribute isPermaLink="true"
 		    and it is not set by a tag with higher prio. */
-		if (ctx.tag->id == RSSTagGuidPermalinkTrue && ctx.field &&
-		    ctx.tag->id > ctx.fields[FeedFieldLink].tagid) {
+		if (ctx.tag.id == RSSTagGuidPermalinkTrue && ctx.field &&
+		    ctx.tag.id > ctx.fields[FeedFieldLink].tagid) {
 			string_clear(&ctx.fields[FeedFieldLink].str);
 			string_append(&ctx.fields[FeedFieldLink].str,
 			              ctx.field->data, ctx.field->len);
-			ctx.fields[FeedFieldLink].tagid = ctx.tag->id;
+			ctx.fields[FeedFieldLink].tagid = ctx.tag.id;
 		}
-	} else if (!ctx.tag->id && ((ctx.feedtype == FeedTypeAtom &&
+	} else if (!ctx.tag.id && ((ctx.feedtype == FeedTypeAtom &&
 	   istag(t, tl, STRP("entry"))) || /* Atom */
 	   (ctx.feedtype == FeedTypeRSS &&
 	   istag(t, tl, STRP("item"))))) /* RSS */
@@ -985,7 +990,7 @@ xmltagend(XMLParser *p, const char *t, size_t tl, int isshort)
 	   directly and need more context, for example by it's tag
 	   attributes, like the Atom link rel="alternate|enclosure". */
 	if (tmpstr.len && ctx.field) {
-		if (ISFEEDFIELDMULTI(fieldmap[ctx.tag->id])) {
+		if (ISFEEDFIELDMULTI(fieldmap[ctx.tag.id])) {
 			if (ctx.field->len)
 				string_append(ctx.field, FieldMultiSeparator, 1);
 			string_append(ctx.field, tmpstr.data, tmpstr.len);
@@ -998,10 +1003,10 @@ xmltagend(XMLParser *p, const char *t, size_t tl, int isshort)
 	/* close field */
 	string_clear(&tmpstr); /* reuse and clear temporary string */
 
-	if (ctx.tag->id == AtomTagAuthorName)
-		ctx.tag = &atomtagauthor; /* outer tag */
+	if (ctx.tag.id == AtomTagAuthorName)
+		memcpy(&(ctx.tag), &atomtagauthor, sizeof(ctx.tag)); /* outer tag */
 	else
-		ctx.tag = &notag;
+		memcpy(&(ctx.tag), &notag, sizeof(ctx.tag));
 
 	ctx.iscontent = 0;
 	ctx.field = NULL;
@@ -1015,6 +1020,8 @@ main(int argc, char *argv[])
 
 	if (argc > 1)
 		baseurl = argv[1];
+
+	memcpy(&(ctx.tag), &notag, sizeof(ctx.tag));
 
 	parser.xmlattr = xmlattr;
 	parser.xmlattrentity = xmlattrentity;
