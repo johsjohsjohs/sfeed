@@ -27,10 +27,12 @@ xmltagstart(XMLParser *p, const char *t, size_t tl)
 {
 	isbasetag = islinktag = 0;
 
-	if (!strcasecmp(t, "base"))
+	if (!strcasecmp(t, "base")) {
 		isbasetag = 1;
-	else if (!strcasecmp(t, "link"))
+	} else if (!strcasecmp(t, "link")) {
 		islinktag = 1;
+		linkhref[0] = '\0';
+	}
 }
 
 static void
