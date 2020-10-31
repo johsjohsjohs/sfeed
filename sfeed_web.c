@@ -32,6 +32,7 @@ xmltagstart(XMLParser *p, const char *t, size_t tl)
 	} else if (!strcasecmp(t, "link")) {
 		islinktag = 1;
 		linkhref[0] = '\0';
+		linktype[0] = '\0';
 	}
 }
 
