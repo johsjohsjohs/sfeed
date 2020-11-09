@@ -1,7 +1,7 @@
 .POSIX:
 
 NAME = sfeed
-VERSION = 0.9.19
+VERSION = 0.9.20
 
 # paths
 PREFIX = /usr/local
