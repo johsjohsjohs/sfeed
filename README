@@ -316,18 +316,6 @@ advertisements, strip tracking parameters and more.
 
 - - -
 
-The fetch function can be overridden in your sfeedrc file. This allows to
-replace the default curl(1) for sfeed_update with any other client to fetch the
-RSS/Atom data:
-
-	# fetch a feed via HTTP/HTTPS etc.
-	# fetch(name, url, feedfile)
-	fetch() {
-		hurl -m 1048576 -t 15 "$2" 2>/dev/null
-	}
-
-- - -
-
 Aggregate feeds. This filters new entries (maximum one day old) and sorts them
 by newest first. Prefix the feed name in the title. Convert the TSV output data
 to an Atom XML feed (again):
@@ -552,6 +540,18 @@ Now you can view feeds in mutt(1) for example.
 
 - - -
 
+The fetch function can be overridden in your sfeedrc file. This allows to
+replace the default curl(1) for sfeed_update with any other client to fetch the
+RSS/Atom data or change the default curl options:
+
+	# fetch a feed via HTTP/HTTPS etc.
+	# fetch(name, url, feedfile)
+	fetch() {
+		hurl -m 1048576 -t 15 "$2" 2>/dev/null
+	}
+
+- - -
+
 Incremental data updates using If-Modified-Since
 
 For servers that support it some incremental updates and bandwidth-saving can
@@ -593,11 +593,11 @@ the --etag-save and --etag-compare options:
 	}
 
 This comes at a cost of some privacy. For example there can be a unique
-generated ETag.
+generated ETag to pin and fingerprint a client.
 
 - - -
 
-CDN's blocking requests due to missing User-Agent
+CDN's blocking requests due to a missing HTTP User-Agent request header
 
 sfeed_update will not send the "User-Agent" header by default for privacy
 reasons.  Some CDNs like Cloudflare don't like this and will block such HTTP
@@ -609,6 +609,20 @@ A custom User-Agent can be set by using the curl -H option, like so:
 
 The above example string pretends to be a Windows 10 (x86-64) machine running
 Firefox 78.
+
+- - -
+
+Page redirects
+
+For security and efficiency reasons by default redirects are not allowed and
+are treated as an error.
+
+For example to prevent hijacking an unencrypted http:// to https:// redirect or
+to not add time of an unnecessary page redirect each time.  It is encouraged to
+use the final redirected url in the sfeedrc config file.
+
+If you want to ignore this advise you can override the fetch() function in the
+sfeedrc file and change the curl options "-L --max-redirs 0".
 
 - - -
 
