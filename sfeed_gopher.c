@@ -112,8 +112,17 @@ main(int argc, char *argv[])
 	char *name, *p, path[PATH_MAX + 1];
 	int i, r;
 
-	if (pledge(argc == 1 ? "stdio" : "stdio rpath wpath cpath", NULL) == -1)
-		err(1, "pledge");
+	if (argc == 1) {
+		if (pledge("stdio", NULL) == -1)
+			err(1, "pledge");
+	} else {
+		if (unveil("/", "r") == -1)
+			err(1, "unveil");
+		if (unveil(".", "rwc") == -1)
+			err(1, "unveil");
+		if (pledge("stdio rpath wpath cpath", NULL) == -1)
+			err(1, "pledge");
+	}
 
 	if ((comparetime = time(NULL)) == -1)
 		err(1, "time");
