@@ -125,7 +125,7 @@ OS tested
 Architectures tested
 --------------------
 
-amd64, ARM, aarch64, HPPA, i386, SPARC64, Z80.
+amd64, ARM, aarch64, HPPA, i386, MIPS32-BE, SPARC64, Z80.
 
 
 Files
