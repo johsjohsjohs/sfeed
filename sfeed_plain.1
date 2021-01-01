@@ -1,4 +1,4 @@
-.Dd March 15, 2020
+.Dd January 1, 2021
 .Dt SFEED_PLAIN 1
 .Os
 .Sh NAME
@@ -40,6 +40,10 @@ and
 .Xr wcwidth 3 .
 .Sh EXIT STATUS
 .Ex -std
+.Sh EXAMPLES
+.Bd -literal
+curl -s 'https://codemadness.org/atom.xml' | sfeed | sfeed_plain
+.Ed
 .Sh SEE ALSO
 .Xr sfeed 1 ,
 .Xr sfeed_html 1 ,

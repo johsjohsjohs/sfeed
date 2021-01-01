@@ -1,4 +1,4 @@
-.Dd September 19, 2020
+.Dd January 1, 2021
 .Dt SFEED 1
 .Os
 .Sh NAME
@@ -51,6 +51,10 @@ Item, categories, multiple values are separated by |.
 .El
 .Sh EXIT STATUS
 .Ex -std
+.Sh EXAMPLES
+.Bd -literal
+curl -s 'https://codemadness.org/atom.xml' | sfeed
+.Ed
 .Sh SEE ALSO
 .Xr sfeed_plain 1 ,
 .Xr sfeed 5
