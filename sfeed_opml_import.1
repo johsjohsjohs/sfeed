@@ -1,4 +1,4 @@
-.Dd March 15, 2020
+.Dd January 3, 2021
 .Dt SFEED_OPML_IMPORT 1
 .Os
 .Sh NAME
@@ -11,6 +11,10 @@
 reads the OPML XML data from stdin and writes the config file text to stdout.
 .Sh EXIT STATUS
 .Ex -std
+.Sh EXAMPLES
+.Bd -literal
+sfeed_opml_import < opmlfile.xml > ~/.sfeed/sfeedrc
+.Ed
 .Sh SEE ALSO
 .Xr sfeed_update 1 ,
 .Xr sfeedrc 5

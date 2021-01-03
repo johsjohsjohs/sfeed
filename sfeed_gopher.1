@@ -1,4 +1,4 @@
-.Dd March 15, 2020
+.Dd January 3, 2021
 .Dt SFEED_GOPHER 1
 .Os
 .Sh NAME
@@ -46,6 +46,11 @@ The default is "70".
 .El
 .Sh EXIT STATUS
 .Ex -std
+.Sh EXAMPLES
+.Bd -literal
+SFEED_GOPHER_HOST="codemadness.org" SFEED_GOPHER_PATH="/feeds/" \\
+	sfeed_gopher ~/.sfeed/feeds/*
+.Ed
 .Sh SEE ALSO
 .Xr sfeed 1 ,
 .Xr sfeed 5
