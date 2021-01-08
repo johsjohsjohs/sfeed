@@ -28,7 +28,7 @@ gophertext(FILE *fp, const char *s)
 			fputs("        ", fp);
 			break;
 		default:
-			fputc(*s, fp);
+			putc(*s, fp);
 			break;
 		}
 	}
