@@ -111,13 +111,8 @@ main(int argc, char *argv[])
 	char *name;
 	int i;
 
-	if (argc == 1) {
-		if (pledge("stdio", NULL) == -1)
-			err(1, "pledge");
-	} else {
-		if (pledge("stdio rpath", NULL) == -1)
-			err(1, "pledge");
-	}
+	if (pledge(argc == 1 ? "stdio" : "stdio rpath", NULL) == -1)
+		err(1, "pledge");
 
 	if ((now = time(NULL)) == -1)
 		err(1, "time");
