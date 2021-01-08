@@ -222,7 +222,7 @@ xmlencode(const char *s, FILE *fp)
 		case '\'': fputs("&#39;",  fp); break;
 		case '&':  fputs("&amp;",  fp); break;
 		case '"':  fputs("&quot;", fp); break;
-		default:   fputc(*s, fp);
+		default:   putc(*s, fp);
 		}
 	}
 }
