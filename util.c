@@ -234,29 +234,48 @@ printutf8pad(FILE *fp, const char *s, size_t len, int pad)
 {
 	wchar_t wc;
 	size_t col = 0, i, slen;
-	int rl, w;
+	int rl, siz, w;
 
 	if (!len)
 		return;
 
 	slen = strlen(s);
-	for (i = 0; i < slen; i += rl) {
-		rl = w = 1;
-		if ((unsigned char)s[i] < 32)
-			continue;
-		if ((unsigned char)s[i] >= 127) {
-			if ((rl = mbtowc(&wc, s + i, slen - i < 4 ? slen - i : 4)) <= 0)
-				break;
-			if ((w = wcwidth(wc)) == -1)
+	for (i = 0; i < slen; i += siz) {
+		siz = 1;
+		if ((unsigned char)s[i] < 32) {
+			continue; /* skip control characters */
+		} else if ((unsigned char)s[i] >= 127) {
+			rl = siz = mbtowc(&wc, s + i, slen - i < 4 ? slen - i : 4);
+			if (rl < 0) {
+				mbtowc(NULL, NULL, 0); /* reset state */
+				siz = 1; /* next byte */
+				w = 1; /* replacement char is one width */
+			} else if ((w = wcwidth(wc)) == -1) {
 				continue;
-		}
-		if (col + w > len || (col + w == len && s[i + rl])) {
-			fputs("\xe2\x80\xa6", fp);
+			}
+
+			if (col + w > len || (col + w == len && s[i + siz])) {
+				fputs("\xe2\x80\xa6", fp); /* ellipsis */
+				col++;
+				break;
+			} else if (rl < 0) {
+				fputs("\xef\xbf\xbd", fp); /* replacement */
+				col++;
+				continue;
+			}
+			fwrite(&s[i], 1, siz, fp);
+			col += w;
+		} else {
+			/* simple ASCII character */
+			if (col + 1 > len || (col + 1 == len && s[i + 1])) {
+				fputs("\xe2\x80\xa6", fp); /* ellipsis */
+				col++;
+				break;
+			}
+			putc(s[i], fp);
 			col++;
-			break;
 		}
-		fwrite(&s[i], 1, rl, fp);
-		col += w;
+
 	}
 	for (; col < len; ++col)
 		putc(pad, fp);
