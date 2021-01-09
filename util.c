@@ -234,27 +234,29 @@ printutf8pad(FILE *fp, const char *s, size_t len, int pad)
 {
 	wchar_t wc;
 	size_t col = 0, i, slen;
-	int rl, siz, w;
+	int inc, rl, w;
 
 	if (!len)
 		return;
 
 	slen = strlen(s);
-	for (i = 0; i < slen; i += siz) {
-		siz = 1;
+	for (i = 0; i < slen; i += inc) {
+		inc = 1;
 		if ((unsigned char)s[i] < 32) {
 			continue; /* skip control characters */
 		} else if ((unsigned char)s[i] >= 127) {
-			rl = siz = mbtowc(&wc, s + i, slen - i < 4 ? slen - i : 4);
+			rl = mbtowc(&wc, s + i, slen - i < 4 ? slen - i : 4);
 			if (rl < 0) {
 				mbtowc(NULL, NULL, 0); /* reset state */
-				siz = 1; /* next byte */
+				inc = 1; /* next byte */
 				w = 1; /* replacement char is one width */
 			} else if ((w = wcwidth(wc)) == -1) {
 				continue;
+			} else {
+				inc = rl;
 			}
 
-			if (col + w > len || (col + w == len && s[i + siz])) {
+			if (col + w > len || (col + w == len && s[i + inc])) {
 				fputs("\xe2\x80\xa6", fp); /* ellipsis */
 				col++;
 				break;
@@ -263,10 +265,10 @@ printutf8pad(FILE *fp, const char *s, size_t len, int pad)
 				col++;
 				continue;
 			}
-			fwrite(&s[i], 1, siz, fp);
+			fwrite(&s[i], 1, rl, fp);
 			col += w;
 		} else {
-			/* simple ASCII character */
+			/* optimization: simple ASCII character */
 			if (col + 1 > len || (col + 1 == len && s[i + 1])) {
 				fputs("\xe2\x80\xa6", fp); /* ellipsis */
 				col++;
