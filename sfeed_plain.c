@@ -16,7 +16,7 @@ static void
 printfeed(FILE *fp, const char *feedname)
 {
 	char *fields[FieldLast];
-	struct tm *tm;
+	struct tm rtm, *tm;
 	time_t parsedtime;
 	ssize_t linelen;
 
@@ -27,7 +27,7 @@ printfeed(FILE *fp, const char *feedname)
 
 		parsedtime = 0;
 		if (!strtotime(fields[FieldUnixTimestamp], &parsedtime) &&
-		    (tm = localtime(&parsedtime))) {
+		    (tm = localtime_r(&parsedtime, &rtm))) {
 			if (parsedtime >= comparetime)
 				fputs("N ", stdout);
 			else

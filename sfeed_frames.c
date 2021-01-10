@@ -20,7 +20,7 @@ printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 	char *fields[FieldLast];
 	ssize_t linelen;
 	unsigned int isnew;
-	struct tm *tm;
+	struct tm rtm, *tm;
 	time_t parsedtime;
 
 	/* menu if not unnamed */
@@ -42,7 +42,7 @@ printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 
 		parsedtime = 0;
 		if (!strtotime(fields[FieldUnixTimestamp], &parsedtime) &&
-		    (tm = localtime(&parsedtime))) {
+		    (tm = localtime_r(&parsedtime, &rtm))) {
 			isnew = (parsedtime >= comparetime) ? 1 : 0;
 			totalnew += isnew;
 			f->totalnew += isnew;
