@@ -45,10 +45,10 @@ fetch() {
 }
 
 # convert encoding from one encoding to another.
-# convertencoding(from, to)
+# convertencoding(name, from, to)
 convertencoding() {
-	if [ "$1" != "" ] && [ "$2" != "" ] && [ "$1" != "$2" ]; then
-		iconv -cs -f "$1" -t "$2" 2> /dev/null
+	if [ "$2" != "" ] && [ "$3" != "" ] && [ "$2" != "$3" ]; then
+		iconv -cs -f "$2" -t "$3" 2> /dev/null
 	else
 		# else no convert, just output
 		cat
@@ -106,7 +106,7 @@ feed() {
 	# try to detect encoding (if not specified). if detecting the encoding fails assume utf-8.
 	[ "${encoding}" = "" ] && encoding=$(sfeed_xmlenc < "${tmpfeedfile}.fetch")
 
-	if ! convertencoding "${encoding}" "utf-8" < "${tmpfeedfile}.fetch" > "${tmpfeedfile}.utf8"; then
+	if ! convertencoding "${name}" "${encoding}" "utf-8" < "${tmpfeedfile}.fetch" > "${tmpfeedfile}.utf8"; then
 		log "${name}" "FAIL (ENCODING)"
 		return
 	fi

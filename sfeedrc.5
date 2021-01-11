@@ -1,4 +1,4 @@
-.Dd February 4, 2020
+.Dd January 11, 2021
 .Dt SFEEDRC 5
 .Os
 .Sh NAME
@@ -71,10 +71,12 @@ Used feedfile (useful for comparing modification times).
 By default the tool
 .Xr curl 1
 is used.
-.It Fn convertencoding "from" "to"
+.It Fn convertencoding "name" "from" "to"
 Convert from text-encoding to another and writes it to stdout, its arguments
 are:
 .Bl -tag -width Ds
+.It Fa name
+Feed name.
 .It Fa from
 From text-encoding.
 .It Fa to
