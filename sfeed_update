@@ -98,6 +98,9 @@ feed() {
 	sfeedfile="${sfeedpath}/${filename}"
 	tmpfeedfile="${sfeedtmpdir}/${filename}"
 
+	# if file does not exist yet create it.
+	[ -e "${sfeedfile}" ] || touch "${sfeedfile}" 2>/dev/null
+
 	if ! fetch "${name}" "${feedurl}" "${sfeedfile}" > "${tmpfeedfile}.fetch"; then
 		log "${name}" "FAIL (FETCH)"
 		return
@@ -130,14 +133,7 @@ feed() {
 		return
 	fi
 
-	# if file does not exist yet "merge" with /dev/null.
-	if [ -e "${sfeedfile}" ]; then
-		oldfile="${sfeedfile}"
-	else
-		oldfile="/dev/null"
-	fi
-
-	if ! merge "${name}" "${oldfile}" "${tmpfeedfile}.filter" > "${tmpfeedfile}.merge"; then
+	if ! merge "${name}" "${sfeedfile}" "${tmpfeedfile}.filter" > "${tmpfeedfile}.merge"; then
 		log "${name}" "FAIL (MERGE)"
 		return
 	fi
