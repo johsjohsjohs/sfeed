@@ -7,7 +7,7 @@
 #include "xml.h"
 
 static XMLParser parser; /* XML parser state */
-static char url[2048], text[256], title[256];
+static char text[256], title[256], xmlurl[2048];
 
 static void
 printsafe(const char *s)
@@ -27,7 +27,7 @@ printsafe(const char *s)
 static void
 xmltagstart(XMLParser *p, const char *t, size_t tl)
 {
-	url[0] = text[0] = title[0] = '\0';
+	text[0] = title[0] = xmlurl[0] = '\0';
 }
 
 static void
@@ -36,8 +36,9 @@ xmltagend(XMLParser *p, const char *t, size_t tl, int isshort)
 	if (strcasecmp(t, "outline"))
 		return;
 
-	if (url[0]) {
+	if (xmlurl[0]) {
 		fputs("\tfeed '", stdout);
+		/* prefer title over text attribute */
 		if (title[0])
 			printsafe(title);
 		else if (text[0])
@@ -45,11 +46,11 @@ xmltagend(XMLParser *p, const char *t, size_t tl, int isshort)
 		else
 			fputs("unnamed", stdout);
 		fputs("' '", stdout);
-		printsafe(url);
+		printsafe(xmlurl);
 		fputs("'\n", stdout);
 	}
 
-	url[0] = text[0] = title[0] = '\0';
+	text[0] = title[0] = xmlurl[0] = '\0';
 }
 
 static void
@@ -59,12 +60,12 @@ xmlattr(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 	if (strcasecmp(t, "outline"))
 		return;
 
-	if (!strcasecmp(n, "title"))
-		strlcat(title, v, sizeof(title));
-	else if (!strcasecmp(n, "text"))
+	if (!strcasecmp(n, "text"))
 		strlcat(text, v, sizeof(text));
+	else if (!strcasecmp(n, "title"))
+		strlcat(title, v, sizeof(title));
 	else if (!strcasecmp(n, "xmlurl"))
-		strlcat(url, v, sizeof(url));
+		strlcat(xmlurl, v, sizeof(xmlurl));
 }
 
 static void
