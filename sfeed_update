@@ -50,7 +50,7 @@ convertencoding() {
 	if [ "$2" != "" ] && [ "$3" != "" ] && [ "$2" != "$3" ]; then
 		iconv -cs -f "$2" -t "$3" 2> /dev/null
 	else
-		# else no convert, just output
+		# else no convert, just output.
 		cat
 	fi
 }
