@@ -628,10 +628,12 @@ sfeedrc file and change the curl options "-L --max-redirs 0".
 
 Shellscript to export existing newsboat cached items from sqlite3 to the sfeed
 TSV format.
-	
+
 	#!/bin/sh
 	# Export newsbeuter/newsboat cached items from sqlite3 to the sfeed TSV format.
 	# The data is split per file per feed with the name of the newsboat title/url.
+	# It writes the urls of the read items line by line to a "urls" file.
+	#
 	# Dependencies: sqlite3, awk.
 	#
 	# Usage: create some directory to store the feeds, run this script.
@@ -653,8 +655,8 @@ TSV format.
 	SELECT
 		i.pubDate, i.title, i.url, i.content, i.guid, i.author,
 		i.enclosure_url,
-		f.rssurl AS rssurl, f.title AS feedtitle --,
-		-- i.id, i.unread, i.enclosure_type, i.enqueued, i.flags, i.deleted,
+		f.rssurl AS rssurl, f.title AS feedtitle, i.unread --,
+		-- i.id, i.enclosure_type, i.enqueued, i.flags, i.deleted,
 		-- i.base
 	FROM rss_feed f
 	INNER JOIN rss_item i ON i.feedurl = f.rssurl
@@ -668,13 +670,19 @@ TSV format.
 		FS = "\x1f";
 		RS = "\x1e";
 	}
-	# strip all control-chars for normal fields.
-	function strip(s) {
+	# normal non-content fields.
+	function field(s) {
+		gsub("^[[:space:]]*", "", s);
+		gsub("[[:space:]]*$", "", s);
+		gsub("[[:space:]]", " ", s);
 		gsub("[[:cntrl:]]", "", s);
 		return s;
 	}
-	# escape chars in content field.
-	function escape(s) {
+	# content field.
+	function content(s) {
+		gsub("^[[:space:]]*", "", s);
+		gsub("[[:space:]]*$", "", s);
+		# escape chars in content field.
 		gsub("\\\\", "\\\\", s);
 		gsub("\n", "\\n", s);
 		gsub("\t", "\\t", s);
@@ -690,9 +698,14 @@ TSV format.
 			print "Writing file: \"" fname "\" (title: " $9 ", url: " $8 ")" > "/dev/stderr";
 		}
 	
-		print $1 "\t" strip($2) "\t" strip($3) "\t" escape($4) "\t" \
-			"html" "\t" strip($5) "\t" strip($6) "\t" strip($7) \
+		print $1 "\t" field($2) "\t" field($3) "\t" content($4) "\t" \
+			"html" "\t" field($5) "\t" field($6) "\t" field($7) \
 			> fname;
+	
+		# write urls of the read items to a file line by line.
+		if ($10 == "0") {
+			print $3 > "urls";
+		}
 	}'
 
 
