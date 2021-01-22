@@ -883,18 +883,17 @@ xmltagstart(XMLParser *p, const char *t, size_t tl)
 	case RSSTagContentEncoded:
 	case RSSTagDescription:
 		tmpcontenttype = ContentTypeHTML; /* default content-type */
-		ctx.iscontenttag = 1;
 		break;
 	case RSSTagMediaDescription:
 	case AtomTagContent:
 	case AtomTagMediaDescription:
 	case AtomTagSummary:
 		tmpcontenttype = ContentTypePlain; /* default content-type */
-		ctx.iscontenttag = 1;
 		break;
 	default:
 		break;
 	}
+	ctx.iscontenttag = (fieldmap[ctx.tag.id] == FeedFieldContent);
 }
 
 static void
