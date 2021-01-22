@@ -111,7 +111,7 @@ Optional dependencies
 OS tested
 ---------
 
-- Linux (compilers: clang, cproc, gcc, pcc, tcc, libc: glibc, musl).
+- Linux (compilers: clang, cproc, gcc, lacc, pcc, tcc, libc: glibc, musl).
 - OpenBSD (clang, gcc).
 - NetBSD
 - FreeBSD
