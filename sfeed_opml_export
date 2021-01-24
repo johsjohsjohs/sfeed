@@ -22,7 +22,7 @@ loadconfig() {
 	fi
 }
 
-# override feeds function to ouput opml XML.
+# override feed function to output OPML XML.
 # feed(name, feedurl, [basesiteurl], [encoding])
 feed() {
 	# NOTE: TABs in field values are unsupported, be sane.
