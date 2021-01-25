@@ -626,6 +626,49 @@ sfeedrc file and change the curl options "-L --max-redirs 0".
 
 - - -
 
+Shellscript to update feeds in parallel more efficiently using xargs -P.
+
+It creates a queue of the feeds with its settings, then uses xargs to process
+them in parallel using the common, but non-POSIX -P option. This is more
+efficient than the more portable solution in sfeed_update which can stall a
+batch of $maxjobs in the queue if one item is slow.
+
+sfeed_update_xargs shellscript:
+
+	#!/bin/sh
+	# update feeds, merge with old feeds using xargs in parallel mode (non-POSIX).
+	
+	# include script and reuse its functions, but do not start main().
+	SFEED_UPDATE_INCLUDE="1" . sfeed_update
+	# load config file, sets $config.
+	loadconfig "$1"
+	
+	# process a single feed.
+	# args are: config, tmpdir, name, feedurl, basesiteurl, encoding
+	if [ "${SFEED_UPDATE_CHILD}" != "" ]; then
+		sfeedtmpdir="$2"
+		_feed "$3" "$4" "$5" "$6"
+		exit $?
+	fi
+	
+	# ...else parent mode:
+	
+	# feed(name, feedurl, basesiteurl, encoding)
+	feed() {
+		printf '%s\0%s\0%s\0%s\0%s\0%s\0' "${config}" "${sfeedtmpdir}" "$1" "$2" "$3" "$4"
+	}
+	
+	# fetch feeds and store in temporary directory.
+	sfeedtmpdir="$(mktemp -d '/tmp/sfeed_XXXXXX')"
+	# make sure path exists.
+	mkdir -p "${sfeedpath}"
+	# print feeds for parallel processing with xargs.
+	feeds | SFEED_UPDATE_CHILD="1" xargs -0 -P "${maxjobs}" -L 6 "$(readlink -f "$0")"
+	# cleanup temporary files etc.
+	cleanup
+
+- - -
+
 Shellscript to export existing newsboat cached items from sqlite3 to the sfeed
 TSV format.
 
