@@ -122,7 +122,7 @@ feed() {
 	rm -f "${tmpfeedfile}.fetch"
 
 	if ! parse "${name}" "${feedurl}" "${basesiteurl}" < "${tmpfeedfile}.utf8" > "${tmpfeedfile}.tsv"; then
-		log "${name}" "FAIL (CONVERT)"
+		log "${name}" "FAIL (PARSE)"
 		return
 	fi
 	rm -f "${tmpfeedfile}.utf8"
