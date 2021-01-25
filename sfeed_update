@@ -94,12 +94,6 @@ feed() {
 	basesiteurl="$3"
 	encoding="$4"
 
-	# if baseurl is empty then use the path from the feed by default.
-	if [ "${basesiteurl}" = "" ]; then
-		host="${feedurl##*://}"
-		basesiteurl="${feedurl%%://*}://${host%/*}/"
-	fi
-
 	filename="$(printf '%s' "${name}" | tr '/' '_')"
 	sfeedfile="${sfeedpath}/${filename}"
 	tmpfeedfile="${sfeedtmpdir}/${filename}"
@@ -120,6 +114,12 @@ feed() {
 		return
 	fi
 	rm -f "${tmpfeedfile}.fetch"
+
+	# if baseurl is empty then use the path from the feed by default.
+	if [ "${basesiteurl}" = "" ]; then
+		host="${feedurl##*://}"
+		basesiteurl="${feedurl%%://*}://${host%/*}/"
+	fi
 
 	if ! parse "${name}" "${feedurl}" "${basesiteurl}" < "${tmpfeedfile}.utf8" > "${tmpfeedfile}.tsv"; then
 		log "${name}" "FAIL (PARSE)"
