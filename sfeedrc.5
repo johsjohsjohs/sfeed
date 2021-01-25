@@ -1,4 +1,4 @@
-.Dd January 11, 2021
+.Dd January 24, 2021
 .Dt SFEEDRC 5
 .Os
 .Sh NAME
@@ -86,6 +86,19 @@ To text-encoding.
 By default the tool
 .Xr iconv 1
 is used.
+.It Fn parse "name" "feedurl" "basesiteurl"
+Parse and convert RSS/Atom XML to the
+.Xr sfeed 5
+TSV format.
+.Bl -tag -width Ds
+.It Fa name
+Name of the feed.
+.It Fa feedurl
+Url of the feed.
+.It Fa basesiteurl
+Baseurl of the feed links.
+This argument allows to fix relative item links.
+.El
 .It Fn filter "name"
 Filter
 .Xr sfeed 5

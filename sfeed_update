@@ -55,6 +55,12 @@ convertencoding() {
 	fi
 }
 
+# parse and convert input, by default XML to the sfeed(5) TSV format.
+# parse(name, feedurl, basesiteurl)
+parse() {
+	sfeed "$3"
+}
+
 # filter fields.
 # filter(name)
 filter() {
@@ -115,7 +121,7 @@ feed() {
 	fi
 	rm -f "${tmpfeedfile}.fetch"
 
-	if ! sfeed "${basesiteurl}" < "${tmpfeedfile}.utf8" > "${tmpfeedfile}.tsv"; then
+	if ! parse "${name}" "${feedurl}" "${basesiteurl}" < "${tmpfeedfile}.utf8" > "${tmpfeedfile}.tsv"; then
 		log "${name}" "FAIL (CONVERT)"
 		return
 	fi
