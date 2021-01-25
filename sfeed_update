@@ -186,26 +186,30 @@ feeds() {
 	echo "See sfeedrc.example for an example." >&2
 }
 
-# job counter.
-curjobs=0
-# signal number received for parent.
-signo=0
-# SIGINT: signal to interrupt parent.
-trap -- "sighandler 2" "INT"
-# SIGTERM: signal to terminate parent.
-trap -- "sighandler 15" "TERM"
-# load config file.
-loadconfig "$1"
-# fetch feeds and store in temporary directory.
-sfeedtmpdir="$(mktemp -d '/tmp/sfeed_XXXXXX')"
-# make sure path exists.
-mkdir -p "${sfeedpath}"
-# fetch feeds specified in config file.
-feeds
-# wait till all feeds are fetched (concurrently).
-[ ${signo} -eq 0 ] && wait
-# cleanup temporary files etc.
-cleanup
-# on signal SIGINT and SIGTERM exit with signal number + 128.
-[ ${signo} -ne 0 ] && exit $((signo+128))
-exit 0
+main() {
+	# job counter.
+	curjobs=0
+	# signal number received for parent.
+	signo=0
+	# SIGINT: signal to interrupt parent.
+	trap -- "sighandler 2" "INT"
+	# SIGTERM: signal to terminate parent.
+	trap -- "sighandler 15" "TERM"
+	# load config file.
+	loadconfig "$1"
+	# fetch feeds and store in temporary directory.
+	sfeedtmpdir="$(mktemp -d '/tmp/sfeed_XXXXXX')"
+	# make sure path exists.
+	mkdir -p "${sfeedpath}"
+	# fetch feeds specified in config file.
+	feeds
+	# wait till all feeds are fetched (concurrently).
+	[ ${signo} -eq 0 ] && wait
+	# cleanup temporary files etc.
+	cleanup
+	# on signal SIGINT and SIGTERM exit with signal number + 128.
+	[ ${signo} -ne 0 ] && exit $((signo+128))
+	exit 0
+}
+
+[ "${SFEED_UPDATE_INCLUDE}" = "1" ] || main "$@"
