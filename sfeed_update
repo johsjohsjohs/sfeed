@@ -79,17 +79,10 @@ order() {
 	sort -t '	' -k1rn,1
 }
 
-# fetch and parse feed.
-# feed(name, feedurl, [basesiteurl], [encoding])
-feed() {
-	# wait until ${maxjobs} are finished: will stall the queue if an item
-	# is slow, but it is portable.
-	[ ${signo} -ne 0 ] && return
-	[ $((curjobs % maxjobs)) -eq 0 ] && wait
-	[ ${signo} -ne 0 ] && return
-	curjobs=$((curjobs + 1))
-
-	(name="$1"
+# internal handler to fetch and process a feed.
+# _feed(name, feedurl, [basesiteurl], [encoding])
+_feed() {
+	name="$1"
 	feedurl="$2"
 	basesiteurl="$3"
 	encoding="$4"
@@ -160,7 +153,19 @@ feed() {
 
 	# OK
 	log "${name}" "OK"
-	) &
+}
+
+# fetch and process a feed in parallel.
+# feed(name, feedurl, [basesiteurl], [encoding])
+feed() {
+	# wait until ${maxjobs} are finished: will stall the queue if an item
+	# is slow, but it is portable.
+	[ ${signo} -ne 0 ] && return
+	[ $((curjobs % maxjobs)) -eq 0 ] && wait
+	[ ${signo} -ne 0 ] && return
+	curjobs=$((curjobs + 1))
+
+	_feed "$@" &
 }
 
 cleanup() {
