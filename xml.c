@@ -292,7 +292,7 @@ xml_parse(XMLParser *x)
 
 			if (c == '!') { /* cdata and comments */
 				for (tagdatalen = 0; (c = GETNEXT()) != EOF;) {
-					/* NOTE: sizeof(x->data) must be atleast sizeof("[CDATA[") */
+					/* NOTE: sizeof(x->data) must be at least sizeof("[CDATA[") */
 					if (tagdatalen <= sizeof("[CDATA[") - 1)
 						x->data[tagdatalen++] = c;
 					if (c == '>')

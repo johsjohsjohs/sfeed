@@ -1,4 +1,4 @@
-.Dd January 24, 2021
+.Dd January 26, 2021
 .Dt SFEEDRC 5
 .Os
 .Sh NAME
@@ -37,13 +37,13 @@ Name of the feed, this is also used as the filename for the TAB-separated
 feed file.
 The feedname cannot contain '/' characters, they will be replaced with '_'.
 .It Fa feedurl
-Url to fetch the RSS/Atom data from, usually a HTTP or HTTPS url.
+URL to fetch the RSS/Atom data from, usually a HTTP or HTTPS URL.
 .It Op Fa basesiteurl
 Baseurl of the feed links.
 This argument allows to fix relative item links.
 .Pp
 According to the RSS and Atom specification feeds should always have absolute
-urls, however this is not always the case in practise.
+URLs, however this is not always the case in practise.
 .It Op Fa encoding
 Feeds are decoded from this name to UTF-8, the name should be a usable
 character-set for the
@@ -58,7 +58,7 @@ is a shellscript each function can be overridden to change its behaviour,
 notable functions are:
 .Bl -tag -width Ds
 .It Fn fetch "name" "url" "feedfile"
-Fetch feed from url and writes data to stdout, its arguments are:
+Fetch feed from URL and writes data to stdout, its arguments are:
 .Bl -tag -width Ds
 .It Fa name
 Specified name in configuration file (useful for logging).
@@ -94,7 +94,7 @@ TSV format.
 .It Fa name
 Name of the feed.
 .It Fa feedurl
-Url of the feed.
+URL of the feed.
 .It Fa basesiteurl
 Baseurl of the feed links.
 This argument allows to fix relative item links.
