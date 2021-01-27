@@ -212,4 +212,4 @@ main() {
 	exit 0
 }
 
-[ "${SFEED_UPDATE_INCLUDE}" = "1" ] || main "$@"
+[ "${SFEED_UPDATE_INCLUDE}" != "" ] || main "$@"
