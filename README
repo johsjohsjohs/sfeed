@@ -663,7 +663,7 @@ sfeed_update_xargs shellscript:
 	# make sure path exists.
 	mkdir -p "${sfeedpath}"
 	# print feeds for parallel processing with xargs.
-	feeds | SFEED_UPDATE_CHILD="1" xargs -0 -P "${maxjobs}" -L 6 "$(readlink -f "$0")"
+	feeds | SFEED_UPDATE_CHILD="1" xargs -r -0 -P "${maxjobs}" -L 6 "$(readlink -f "$0")"
 	# cleanup temporary files etc.
 	cleanup
 
