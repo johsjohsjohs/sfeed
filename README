@@ -645,7 +645,7 @@ sfeed_update_xargs shellscript:
 	
 	# process a single feed.
 	# args are: config, tmpdir, name, feedurl, basesiteurl, encoding
-	if [ "${SFEED_UPDATE_CHILD}" != "" ]; then
+	if [ "${SFEED_UPDATE_CHILD}" = "1" ]; then
 		sfeedtmpdir="$2"
 		_feed "$3" "$4" "$5" "$6"
 		exit $?
