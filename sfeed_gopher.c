@@ -38,7 +38,8 @@ static void
 printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 {
 	struct uri u;
-	char *fields[FieldLast], *itemhost, *itemport, *itempath;
+	char *fields[FieldLast];
+	char *itemhost, *itemport, *itempath, *itemquery, *itemfragment;
 	ssize_t linelen;
 	unsigned int isnew;
 	struct tm rtm, *tm;
@@ -59,15 +60,20 @@ printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 		itemport = port;
 		itemtype = 'i';
 		itempath = fields[FieldLink];
+		itemquery = "";
+		itemfragment = "";
 
 		if (fields[FieldLink][0]) {
 			itemtype = 'h';
+			/* if it's a gopher URL then change it into a direntry */
 			if (!strncmp(fields[FieldLink], "gopher://", 9) &&
-			    parseuri(fields[FieldLink], &u, 0) != -1) {
+			    uri_parse(fields[FieldLink], &u) != -1) {
 				itemhost = u.host;
 				itemport = u.port[0] ? u.port : "70";
 				itemtype = '1';
 				itempath = u.path;
+				itemquery = u.query;
+				itemfragment = u.fragment;
 
 				if (itempath[0] == '/') {
 					itempath++;
@@ -100,6 +106,14 @@ printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 		if (itemtype == 'h' && fields[FieldLink] == itempath)
 			fputs("URL:", fpitems);
 		gophertext(fpitems, itempath);
+		if (itemquery[0]) {
+			fputs("?", fpitems);
+			gophertext(fpitems, itemquery);
+		}
+		if (itemfragment[0]) {
+			fputs("#", fpitems);
+			gophertext(fpitems, itemfragment);
+		}
 		fprintf(fpitems, "\t%s\t%s\r\n", itemhost, itemport);
 	}
 	fputs(".\r\n", fpitems);
