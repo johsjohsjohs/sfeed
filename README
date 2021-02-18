@@ -552,28 +552,7 @@ RSS/Atom data or change the default curl options:
 
 - - -
 
-Incremental data updates using If-Modified-Since
-
-For servers that support it some incremental updates and bandwidth-saving can
-be done by using the "If-Modified-Since" HTTP header.
-
-The curl -z option can be used to send the modification date of the local feed
-file so the server can make the decision to respond with incremental data.
-
-You can do this by overriding the fetch() function in the sfeedrc file and
-adding the -z option:
-
-	# fetch(name, url, feedfile)
-	fetch() {
-		curl -z "$3" "$2"
-	}
-
-This comes at a cost of some privacy. For example there can be a fingerprinting
-vector of the local modification date of the feed file.
-
-- - -
-
-Incremental data updates using ETag caching
+Caching, incremental data updates and bandwidth-saving
 
 For servers that support it some incremental updates and bandwidth-saving can
 be done by using the "ETag" HTTP header.
@@ -582,18 +561,34 @@ Create a directory for storing the ETags per feed:
 
 	mkdir -p ~/.sfeed/etags/
 
-The curl ETag options can be used to send the previous ETag header value.  You
-can do this by overriding the fetch() function in the sfeedrc file and adding
-the --etag-save and --etag-compare options:
+The curl ETag options (--etag-save and --etag-compare) can be used to store and
+send the previous ETag header value. curl version 7.73+ is recommended for it
+to work properly.
+
+The curl -z option can be used to send the modification date of a local file as
+a HTTP "If-Modified-Since" request header. The server can then respond if the
+data is modified or not or respond with only the incremental data.
+
+The curl --compressed option can be used to indicate the client supports
+decompression. Because RSS/Atom feeds are textual XML content this generally
+compresses very well.
+
+These options can be set by overriding the fetch() function in the sfeedrc
+file:
 
 	# fetch(name, url, feedfile)
 	fetch() {
 		etag="$HOME/.sfeed/etags/$(basename "$3")"
-		curl --etag-save "${etag}" --etag-compare "${etag}" "$2"
+		curl \
+			-L --max-redirs 0 -H "User-Agent:" -f -s -m 15 \
+			--compressed \
+			--etag-save "${etag}" --etag-compare "${etag}" \
+			-z "${etag}" \
+			"$2" 2>/dev/null
 	}
 
-This comes at a cost of some privacy. For example there can be a unique
-generated ETag to pin and fingerprint a client.
+These options can come at a cost of some privacy, because it exposes
+additional metadata from the previous request.
 
 - - -
 
