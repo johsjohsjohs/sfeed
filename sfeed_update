@@ -108,13 +108,8 @@ _feed() {
 	fi
 	rm -f "${tmpfeedfile}.fetch"
 
-	# if baseurl is empty then use the path from the feed by default.
-	if [ "${basesiteurl}" = "" ]; then
-		host="${feedurl##*://}"
-		basesiteurl="${feedurl%%://*}://${host%/*}/"
-	fi
-
-	if ! parse "${name}" "${feedurl}" "${basesiteurl}" < "${tmpfeedfile}.utf8" > "${tmpfeedfile}.tsv"; then
+	# if baseurl is empty then use feedurl.
+	if ! parse "${name}" "${feedurl}" "${basesiteurl:-feedurl}" < "${tmpfeedfile}.utf8" > "${tmpfeedfile}.tsv"; then
 		log "${name}" "FAIL (PARSE)"
 		return
 	fi
