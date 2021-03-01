@@ -109,7 +109,7 @@ _feed() {
 	rm -f "${tmpfeedfile}.fetch"
 
 	# if baseurl is empty then use feedurl.
-	if ! parse "${name}" "${feedurl}" "${basesiteurl:-feedurl}" < "${tmpfeedfile}.utf8" > "${tmpfeedfile}.tsv"; then
+	if ! parse "${name}" "${feedurl}" "${basesiteurl:-${feedurl}}" < "${tmpfeedfile}.utf8" > "${tmpfeedfile}.tsv"; then
 		log "${name}" "FAIL (PARSE)"
 		return
 	fi
