@@ -166,7 +166,7 @@ uri_makeabs(struct uri *a, struct uri *u, struct uri *b)
 	} else if (u->path[0] == '/') {
 		strlcpy(a->path, u->path, sizeof(a->path));
 	} else {
-		a->path[0] = (a->host[0] && b->path[0] != '/') ? '/' : '\0';
+		a->path[0] = (b->host[0] && b->path[0] != '/') ? '/' : '\0';
 		a->path[1] = '\0';
 
 		if ((p = strrchr(b->path, '/'))) {
