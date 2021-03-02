@@ -650,7 +650,14 @@ sfeed_update_xargs shellscript:
 	
 	# feed(name, feedurl, basesiteurl, encoding)
 	feed() {
-		printf '%s\0%s\0%s\0%s\0%s\0%s\0' "${config}" "${sfeedtmpdir}" "$1" "$2" "$3" "$4"
+		# workaround: *BSD xargs doesn't handle empty fields in the middle.
+		name="${1:-$$}"
+		feedurl="${2:-http://}"
+		basesiteurl="${3:-${feedurl}}"
+		encoding="$4"
+	
+		printf '%s\0%s\0%s\0%s\0%s\0%s\0' "${config}" "${sfeedtmpdir}" \
+			"${name}" "${feedurl}" "${basesiteurl}" "${encoding}"
 	}
 	
 	# fetch feeds and store in temporary directory.
