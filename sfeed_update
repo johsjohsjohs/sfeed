@@ -204,7 +204,7 @@ main() {
 	cleanup
 	# on signal SIGINT and SIGTERM exit with signal number + 128.
 	[ ${signo} -ne 0 ] && exit $((signo+128))
-	exit 0
+	return 0
 }
 
 [ "${SFEED_UPDATE_INCLUDE}" = "1" ] || main "$@"
