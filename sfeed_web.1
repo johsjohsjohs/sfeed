@@ -1,4 +1,4 @@
-.Dd January 26, 2021
+.Dd March 12, 2021
 .Dt SFEED_WEB 1
 .Os
 .Sh NAME
@@ -17,7 +17,7 @@ URLs to stdout.
 Optional base URL to use for found feed URLs that are relative.
 .El
 .Sh OUTPUT FORMAT
-url<TAB>content\-type<newline>
+url<TAB>content-type<newline>
 .Bl -tag -width Ds
 .It url
 Found relative or absolute URL.
@@ -27,7 +27,7 @@ otherwise if the
 .Ar baseurl
 option is specified then that is used, if neither are set then the relative URL
 is printed.
-.It content\-type
+.It content-type
 Usually application/atom+xml or application/rss+xml.
 .El
 .Sh EXIT STATUS

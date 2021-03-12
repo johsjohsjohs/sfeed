@@ -1,20 +1,20 @@
-.Dd November 1, 2020
+.Dd March 12, 2021
 .Dt SFEED_XMLENC 1
 .Os
 .Sh NAME
 .Nm sfeed_xmlenc
-.Nd get text\-encoding from XML
+.Nd get text-encoding from XML
 .Sh SYNOPSIS
 .Nm
 .Sh DESCRIPTION
 .Nm
-reads XML data from stdin and writes the found text\-encoding to stdout.
+reads XML data from stdin and writes the found text-encoding to stdout.
 It converts characters in the encoding-name to lowercase and strips characters
 which are not allowed in an encoding-name.
 .Sh EXIT STATUS
 .Ex -std
 .Sh EXAMPLES
-Get text\-encoding from xkcd Atom feed:
+Get text-encoding from xkcd Atom feed:
 .Bd -literal
 curl -s -L http://www.xkcd.com/atom.xml | sfeed_xmlenc
 .Ed
