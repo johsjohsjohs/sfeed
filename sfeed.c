@@ -58,7 +58,8 @@ enum TagId {
 	RSSTagAuthor, RSSTagDccreator,
 	RSSTagCategory,
 	/* Atom */
-	AtomTagUpdated, AtomTagPublished, /* creation date has higher priority */
+	/* creation date has higher priority */
+	AtomTagModified, AtomTagUpdated, AtomTagIssued, AtomTagPublished,
 	AtomTagTitle,
 	AtomTagMediaDescription, AtomTagSummary, AtomTagContent,
 	AtomTagId,
@@ -151,9 +152,11 @@ static FeedTag atomtags[] = {
 	{ STRP("category"),          AtomTagCategory         },
 	{ STRP("content"),           AtomTagContent          },
 	{ STRP("id"),                AtomTagId               },
+	{ STRP("issued"),            AtomTagIssued           }, /* Atom 0.3 */
 	/* Atom: <link href="" />, RSS has <link></link> */
 	{ STRP("link"),              AtomTagLink             },
 	{ STRP("media:description"), AtomTagMediaDescription },
+	{ STRP("modified"),          AtomTagModified         }, /* Atom 0.3 */
 	{ STRP("published"),         AtomTagPublished        },
 	{ STRP("summary"),           AtomTagSummary          },
 	{ STRP("title"),             AtomTagTitle            },
@@ -186,7 +189,9 @@ static int fieldmap[TagLast] = {
 	[RSSTagDccreator]          = FeedFieldAuthor,
 	[RSSTagCategory]           = FeedFieldCategory,
 	/* Atom */
+	[AtomTagModified]          = FeedFieldTime,
 	[AtomTagUpdated]           = FeedFieldTime,
+	[AtomTagIssued]            = FeedFieldTime,
 	[AtomTagPublished]         = FeedFieldTime,
 	[AtomTagTitle]             = FeedFieldTitle,
 	[AtomTagMediaDescription]  = FeedFieldContent,
