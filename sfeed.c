@@ -706,7 +706,8 @@ xmlattr(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 			if (isattr(v, vl, STRP("html")) ||
 			    isattr(v, vl, STRP("xhtml")) ||
 			    isattr(v, vl, STRP("text/html")) ||
-			    isattr(v, vl, STRP("text/xhtml"))) {
+			    isattr(v, vl, STRP("text/xhtml")) ||
+			    isattr(v, vl, STRP("application/xhtml+xml"))) {
 				tmpcontenttype = ContentTypeHTML;
 			} else if (isattr(v, vl, STRP("text")) ||
 			           isattr(v, vl, STRP("plain")) ||
