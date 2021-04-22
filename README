@@ -683,7 +683,6 @@ TSV format.
 	#
 	# Usage: create some directory to store the feeds, run this script.
 	#
-	# Assumes "html" for content-type (Newsboat only handles HTML content).
 	# Assumes feednames are unique and a feed title is set.
 	
 	# newsboat cache.db file.
@@ -698,11 +697,10 @@ TSV format.
 	.mode ascii
 	.output
 	SELECT
-		i.pubDate, i.title, i.url, i.content, i.guid, i.author,
-		i.enclosure_url,
-		f.rssurl AS rssurl, f.title AS feedtitle, i.unread --,
-		-- i.id, i.enclosure_type, i.enqueued, i.flags, i.deleted,
-		-- i.base
+		i.pubDate, i.title, i.url, i.content, i.content_mime_type,
+		i.guid, i.author, i.enclosure_url,
+		f.rssurl AS rssurl, f.title AS feedtitle, i.unread
+		-- i.id, i.enclosure_type, i.enqueued, i.flags, i.deleted, i.base
 	FROM rss_feed f
 	INNER JOIN rss_item i ON i.feedurl = f.rssurl
 	ORDER BY
@@ -738,17 +736,25 @@ TSV format.
 		return title;
 	}
 	{
-		fname = feedname($8, $9);
+		fname = feedname($9, $10);
 		if (!feed[fname]++) {
-			print "Writing file: \"" fname "\" (title: " $9 ", url: " $8 ")" > "/dev/stderr";
+			print "Writing file: \"" fname "\" (title: " $10 ", url: " $9 ")" > "/dev/stderr";
 		}
 	
+		contenttype = field($5);
+		if (contenttype == "")
+			contenttype = "html";
+		else if (index(contenttype, "/html") || index(contenttype, "/xhtml"))
+			contenttype = "html";
+		else
+			contenttype = "plain";
+	
 		print $1 "\t" field($2) "\t" field($3) "\t" content($4) "\t" \
-			"html" "\t" field($5) "\t" field($6) "\t" field($7) \
+			contenttype "\t" field($6) "\t" field($7) "\t" field($8) "\t" \
 			> fname;
 	
 		# write URLs of the read items to a file line by line.
-		if ($10 == "0") {
+		if ($11 == "0") {
 			print $3 > "urls";
 		}
 	}'
