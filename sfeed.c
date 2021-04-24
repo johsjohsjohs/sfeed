@@ -966,7 +966,7 @@ xmltagend(XMLParser *p, const char *t, size_t tl, int isshort)
 	} else if (ctx.tag.id && istag(ctx.tag.name, ctx.tag.len, t, tl)) {
 		/* matched tag end: close it */
 		/* copy also to the link field if the attribute isPermaLink="true"
-		    and it is not set by a tag with higher prio. */
+		   and it is not set by a tag with higher prio. */
 		if (ctx.tag.id == RSSTagGuidPermalinkTrue && ctx.field &&
 		    ctx.tag.id > ctx.fields[FeedFieldLink].tagid) {
 			string_clear(&ctx.fields[FeedFieldLink].str);
