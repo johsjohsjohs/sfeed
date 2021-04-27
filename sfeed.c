@@ -894,7 +894,9 @@ xmltagstartparsed(XMLParser *p, const char *t, size_t tl, int isshort)
 
 	/* set tag type based on it's attribute value */
 	if (ctx.tag.id == RSSTagGuid) {
-		if (isattr(attrispermalink.data, attrispermalink.len, STRP("true")))
+		/* if empty the default is "true" */
+		if (!attrispermalink.len ||
+		    isattr(attrispermalink.data, attrispermalink.len, STRP("true")))
 			ctx.tag.id = RSSTagGuidPermalinkTrue;
 		else
 			ctx.tag.id = RSSTagGuidPermalinkFalse;
