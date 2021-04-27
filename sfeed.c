@@ -785,12 +785,18 @@ xmlattrstart(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl)
 		}
 		return;
 	}
+
 	if (attrispermalink.len && isattr(n, nl, STRP("ispermalink")))
 		string_clear(&attrispermalink);
 	else if (attrrel.len && isattr(n, nl, STRP("rel")))
 		string_clear(&attrrel);
 	else if (attrtype.len && isattr(n, nl, STRP("type")))
 		string_clear(&attrtype);
+	else if (tmpstr.len &&
+	    (isattr(n, nl, STRP("href")) ||
+	     isattr(n, nl, STRP("term")) ||
+	     isattr(n, nl, STRP("url"))))
+		string_clear(&tmpstr); /* use the last value for multiple attribute values */
 }
 
 /* NOTE: this handler can be called multiple times if the data in this
