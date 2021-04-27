@@ -209,7 +209,7 @@ static const char *baseurl;
 
 static FeedContext ctx;
 static XMLParser parser; /* XML parser state */
-static String attrtype, tmpstr;
+static String attrispermalink, attrrel, attrtype, tmpstr;
 
 int
 tagcmp(const void *v1, const void *v2)
@@ -710,30 +710,15 @@ xmlattr(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 		if (ctx.tag.id == RSSTagEnclosure &&
 		    isattr(n, nl, STRP("url"))) {
 			string_append(&tmpstr, v, vl);
-		} else if ((ctx.tag.id == RSSTagGuid ||
-		            ctx.tag.id == RSSTagGuidPermalinkFalse ||
-			    ctx.tag.id == RSSTagGuidPermalinkTrue) &&
+		} else if (ctx.tag.id == RSSTagGuid &&
 		           isattr(n, nl, STRP("ispermalink"))) {
-			if (isattr(v, vl, STRP("true")))
-				ctx.tag.id = RSSTagGuidPermalinkTrue;
-			else
-				ctx.tag.id = RSSTagGuidPermalinkFalse;
+			string_append(&attrispermalink, v, vl);
 		}
 	} else if (ctx.feedtype == FeedTypeAtom) {
-		if (ctx.tag.id == AtomTagLink ||
-		    ctx.tag.id == AtomTagLinkAlternate ||
-		    ctx.tag.id == AtomTagLinkEnclosure) {
+		if (ctx.tag.id == AtomTagLink) {
 			if (isattr(n, nl, STRP("rel"))) {
-				/* empty or "alternate": other types could be
-				   "enclosure", "related", "self" or "via" */
-				if (!vl || isattr(v, vl, STRP("alternate")))
-					ctx.tag.id = AtomTagLinkAlternate;
-				else if (isattr(v, vl, STRP("enclosure")))
-					ctx.tag.id = AtomTagLinkEnclosure;
-				else
-					ctx.tag.id = AtomTagLink; /* unknown */
-			} else if (ctx.tag.id != AtomTagLink &&
-			           isattr(n, nl, STRP("href"))) {
+				string_append(&attrrel, v, vl);
+			} else if (isattr(n, nl, STRP("href"))) {
 				string_append(&tmpstr, v, vl);
 			}
 		} else if (ctx.tag.id == AtomTagCategory &&
@@ -795,7 +780,11 @@ xmlattrstart(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl)
 		}
 		return;
 	}
-	if (attrtype.len && isattr(n, nl, STRP("type")))
+	if (attrispermalink.len && isattr(n, nl, STRP("ispermalink")))
+		string_clear(&attrispermalink);
+	else if (attrrel.len && isattr(n, nl, STRP("rel")))
+		string_clear(&attrrel);
+	else if (attrtype.len && isattr(n, nl, STRP("type")))
 		string_clear(&attrtype);
 }
 
@@ -871,20 +860,9 @@ xmltagstart(XMLParser *p, const char *t, size_t tl)
 		memcpy(&(ctx.tag), f, sizeof(ctx.tag));
 	}
 
-	switch (ctx.tag.id) {
-	case AtomTagLink:
-		/* without a rel attribute the default link type is "alternate" */
-		ctx.tag.id = AtomTagLinkAlternate;
-		break;
-	case RSSTagGuid:
-		/* without a ispermalink attribute the default value is "true" */
-		ctx.tag.id = RSSTagGuidPermalinkTrue;
-		break;
-	default:
-		break;
-	}
-
 	ctx.iscontenttag = (fieldmap[ctx.tag.id] == FeedFieldContent);
+	string_clear(&attrispermalink);
+	string_clear(&attrrel);
 	string_clear(&attrtype);
 }
 
@@ -901,6 +879,23 @@ xmltagstartparsed(XMLParser *p, const char *t, size_t tl, int isshort)
 				xmldata(p, ">", 1);
 		}
 		return;
+	}
+
+	/* set tag type based on it's attribute value */
+	if (ctx.tag.id == RSSTagGuid) {
+		if (isattr(attrispermalink.data, attrispermalink.len, STRP("true")))
+			ctx.tag.id = RSSTagGuidPermalinkTrue;
+		else
+			ctx.tag.id = RSSTagGuidPermalinkFalse;
+	} else if (ctx.tag.id == AtomTagLink) {
+		/* empty or "alternate": other types could be
+		   "enclosure", "related", "self" or "via" */
+		if (!attrrel.len || isattr(attrrel.data, attrrel.len, STRP("alternate")))
+			ctx.tag.id = AtomTagLinkAlternate;
+		else if (isattr(attrrel.data, attrrel.len, STRP("enclosure")))
+			ctx.tag.id = AtomTagLinkEnclosure;
+		else
+			ctx.tag.id = AtomTagLink; /* unknown */
 	}
 
 	tagid = ctx.tag.id;
