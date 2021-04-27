@@ -209,8 +209,7 @@ static const char *baseurl;
 
 static FeedContext ctx;
 static XMLParser parser; /* XML parser state */
-static String tmpstr;
-static enum ContentType tmpcontenttype; /* content-type for item */
+static String attrtype, tmpstr;
 
 int
 tagcmp(const void *v1, const void *v2)
@@ -702,19 +701,8 @@ xmlattr(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 	/* content-type may be: Atom: text, xhtml, html or mime-type.
 	   MRSS (media:description): plain, html. */
 	if (ISCONTENTTAG(ctx)) {
-		if (isattr(n, nl, STRP("type"))) {
-			if (isattr(v, vl, STRP("html")) ||
-			    isattr(v, vl, STRP("xhtml")) ||
-			    isattr(v, vl, STRP("text/html")) ||
-			    isattr(v, vl, STRP("text/xhtml")) ||
-			    isattr(v, vl, STRP("application/xhtml+xml"))) {
-				tmpcontenttype = ContentTypeHTML;
-			} else if (isattr(v, vl, STRP("text")) ||
-			           isattr(v, vl, STRP("plain")) ||
-				   isattr(v, vl, STRP("text/plain"))) {
-				tmpcontenttype = ContentTypePlain;
-			}
-		}
+		if (isattr(n, nl, STRP("type")))
+			string_append(&attrtype, v, vl);
 		return;
 	}
 
@@ -807,6 +795,8 @@ xmlattrstart(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl)
 		}
 		return;
 	}
+	if (attrtype.len && isattr(n, nl, STRP("type")))
+		string_clear(&attrtype);
 }
 
 /* NOTE: this handler can be called multiple times if the data in this
@@ -890,20 +880,12 @@ xmltagstart(XMLParser *p, const char *t, size_t tl)
 		/* without a ispermalink attribute the default value is "true" */
 		ctx.tag.id = RSSTagGuidPermalinkTrue;
 		break;
-	case RSSTagContentEncoded:
-	case RSSTagDescription:
-		tmpcontenttype = ContentTypeHTML; /* default content-type */
-		break;
-	case RSSTagMediaDescription:
-	case AtomTagContent:
-	case AtomTagMediaDescription:
-	case AtomTagSummary:
-		tmpcontenttype = ContentTypePlain; /* default content-type */
-		break;
 	default:
 		break;
 	}
+
 	ctx.iscontenttag = (fieldmap[ctx.tag.id] == FeedFieldContent);
+	string_clear(&attrtype);
 }
 
 static void
@@ -934,7 +916,24 @@ xmltagstartparsed(XMLParser *p, const char *t, size_t tl, int isshort)
 	if (ctx.iscontenttag) {
 		ctx.iscontent = 1;
 		ctx.iscontenttag = 0;
-		ctx.contenttype = tmpcontenttype;
+
+		/* detect content-type based on type attribute */
+		if (attrtype.len) {
+			if (isattr(attrtype.data, attrtype.len, STRP("html")) ||
+			    isattr(attrtype.data, attrtype.len, STRP("xhtml")) ||
+			    isattr(attrtype.data, attrtype.len, STRP("text/html")) ||
+			    isattr(attrtype.data, attrtype.len, STRP("text/xhtml")) ||
+			    isattr(attrtype.data, attrtype.len, STRP("application/xhtml+xml")))
+				ctx.contenttype = ContentTypeHTML;
+			else /* unknown: handle as base64 text data */
+				ctx.contenttype = ContentTypePlain;
+		} else {
+			/* default content-type */
+			if (tagid == RSSTagContentEncoded || tagid == RSSTagDescription)
+				ctx.contenttype = ContentTypeHTML;
+			else
+				ctx.contenttype = ContentTypePlain;
+		}
 	}
 
 	ctx.field = &(ctx.fields[fieldmap[tagid]].str);
