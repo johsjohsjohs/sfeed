@@ -12,7 +12,7 @@ static struct feed *feeds;
 static char *line;
 static size_t linesize;
 static time_t comparetime;
-static unsigned long totalnew;
+static unsigned long totalnew, total;
 
 static void
 printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
@@ -54,6 +54,7 @@ printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 			fputs("                 ", fpitems);
 		}
 		f->total++;
+		total++;
 
 		if (fields[FieldLink][0]) {
 			fputs("<a href=\"", fpitems);
@@ -159,9 +160,9 @@ main(int argc, char *argv[])
 	fputs("<!DOCTYPE html>\n<html>\n<head>\n"
 	      "\t<meta name=\"referrer\" content=\"no-referrer\" />\n"
 	      "\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n"
-	      "\t<title>Newsfeed (", fpindex);
-	fprintf(fpindex, "%lu", totalnew);
-	fputs(")</title>\n\t<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />\n"
+	      "\t<title>(", fpindex);
+	fprintf(fpindex, "%lu/%lu", totalnew, total);
+	fputs(") - Newsfeed</title>\n\t<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />\n"
 	      "</head>\n", fpindex);
 	if (showsidebar) {
 		fputs("<frameset framespacing=\"0\" cols=\"250,*\" frameborder=\"1\">\n"

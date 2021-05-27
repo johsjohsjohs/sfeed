@@ -12,7 +12,7 @@ static struct feed *feeds;
 static int showsidebar;
 static char *line;
 static size_t linesize;
-static unsigned long totalnew;
+static unsigned long totalnew, total;
 static time_t comparetime;
 
 static void
@@ -55,6 +55,7 @@ printfeed(FILE *fp, struct feed *f)
 			fputs("                 ", stdout);
 		}
 		f->total++;
+		total++;
 
 		if (fields[FieldLink][0]) {
 			fputs("<a href=\"", stdout);
@@ -147,8 +148,8 @@ main(int argc, char *argv[])
 		fputs("\t\t</ul>\n\t</div>\n", stdout);
 	}
 
-	fprintf(stdout, "\t</body>\n\t<title>Newsfeed (%lu)</title>\n</html>\n",
-	        totalnew);
+	fprintf(stdout, "\t</body>\n\t<title>(%lu/%lu) - Newsfeed</title>\n</html>\n",
+	        totalnew, total);
 
 	return 0;
 }
