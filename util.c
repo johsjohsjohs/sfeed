@@ -22,7 +22,7 @@ err(int exitstatus, const char *fmt, ...)
 		va_start(ap, fmt);
 		vfprintf(stderr, fmt, ap);
 		va_end(ap);
-		fprintf(stderr, ": ");
+		fputs(": ", stderr);
 	}
 	fprintf(stderr, "%s\n", strerror(saved_errno));
 
