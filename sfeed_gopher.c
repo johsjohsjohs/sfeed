@@ -1,6 +1,5 @@
 #include <sys/types.h>
 
-#include <err.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>

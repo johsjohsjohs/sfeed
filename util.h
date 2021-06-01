@@ -38,6 +38,14 @@ enum {
 	FieldLast
 };
 
+/* hint for compilers and static analyzers that a function exits */
+#ifndef __dead
+#define __dead
+#endif
+
+__dead void err(int, const char *, ...);
+__dead void errx(int, const char *, ...);
+
 int uri_format(char *, size_t, struct uri *);
 int uri_hasscheme(const char *);
 int uri_makeabs(struct uri *, struct uri *, struct uri *);

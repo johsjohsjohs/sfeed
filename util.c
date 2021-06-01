@@ -1,11 +1,50 @@
 #include <ctype.h>
 #include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
 
 #include "util.h"
+
+/* print to stderr, print error message of errno and exit().
+   Unlike BSD err() it does not prefix __progname */
+__dead void
+err(int exitstatus, const char *fmt, ...)
+{
+	va_list ap;
+	int saved_errno;
+
+	saved_errno = errno;
+
+	if (fmt) {
+		va_start(ap, fmt);
+		vfprintf(stderr, fmt, ap);
+		va_end(ap);
+		fprintf(stderr, ": ");
+	}
+	fprintf(stderr, "%s\n", strerror(saved_errno));
+
+	exit(exitstatus);
+}
+
+/* print to stderr and exit().
+   Unlike BSD errx() it does not prefix __progname */
+__dead void
+errx(int exitstatus, const char *fmt, ...)
+{
+	va_list ap;
+
+	if (fmt) {
+		va_start(ap, fmt);
+		vfprintf(stderr, fmt, ap);
+		va_end(ap);
+	}
+	fputs("\n", stderr);
+
+	exit(exitstatus);
+}
 
 /* check if string has a non-empty scheme / protocol part */
 int

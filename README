@@ -117,7 +117,8 @@ OS tested
 - FreeBSD
 - DragonFlyBSD
 - Windows (cygwin gcc, mingw).
-- HaikuOS (using libbsd).
+- HaikuOS
+- SerenityOS
 - FreeDOS (djgpp).
 - FUZIX (sdcc -mz80).
 
