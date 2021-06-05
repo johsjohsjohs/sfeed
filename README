@@ -309,7 +309,7 @@ advertisements, strip tracking parameters and more.
 				$8 = filterlink($8); # enclosure
 
 				# try to remove tracking pixels: <img/> tags with 1px width or height.
-				gsub("<img[^>]*(width|height)[\s]*=[\s]*[\"'"'"' ]?1[\"'"'"' ]?[^0-9>]+[^>]*>", "", $4);
+				gsub("<img[^>]*(width|height)[[:space:]]*=[[:space:]]*[\"'"'"' ]?1[\"'"'"' ]?[^0-9>]+[^>]*>", "", $4);
 
 				print $0;
 			}'
