@@ -408,7 +408,7 @@ fdm config file (~/.sfeed/fdm.conf):
 		cache "${cachepath}"
 		$maildir = "%[home]/feeds/"
 
-		# Check if message is in in cache by Message-ID.
+		# Check if message is in the cache by Message-ID.
 		match case "^Message-ID: (.*)" in headers
 			action {
 				tag "msgid" value "%1"
@@ -452,7 +452,7 @@ fdm config file (~/.sfeed/fdm.conf):
 		$cachepath = "%[home]/.sfeed/fdm.cache"
 		cache "${cachepath}"
 
-		# Check if message is in in cache by Message-ID.
+		# Check if message is in the cache by Message-ID.
 		match case "^Message-ID: (.*)" in headers
 			action {
 				tag "msgid" value "%1"
