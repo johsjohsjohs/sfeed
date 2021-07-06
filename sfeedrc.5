@@ -1,4 +1,4 @@
-.Dd January 26, 2021
+.Dd July 6, 2021
 .Dt SFEEDRC 5
 .Os
 .Sh NAME
@@ -145,6 +145,22 @@ feeds() {
 	# get youtube Atom feed: curl -s -L 'https://www.youtube.com/user/gocoding/videos' | sfeed_web | cut -f 1
 	feed "youtube golang" "https://www.youtube.com/feeds/videos.xml?channel_id=UCO3LEtymiLrgvpb59cNsb8A"
 	feed "xkcd" "https://xkcd.com/atom.xml" "https://xkcd.com"
+}
+.Ed
+.Pp
+To change the default
+.Xr curl 1
+options for fetching the data, the
+.Fn fetch
+function can be overridden and added at the top of the
+.Nm
+file:
+.Bd -literal
+# fetch(name, url, feedfile)
+fetch() {
+	# allow for 1 redirect, hide User-Agent, timeout is 15 seconds.
+	curl -L --max-redirs 1 -H "User-Agent:" -f -s -m 15 \\
+		"$2" 2>/dev/null
 }
 .Ed
 .Sh SEE ALSO
