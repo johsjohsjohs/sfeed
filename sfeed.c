@@ -385,7 +385,7 @@ string_print_trimmed_multi(String *s)
 	}
 }
 
-/* always print absolute URLs (using global baseurl) */
+/* print URL, if it's a relative URL then it uses global baseurl */
 void
 printuri(char *s)
 {
@@ -411,7 +411,7 @@ printuri(char *s)
 	*e = c; /* restore NUL byte to original character */
 }
 
-/* always print absolute URLs (using global baseurl) */
+/* print URL, if it's a relative URL then it uses global baseurl */
 void
 string_print_uri(String *s)
 {
