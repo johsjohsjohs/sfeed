@@ -336,7 +336,7 @@ string_print_encoded(String *s)
 }
 
 static void
-printtrimmed(char *s)
+printtrimmed(const char *s)
 {
 	char *p, *e;
 
