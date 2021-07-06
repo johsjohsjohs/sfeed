@@ -380,6 +380,10 @@ enclosure URL (probably some audio file):
 	}
 	END { if (length(url)) { print url; } }'
 
+... or on a file already sorted from newest to oldest:
+
+	awk -F '\t' '$8 { print $8; exit }'
+
 - - -
 
 Over time your feeds file might become quite big. You can archive items of a
