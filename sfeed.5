@@ -1,4 +1,4 @@
-.Dd April 27, 2021
+.Dd July 6, 2021
 .Dt SFEED 5
 .Os
 .Sh NAME
@@ -23,24 +23,24 @@ Other whitespace characters except spaces are removed.
 Control characters are removed.
 .Pp
 The order and content of the fields are:
-.Bl -tag -width 12n
-.It timestamp
+.Bl -tag -width 15n
+.It 1. timestamp
 UNIX timestamp in UTC+0, empty if missing or on parse failure.
-.It title
+.It 2. title
 Title text, HTML code in titles is ignored and is treated as plain-text.
-.It link
+.It 3. link
 Link
-.It content
+.It 4. content
 Content, can have plain-text or HTML code depending on the content-type field.
-.It content-type
+.It 5. content-type
 "html" or "plain" if it has content.
-.It id
+.It 6. id
 RSS item GUID or Atom id.
-.It author
+.It 7. author
 Item author.
-.It enclosure
+.It 8. enclosure
 Item, first enclosure.
-.It category
+.It 9. category
 Item, categories, multiple values are separated by |.
 .El
 .Sh SEE ALSO
