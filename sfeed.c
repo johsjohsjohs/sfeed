@@ -611,6 +611,9 @@ parsetime(const char *s, time_t *tp)
 			;
 		for (v = 0, i = 0; i < 4 && isdigit((unsigned char)*s); s++, i++)
 			v = (v * 10) + (*s - '0');
+		/* obsolete short year: RFC2822 4.3 */
+		if (i <= 3)
+			v += (v >= 0 && v <= 49) ? 2000 : 1900;
 		va[0] = v; /* year */
 		for (; isspace((unsigned char)*s); s++)
 			;
