@@ -57,7 +57,7 @@ static void
 printfeed(FILE *fp, const char *feedname)
 {
 	char *fields[FieldLast], timebuf[32];
-	struct tm *tm;
+	struct tm parsedtm, *tm;
 	time_t parsedtime;
 	unsigned long hash;
 	ssize_t linelen;
@@ -74,7 +74,7 @@ printfeed(FILE *fp, const char *feedname)
 
 		parsedtime = 0;
 		if (!strtotime(fields[FieldUnixTimestamp], &parsedtime) &&
-		    (tm = gmtime(&parsedtime)) &&
+		    (tm = gmtime_r(&parsedtime, &parsedtm)) &&
 		    strftime(timebuf, sizeof(timebuf), "%a, %d %b %Y %H:%M:%S +0000", tm)) {
 			printf("Date: %s\n", timebuf);
 		} else {
