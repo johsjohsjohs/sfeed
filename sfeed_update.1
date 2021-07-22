@@ -1,4 +1,4 @@
-.Dd February 5, 2021
+.Dd July 22, 2021
 .Dt SFEED_UPDATE 1
 .Os
 .Sh NAME
@@ -61,11 +61,11 @@ To update your feeds and format them in various formats:
 # Update
 sfeed_update "configfile"
 # Plain-text list
-sfeed_plain $HOME/.sfeed/feeds/* > $HOME/.sfeed/feeds.txt
+sfeed_plain ~/.sfeed/feeds/* > ~/.sfeed/feeds.txt
 # HTML
-sfeed_html $HOME/.sfeed/feeds/* > $HOME/.sfeed/feeds.html
+sfeed_html ~/.sfeed/feeds/* > ~/.sfeed/feeds.html
 # HTML with frames
-mkdir -p somedir && cd somedir && sfeed_frames $HOME/.sfeed/feeds/*
+mkdir -p somedir && cd somedir && sfeed_frames ~/.sfeed/feeds/*
 .Ed
 .Sh SEE ALSO
 .Xr sfeed 1 ,
