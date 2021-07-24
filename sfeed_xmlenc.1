@@ -1,4 +1,4 @@
-.Dd March 12, 2021
+.Dd July 24, 2021
 .Dt SFEED_XMLENC 1
 .Os
 .Sh NAME
@@ -16,7 +16,7 @@ which are not allowed in an encoding-name.
 .Sh EXAMPLES
 Get text-encoding from xkcd Atom feed:
 .Bd -literal
-curl -s -L http://www.xkcd.com/atom.xml | sfeed_xmlenc
+curl -s -L 'https://codemadness.org/atom.xml' | sfeed_xmlenc
 .Ed
 .Sh SEE ALSO
 .Xr sfeed_update 1 ,

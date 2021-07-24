@@ -1,4 +1,4 @@
-.Dd July 7, 2021
+.Dd July 24, 2021
 .Dt SFEED_WEB 1
 .Os
 .Sh NAME
@@ -35,7 +35,7 @@ Usually application/atom+xml or application/rss+xml.
 .Sh EXAMPLES
 Get URLs from xkcd website:
 .Bd -literal
-curl -s -L 'http://www.xkcd.com/' | sfeed_web 'http://www.xkcd.com/'
+curl -s -L 'https://codemadness.org/' | sfeed_web 'https://codemadness.org/'
 .Ed
 .Sh SEE ALSO
 .Xr sfeed_update 1 ,
