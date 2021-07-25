@@ -1,4 +1,4 @@
-.Dd July 24, 2021
+.Dd July 25, 2021
 .Dt SFEED_WEB 1
 .Os
 .Sh NAME
@@ -11,6 +11,11 @@
 .Nm
 reads the HTML website as XML or HTML data from stdin and writes the found
 URLs to stdout.
+.Pp
+Such a link reference in HTML code looks like:
+.Bd -literal
+        <link rel="alternate" href="atom.xml" type="application/atom+xml" />
+.Ed
 .Sh OPTIONS
 .Bl -tag -width 8n
 .It Ar baseurl
@@ -33,7 +38,7 @@ Usually application/atom+xml or application/rss+xml.
 .Sh EXIT STATUS
 .Ex -std
 .Sh EXAMPLES
-Get URLs from xkcd website:
+Get URLs from a website:
 .Bd -literal
 curl -s -L 'https://codemadness.org/' | sfeed_web 'https://codemadness.org/'
 .Ed

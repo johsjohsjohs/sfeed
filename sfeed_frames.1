@@ -1,4 +1,4 @@
-.Dd May 30, 2020
+.Dd July 25, 2021
 .Dt SFEED_FRAMES 1
 .Os
 .Sh NAME
@@ -6,19 +6,19 @@
 .Nd format feed data to HTML with frames
 .Sh SYNOPSIS
 .Nm
-.Op Ar file...
+.Op Ar
 .Sh DESCRIPTION
 .Nm
 formats feed data (TSV) from
 .Xr sfeed 1
-to HTML.
-It reads TSV data from stdin or
+from stdin or for each
 .Ar file
-and writes HTML files for the frameset to the current directory.
+to HTML.
+It writes HTML files for the frameset to the current directory.
 If no
 .Ar file
-parameters are specified and therefore the data is read from stdin then the
-menu.html file is not written.
+arguments are specified and so the data is read from stdin then the menu.html
+file is not written.
 .Pp
 Items with a timestamp from the last day compared to the system time at the
 time of formatting are counted and marked as new.
