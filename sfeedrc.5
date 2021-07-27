@@ -1,4 +1,4 @@
-.Dd July 6, 2021
+.Dd August 3, 2021
 .Dt SFEEDRC 5
 .Os
 .Sh NAME
@@ -35,7 +35,8 @@ function, its arguments are:
 .It Fa name
 Name of the feed, this is also used as the filename for the TAB-separated
 feed file.
-The feedname cannot contain '/' characters, they will be replaced with '_'.
+The feed name cannot contain the '/' character because it is a path separator,
+they will be replaced with '_'.
 .It Fa feedurl
 URL to fetch the RSS/Atom data from, usually a HTTP or HTTPS URL.
 .It Op Fa basesiteurl

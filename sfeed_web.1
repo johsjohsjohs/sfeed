@@ -1,4 +1,4 @@
-.Dd July 25, 2021
+.Dd July 27, 2021
 .Dt SFEED_WEB 1
 .Os
 .Sh NAME
@@ -9,12 +9,12 @@
 .Op Ar baseurl
 .Sh DESCRIPTION
 .Nm
-reads the HTML website as XML or HTML data from stdin and writes the found
-URLs to stdout.
+reads the HTML data of the webpage from stdin and writes the found URLs to
+stdout.
 .Pp
 Such a link reference in HTML code looks like:
 .Bd -literal
-        <link rel="alternate" href="atom.xml" type="application/atom+xml" />
+	<link rel="alternate" href="atom.xml" type="application/atom+xml" />
 .Ed
 .Sh OPTIONS
 .Bl -tag -width 8n

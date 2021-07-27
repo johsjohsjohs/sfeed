@@ -1,4 +1,4 @@
-.Dd July 22, 2021
+.Dd August 3, 2021
 .Dt SFEED_UPDATE 1
 .Os
 .Sh NAME
@@ -11,7 +11,7 @@
 .Nm
 writes TAB-separated feed files and merges new items with the items in any
 existing files.
-The items are stored in one file per feed in the directory
+The items are stored as one file per feed in the directory
 .Pa $HOME/.sfeed/feeds
 by default.
 The directory can be changed in the
@@ -42,7 +42,8 @@ format containing all items per feed.
 The
 .Nm
 script merges new items with this file.
-The feedname cannot contain '/' characters, they will be replaced with '_'.
+The feed name cannot contain the '/' character because it is a path separator,
+they will be replaced with '_'.
 .El
 .Sh ENVIRONMENT VARIABLES
 .Bl -tag -width Ds

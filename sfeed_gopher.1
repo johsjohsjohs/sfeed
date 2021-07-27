@@ -1,4 +1,4 @@
-.Dd July 25, 2021
+.Dd July 31, 2021
 .Dt SFEED_GOPHER 1
 .Os
 .Sh NAME
@@ -22,7 +22,8 @@ arguments are specified then the basename of the
 is used as the feed name in the output.
 .Nm
 creates an index file named "index" and for each feed it creates a file with
-the same name as the feedname.
+the same name as the basename of the feed
+.Ar file .
 .Pp
 If no
 .Ar file
@@ -31,6 +32,7 @@ written to stdout and no files are written.
 .Pp
 Items with a timestamp from the last day compared to the system time at the
 time of formatting are counted and marked as new.
+Items are marked as new with the prefix "N".
 .Sh ENVIRONMENT
 .Bl -tag -width Ds
 .It Ev SFEED_GOPHER_PATH
