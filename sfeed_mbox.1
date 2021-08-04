@@ -1,4 +1,4 @@
-.Dd July 29, 2021
+.Dd August 4, 2021
 .Dt SFEED_MBOX 1
 .Os
 .Sh NAME
@@ -40,12 +40,23 @@ The feed name, this is the basename of the feed
 .Bl -tag -width Ds
 .It Ev SFEED_MBOX_CONTENT
 Include the content.
-This is very insecure for some of the mail clients that interpret HTML code in
+This can be insecure for some of the mail clients that interpret HTML code in
 an unsafe way.
 By default this is set to "0".
 .El
 .Sh EXIT STATUS
 .Ex -std
+.Sh EXAMPLES
+.Bd -literal
+sfeed_mbox ~/.sfeed/feeds/*
+.Ed
+.Pp
+To include the content.
+This can be insecure for some of the mail clients that interpret HTML code in
+an unsafe way:
+.Bd -literal
+SFEED_MBOX_CONTENT=1 sfeed_mbox ~/.sfeed/feeds/*
+.Ed
 .Sh SEE ALSO
 .Xr fdm 1 ,
 .Xr procmail 1 ,
