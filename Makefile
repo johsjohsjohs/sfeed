@@ -88,7 +88,7 @@ ${LIBUTIL}: ${LIBUTILOBJ}
 	${RANLIB} $@
 
 ${LIBXML}: ${LIBXMLOBJ}
-	${AR} rc $@ $?
+	${AR} -rc $@ $?
 	${RANLIB} $@
 
 dist:
