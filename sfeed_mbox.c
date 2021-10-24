@@ -11,8 +11,8 @@ static size_t linesize;
 static char host[256], *user, dtimebuf[32], mtimebuf[32];
 static int usecontent = 0; /* env variable: $SFEED_MBOX_CONTENT */
 
-static unsigned long
-djb2(unsigned char *s, unsigned long hash)
+static unsigned long long
+djb2(unsigned char *s, unsigned long long hash)
 {
 	int c;
 
@@ -59,14 +59,14 @@ printfeed(FILE *fp, const char *feedname)
 	char *fields[FieldLast], timebuf[32];
 	struct tm parsedtm, *tm;
 	time_t parsedtime;
-	unsigned long hash;
+	unsigned long long hash;
 	ssize_t linelen;
 	int ishtml;
 
 	while ((linelen = getline(&line, &linesize, fp)) > 0) {
 		if (line[linelen - 1] == '\n')
 			line[--linelen] = '\0';
-		hash = djb2((unsigned char *)line, 5381UL);
+		hash = djb2((unsigned char *)line, 5381ULL);
 		parseline(line, fields);
 
 		/* mbox + mail header */
@@ -84,7 +84,7 @@ printfeed(FILE *fp, const char *feedname)
 		printf("From: %s <sfeed@>\n", fields[FieldAuthor][0] ? fields[FieldAuthor] : feedname);
 		printf("To: %s <%s@%s>\n", user, user, host);
 		printf("Subject: %s\n", fields[FieldTitle]);
-		printf("Message-ID: <%s%s%lu@%s>\n",
+		printf("Message-ID: <%s%s%llu@%s>\n",
 		       fields[FieldUnixTimestamp],
 		       fields[FieldUnixTimestamp][0] ? "." : "",
 		       hash, feedname);
