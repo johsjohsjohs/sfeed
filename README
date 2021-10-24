@@ -111,7 +111,9 @@ Optional dependencies
 OS tested
 ---------
 
-- Linux (compilers: clang, cproc, gcc, lacc, pcc, tcc, libc: glibc, musl).
+- Linux,
+  compilers: clang, gcc, chibicc, cproc, lacc, pcc, tcc,
+  libc: glibc, musl.
 - OpenBSD (clang, gcc).
 - NetBSD
 - FreeBSD
@@ -126,7 +128,7 @@ OS tested
 Architectures tested
 --------------------
 
-amd64, ARM, aarch64, HPPA, i386, MIPS32-BE, SPARC64, Z80.
+amd64, ARM, aarch64, HPPA, i386, MIPS32-BE, RISCV64, SPARC64, Z80.
 
 
 Files
