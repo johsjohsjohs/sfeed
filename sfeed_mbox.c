@@ -123,6 +123,11 @@ printfeed(FILE *fp, const char *feedname)
 		}
 		if (usecontent) {
 			fputs("\n", stdout);
+			if (ishtml && fields[FieldLink][0]) {
+				fputs("<base href=\"", stdout);
+				xmlencode(fields[FieldLink], stdout);
+				fputs("\"/>\n", stdout);
+			}
 			printcontent(fields[FieldContent], stdout);
 		}
 		fputs("\n\n", stdout);
