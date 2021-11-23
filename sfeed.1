@@ -55,6 +55,38 @@ Item, categories, multiple values are separated by the '|' character.
 .Bd -literal
 curl -s 'https://codemadness.org/atom.xml' | sfeed
 .Ed
+.Sh EXAMPLE SETUP
+1. Create a directory for the sfeedrc configuration and the feeds:
+.Bd -literal
+	mkdir -p ~/.sfeed/feeds
+.Ed
+.Pp
+2. Copy the example
+.Xr sfeedrc 5
+configuration:
+.Bd -literal
+	cp sfeedrc.example ~/.sfeed/sfeedrc
+	$EDITOR ~/.sfeed/sfeedrc
+.Ed
+.Pp
+Or import existing OPML subscriptions using
+.Xr sfeed_opml_import 1 :
+.Bd -literal
+	sfeed_opml_import < file.opml > ~/.sfeed/sfeedrc
+.Ed
+.Pp
+3. To update feeds and merge the new items with existing items:
+.Bd -literal
+	sfeed_update
+.Ed
+.Pp
+4. Format feeds to a plain-text list using one of the included format programs
+.Xr sfeed_plain 1 :
+.Bd -literal
+	sfeed_plain ~/.sfeed/feeds/*
+.Ed
+.Pp
+The README file has more examples.
 .Sh SEE ALSO
 .Xr sfeed_plain 1 ,
 .Xr sfeed_update 1 ,
