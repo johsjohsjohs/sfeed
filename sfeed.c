@@ -288,6 +288,7 @@ string_buffer_realloc(String *s, size_t newlen)
 	s->bufsiz = alloclen;
 }
 
+/* Append data to String, s->data and data may not overlap. */
 static void
 string_append(String *s, const char *data, size_t len)
 {
@@ -299,8 +300,7 @@ string_append(String *s, const char *data, size_t len)
 		err(1, "realloc");
 	}
 
-	/* check if allocation is necessary, don't shrink buffer,
-	 * should be more than bufsiz of course. */
+	/* check if allocation is necessary, never shrink the buffer. */
 	if (s->len + len >= s->bufsiz)
 		string_buffer_realloc(s, s->len + len + 1);
 	memcpy(s->data + s->len, data, len);
