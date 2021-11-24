@@ -104,14 +104,14 @@ printfeed(FILE *fp, const char *feedname)
 				fputs("Link: <a href=\"", stdout);
 				xmlencode(fields[FieldLink], stdout);
 				fputs("\">", stdout);
-				fputs(fields[FieldLink], stdout);
+				xmlencode(fields[FieldLink], stdout);
 				fputs("</a><br/>\n", stdout);
 			}
 			if (fields[FieldEnclosure][0]) {
 				fputs("Enclosure: <a href=\"", stdout);
 				xmlencode(fields[FieldEnclosure], stdout);
 				fputs("\">", stdout);
-				fputs(fields[FieldEnclosure], stdout);
+				xmlencode(fields[FieldEnclosure], stdout);
 				fputs("</a><br/>\n", stdout);
 			}
 			fputs("</p>\n", stdout);
