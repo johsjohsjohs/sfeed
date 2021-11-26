@@ -9,6 +9,8 @@
 #define unveil(p1,p2) 0
 #endif
 
+#undef strcasestr
+char *strcasestr(const char *, const char *);
 #undef strlcat
 size_t strlcat(char *, const char *, size_t);
 #undef strlcpy
@@ -19,6 +21,9 @@ struct feed {
 	char         *name;     /* feed name */
 	unsigned long totalnew; /* amount of new items per feed */
 	unsigned long total;    /* total items */
+	/* sfeed_curses */
+	char         *path;     /* path to feed or NULL for stdin */
+	FILE         *fp;       /* file pointer */
 };
 
 /* URI */

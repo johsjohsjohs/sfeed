@@ -18,6 +18,8 @@
 #include <unistd.h>
 #include <wchar.h>
 
+#include "util.h"
+
 /* curses */
 #ifndef SFEED_MINICURSES
 #include <curses.h>
@@ -52,12 +54,6 @@ enum Layout {
 };
 
 enum Pane { PaneFeeds, PaneItems, PaneLast };
-
-enum {
-	FieldUnixTimestamp = 0, FieldTitle, FieldLink, FieldContent,
-	FieldContentType, FieldId, FieldAuthor, FieldEnclosure,
-	FieldCategory, FieldLast
-};
 
 struct win {
 	int width; /* absolute width of the window */
@@ -133,14 +129,6 @@ struct items {
 	struct item *items;     /* array of items */
 	size_t len;             /* amount of items */
 	size_t cap;             /* available capacity */
-};
-
-struct feed {
-	char         *name;     /* feed name */
-	char         *path;     /* path to feed or NULL for stdin */
-	unsigned long totalnew; /* amount of new items per feed */
-	unsigned long total;    /* total items */
-	FILE *fp;               /* file pointer */
 };
 
 void alldirty(void);
@@ -282,68 +270,6 @@ tparmnull(const char *str, long p1, long p2, long p3, long p4, long p5,
 	return tparm(str, p1, p2, p3, p4, p5, p6, p7, p8, p9);
 }
 
-/* strcasestr() included for portability */
-#undef strcasestr
-char *
-strcasestr(const char *h, const char *n)
-{
-	size_t i;
-
-	if (!n[0])
-		return (char *)h;
-
-	for (; *h; ++h) {
-		for (i = 0; n[i] && tolower((unsigned char)n[i]) ==
-		            tolower((unsigned char)h[i]); ++i)
-			;
-		if (n[i] == '\0')
-			return (char *)h;
-	}
-
-	return NULL;
-}
-
-/* Splits fields in the line buffer by replacing TAB separators with NUL ('\0')
-   terminators and assign these fields as pointers. If there are less fields
-   than expected then the field is an empty string constant. */
-void
-parseline(char *line, char *fields[FieldLast])
-{
-	char *prev, *s;
-	size_t i;
-
-	for (prev = line, i = 0;
-	    (s = strchr(prev, '\t')) && i < FieldLast - 1;
-	    i++) {
-		*s = '\0';
-		fields[i] = prev;
-		prev = s + 1;
-	}
-	fields[i++] = prev;
-	/* make non-parsed fields empty. */
-	for (; i < FieldLast; i++)
-		fields[i] = "";
-}
-
-/* Parse time to time_t, assumes time_t is signed, ignores fractions. */
-int
-strtotime(const char *s, time_t *t)
-{
-	long long l;
-	char *e;
-
-	errno = 0;
-	l = strtoll(s, &e, 10);
-	if (errno || *s == '\0' || *e)
-		return -1;
-	/* NOTE: assumes time_t is 64-bit on 64-bit platforms:
-	         long long (at least 32-bit) to time_t. */
-	if (t)
-		*t = (time_t)l;
-
-	return 0;
-}
-
 size_t
 colw(const char *s)
 {
@@ -439,61 +365,6 @@ utf8pad(char *buf, size_t bufsiz, const char *s, size_t len, int pad)
 	buf[siz] = '\0';
 
 	return 0;
-}
-
-/* print `len' columns of characters. If string is shorter pad the rest with
- * characters `pad`. */
-void
-printutf8pad(FILE *fp, const char *s, size_t len, int pad)
-{
-	wchar_t wc;
-	size_t col = 0, i, slen;
-	int inc, rl, w;
-
-	if (!len)
-		return;
-
-	slen = strlen(s);
-	for (i = 0; i < slen; i += inc) {
-		inc = 1; /* next byte */
-		if ((unsigned char)s[i] < 32) {
-			continue; /* skip control characters */
-		} else if ((unsigned char)s[i] >= 127) {
-			rl = mbtowc(&wc, s + i, slen - i < 4 ? slen - i : 4);
-			inc = rl;
-			if (rl < 0) {
-				mbtowc(NULL, NULL, 0); /* reset state */
-				inc = 1; /* invalid, seek next byte */
-				w = 1; /* replacement char is one width */
-			} else if ((w = wcwidth(wc)) == -1) {
-				continue;
-			}
-
-			if (col + w > len || (col + w == len && s[i + inc])) {
-				fputs("\xe2\x80\xa6", fp); /* ellipsis */
-				col++;
-				break;
-			} else if (rl < 0) {
-				fputs("\xef\xbf\xbd", fp); /* replacement */
-				col++;
-				continue;
-			}
-			fwrite(&s[i], 1, rl, fp);
-			col += w;
-		} else {
-			/* optimization: simple ASCII character */
-			if (col + 1 > len || (col + 1 == len && s[i + 1])) {
-				fputs("\xe2\x80\xa6", fp); /* ellipsis */
-				col++;
-				break;
-			}
-			putc(s[i], fp);
-			col++;
-		}
-
-	}
-	for (; col < len; ++col)
-		putc(pad, fp);
 }
 
 void

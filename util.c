@@ -46,6 +46,26 @@ errx(int exitstatus, const char *fmt, ...)
 	exit(exitstatus);
 }
 
+/* strcasestr() included for portability */
+char *
+strcasestr(const char *h, const char *n)
+{
+	size_t i;
+
+	if (!n[0])
+		return (char *)h;
+
+	for (; *h; ++h) {
+		for (i = 0; n[i] && tolower((unsigned char)n[i]) ==
+		            tolower((unsigned char)h[i]); ++i)
+			;
+		if (n[i] == '\0')
+			return (char *)h;
+	}
+
+	return NULL;
+}
+
 /* check if string has a non-empty scheme / protocol part */
 int
 uri_hasscheme(const char *s)
