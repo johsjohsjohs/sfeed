@@ -16,6 +16,20 @@ $ make
 # make install
 
 
+To build sfeed without sfeed_curses:
+
+$ make SFEED_CURSES=""
+# make SFEED_CURSES="" install
+
+
+To change the default theme you can set SFEED_THEME using make or in the
+Makefile or include the header file in sfeed_curses.c. See also the themes/
+directory.
+
+$ make SFEED_THEME="templeos"
+# make SFEED_THEME="templeos" install
+
+
 Usage
 -----
 
@@ -79,9 +93,6 @@ Gopher, SSH, etc.
 See the section "Usage and examples" below and the man-pages for more
 information how to use sfeed(1) and the additional tools.
 
-A separate curses UI front-end called sfeed_curses is available at:
-https://codemadness.org/sfeed_curses.html
-
 
 Dependencies
 ------------
@@ -93,11 +104,11 @@ Dependencies
 Optional dependencies
 ---------------------
 
-- POSIX make(1) for Makefile.
+- POSIX make(1) for the Makefile.
 - POSIX sh(1),
   used by sfeed_update(1) and sfeed_opml_export(1).
 - POSIX utilities such as awk(1) and sort(1),
-  used by sfeed_update(1).
+  used by sfeed_content(1), sfeed_markread(1) and sfeed_update(1).
 - curl(1) binary: https://curl.haxx.se/ ,
   used by sfeed_update(1), but can be replaced with any tool like wget(1),
   OpenBSD ftp(1) or hurl(1): https://git.codemadness.org/hurl/
@@ -106,6 +117,21 @@ Optional dependencies
   encoded then you don't need this. For a minimal iconv implementation:
   https://git.etalabs.net/cgit/noxcuse/tree/src/iconv.c
 - mandoc for documentation: https://mdocml.bsd.lv/
+- curses (typically ncurses), otherwise see minicurses.h,
+  used by sfeed_curses(1).
+- a terminal (emulator) supporting UTF-8 and the used capabilities,
+  used by sfeed_curses(1).
+
+
+Optional run-time dependencies for sfeed_curses
+-----------------------------------------------
+
+- xclip for yanking the URL or enclosure. See $SFEED_YANKER to change it.
+- xdg-open, used as a plumber by default. See $SFEED_PLUMBER to change it.
+- awk, used by the sfeed_content and sfeed_markread script.
+  See the ENVIRONMENT VARIABLES section in the man page to change it.
+- lynx, used by the sfeed_content script to convert HTML content.
+  See the ENVIRONMENT VARIABLES section in the man page to change it.
 
 
 OS tested
@@ -115,14 +141,15 @@ OS tested
   compilers: clang, gcc, chibicc, cproc, lacc, pcc, tcc,
   libc: glibc, musl.
 - OpenBSD (clang, gcc).
-- NetBSD
+- NetBSD (with NetBSD curses).
 - FreeBSD
 - DragonFlyBSD
-- Windows (cygwin gcc, mingw).
+- Illumos (OpenIndiana).
+- Windows (cygwin gcc + mintty, mingw).
 - HaikuOS
 - SerenityOS
 - FreeDOS (djgpp).
-- FUZIX (sdcc -mz80).
+- FUZIX (sdcc -mz80, with the sfeed parser program).
 
 
 Architectures tested
@@ -137,11 +164,14 @@ Files
 sfeed             - Read XML RSS or Atom feed data from stdin. Write feed data
                     in TAB-separated format to stdout.
 sfeed_atom        - Format feed data (TSV) to an Atom feed.
+sfeed_content     - View item content, for use with sfeed_curses.
+sfeed_curses      - Format feed data (TSV) to a curses interface.
 sfeed_frames      - Format feed data (TSV) to HTML file(s) with frames.
 sfeed_gopher      - Format feed data (TSV) to Gopher files.
 sfeed_html        - Format feed data (TSV) to HTML.
 sfeed_opml_export - Generate an OPML XML file from a sfeedrc config file.
 sfeed_opml_import - Generate a sfeedrc config file from an OPML XML file.
+sfeed_markread    - Mark items as read/unread, for use with sfeed_curses.
 sfeed_mbox        - Format feed data (TSV) to mbox.
 sfeed_plain       - Format feed data (TSV) to a plain-text list.
 sfeed_twtxt       - Format feed data (TSV) to a twtxt feed.
@@ -225,6 +255,33 @@ View formatted output in your browser:
 View formatted output in your editor:
 
 	$EDITOR "$HOME/.sfeed/feeds.txt"
+
+- - -
+
+View formatted output in a curses interface.  The interface has a look inspired
+by the mutt mail client.  It has a sidebar panel for the feeds, a panel with a
+listing of the items and a small statusbar for the selected item/URL. Some
+functions like searching and scrolling are integrated in the interface itself.
+
+Just like the other format programs included in sfeed you can run it like this:
+
+	sfeed_curses ~/.sfeed/feeds/*
+
+... or by reading from stdin:
+
+	sfeed_curses < ~/.sfeed/feeds/xkcd
+
+By default sfeed_curses marks the items of the last day as new/bold. To manage
+read/unread items in a different way a plain-text file with a list of the read
+URLs can be used. To enable this behaviour the path to this file can be
+specified by setting the environment variable $SFEED_URL_FILE to the URL file:
+
+	export SFEED_URL_FILE="$HOME/.sfeed/urls"
+	[ -f "$SFEED_URL_FILE" ] || touch "$SFEED_URL_FILE"
+	sfeed_curses ~/.sfeed/feeds/*
+
+It then uses the shellscript "sfeed_markread" to process the read and unread
+items.
 
 - - -
 
@@ -765,6 +822,76 @@ TSV format.
 			print $3 > "urls";
 		}
 	}'
+
+- - -
+
+Running custom commands inside the program
+------------------------------------------
+
+Running commands inside the sfeed_curses program can be useful for example to
+sync items or mark all items across all feeds as read. It can be comfortable to
+have a keybind for this inside the program to perform a scripted action and
+then reload the feeds by sending the signal SIGHUP.
+
+In the input handling code you can then add a case:
+
+	case 'M':
+		forkexec((char *[]) { "markallread.sh", NULL }, 0);
+		break;
+
+or
+
+	case 'S':
+		forkexec((char *[]) { "syncnews.sh", NULL }, 1);
+		break;
+
+The specified script should be in $PATH or an absolute path.
+
+Example of a `markallread.sh` shellscript to mark all URLs as read:
+
+	#!/bin/sh
+	# mark all items/URLs as read.
+
+	tmp=$(mktemp)
+	(cat ~/.sfeed/urls; cut -f 3 ~/.sfeed/feeds/*) | \
+	awk '!x[$0]++' > "$tmp" &&
+	mv "$tmp" ~/.sfeed/urls &&
+	pkill -SIGHUP sfeed_curses # reload feeds.
+
+Example of a `syncnews.sh` shellscript to update the feeds and reload them:
+
+	#!/bin/sh
+	sfeed_update && pkill -SIGHUP sfeed_curses
+
+
+Open an URL directly in the same terminal
+-----------------------------------------
+
+To open an URL directly in the same terminal using the text-mode lynx browser:
+
+	SFEED_PLUMBER=lynx SFEED_PLUMBER_INTERACTIVE=1 sfeed_curses ~/.sfeed/feeds/*
+
+
+Yank to tmux buffer
+-------------------
+
+This changes the yank command to set the tmux buffer, instead of X11 xclip:
+
+	SFEED_YANKER="tmux set-buffer \`cat\`"
+
+
+Known terminal issues
+---------------------
+
+Below lists some bugs or missing features in terminals that are found while
+testing sfeed_curses.  Some of them might be fixed already upstream:
+
+- cygwin + mintty: the xterm mouse-encoding of the mouse position is broken for
+  scrolling.
+- HaikuOS terminal: the xterm mouse-encoding of the mouse button number of the
+  middle-button, right-button is incorrect / reversed.
+- putty: the full reset attribute (ESC c, typically `rs1`) does not reset the
+  window title.
 
 
 License
