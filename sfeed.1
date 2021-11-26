@@ -1,4 +1,4 @@
-.Dd November 23, 2021
+.Dd November 26, 2021
 .Dt SFEED 1
 .Os
 .Sh NAME
@@ -80,14 +80,20 @@ Or import existing OPML subscriptions using
 	sfeed_update
 .Ed
 .Pp
-4. Format feeds to a plain-text list using one of the included format programs
-.Xr sfeed_plain 1 :
+4. Format feeds to a plain-text list:
 .Bd -literal
 	sfeed_plain ~/.sfeed/feeds/*
 .Ed
 .Pp
+Or format feeds to a curses interface:
+.Bd -literal
+	sfeed_curses ~/.sfeed/feeds/*
+.Ed
+.Pp
+There are also other formatting programs included.
 The README file has more examples.
 .Sh SEE ALSO
+.Xr sfeed_curses 1 ,
 .Xr sfeed_plain 1 ,
 .Xr sfeed_update 1 ,
 .Xr sfeed 5 ,
