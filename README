@@ -16,15 +16,14 @@ $ make
 # make install
 
 
-To build sfeed without sfeed_curses:
+To build sfeed without sfeed_curses set SFEED_CURSES to an empty string:
 
 $ make SFEED_CURSES=""
 # make SFEED_CURSES="" install
 
 
-To change the default theme you can set SFEED_THEME using make or in the
-Makefile or include the header file in sfeed_curses.c. See also the themes/
-directory.
+To change the default theme you can set SFEED_THEME.  See the themes/ directory
+for the theme names.
 
 $ make SFEED_THEME="templeos"
 # make SFEED_THEME="templeos" install
