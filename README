@@ -22,8 +22,8 @@ $ make SFEED_CURSES=""
 # make SFEED_CURSES="" install
 
 
-To change the default theme you can set SFEED_THEME.  See the themes/ directory
-for the theme names.
+To change the theme for sfeed_curses you can set SFEED_THEME.  See the themes/
+directory for the theme names.
 
 $ make SFEED_THEME="templeos"
 # make SFEED_THEME="templeos" install
