@@ -1,7 +1,7 @@
 .POSIX:
 
 NAME = sfeed
-VERSION = 1.0
+VERSION = 1.1
 
 # curses theme, see themes/ directory.
 SFEED_THEME = mono
