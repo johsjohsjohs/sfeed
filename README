@@ -143,6 +143,7 @@ OS tested
 - NetBSD (with NetBSD curses).
 - FreeBSD
 - DragonFlyBSD
+- GNU/Hurd
 - Illumos (OpenIndiana).
 - Windows (cygwin gcc + mintty, mingw).
 - HaikuOS
