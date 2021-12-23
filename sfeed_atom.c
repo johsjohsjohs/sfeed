@@ -37,10 +37,11 @@ printcontent(const char *s)
 static void
 printfeed(FILE *fp, const char *feedname)
 {
-	char *fields[FieldLast];
+	char *fields[FieldLast], *p, *tmp;
 	struct tm parsedtm, *tm;
 	time_t parsedtime;
 	ssize_t linelen;
+	int c;
 
 	while ((linelen = getline(&line, &linesize, fp)) > 0) {
 		if (line[linelen - 1] == '\n')
@@ -97,6 +98,16 @@ printfeed(FILE *fp, const char *feedname)
 			}
 			printcontent(fields[FieldContent]);
 			fputs("</content>\n", stdout);
+		}
+		for (p = fields[FieldCategory]; (tmp = strchr(p, '|')); p = tmp + 1) {
+			c = *tmp;
+			*tmp = '\0'; /* temporary NUL-terminate */
+			if (*p) {
+				fputs("\t<category term=\"", stdout);
+				xmlencode(p, stdout);
+				fputs("\" />\n", stdout);
+			}
+			*tmp = c; /* restore */
 		}
 		fputs("</entry>\n", stdout);
 	}
