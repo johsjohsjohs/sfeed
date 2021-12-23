@@ -12,9 +12,11 @@ function unescape(s) {
 	return s;
 }
 BEGIN {
-	htmlconv = "lynx -stdin -dump " \
-		"-underline_links -image_links " \
-		"-display_charset=\"utf-8\" -assume_charset=\"utf-8\" ";
+	htmlconv = ENVIRON["SFEED_HTMLCONV"];
+	if (!length(htmlconv))
+		htmlconv = "lynx -stdin -dump " \
+			"-underline_links -image_links " \
+			"-display_charset=\"utf-8\" -assume_charset=\"utf-8\" ";
 }
 {
 	if (previtem)
