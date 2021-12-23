@@ -745,9 +745,7 @@ TSV format.
 	#
 	# Dependencies: sqlite3, awk.
 	#
-	# Usage: create some directory to store the feeds, run this script.
-	#
-	# Assumes feednames are unique and a feed title is set.
+	# Usage: create some directory to store the feeds then run this script.
 	
 	# newsboat cache.db file.
 	cachefile="$HOME/.newsboat/cache.db"
@@ -772,7 +770,7 @@ TSV format.
 	.quit
 	!EOF
 	# convert to sfeed(5) TSV format.
-	awk '
+	LC_ALL=C awk '
 	BEGIN {
 		FS = "\x1f";
 		RS = "\x1e";
@@ -795,9 +793,13 @@ TSV format.
 		gsub("\t", "\\t", s);
 		return s;
 	}
-	function feedname(url, title) {
-		gsub("/", "_", title);
-		return title;
+	function feedname(feedurl, feedtitle) {
+		if (feedtitle == "") {
+			gsub("/", "_", feedurl);
+			return feedurl;
+		}
+		gsub("/", "_", feedtitle);
+		return feedtitle;
 	}
 	{
 		fname = feedname($9, $10);
