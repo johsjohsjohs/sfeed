@@ -33,8 +33,11 @@ SFEED_CURSES_LDFLAGS = ${LDFLAGS} -lcurses
 #SFEED_CURSES_LDFLAGS = ${LDFLAGS} -lncurses
 
 # Gentoo Linux: some distros might also require -ltinfo and -D_DEFAULT_SOURCE
-# to prevent warnings about feature macros.
+# to prevent warnings about feature test macros.
 #SFEED_CURSES_LDFLAGS = ${LDFLAGS} -lcurses -ltinfo
+
+# FreeBSD: unset feature test macros for SIGWINCH etc.
+#SFEED_CURSES_CPPFLAGS =
 
 # use minicurses with hardcoded escape sequences (not the system curses).
 #SFEED_CURSES_CPPFLAGS = -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=700 -D_BSD_SOURCE \
