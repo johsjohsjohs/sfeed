@@ -735,6 +735,124 @@ sfeed_update_xargs shellscript:
 
 - - -
 
+Shellscript to handle URLs and enclosures in parallel using xargs -P.
+
+This can be used to download and process URLs for downloading podcasts,
+webcomics, download and convert webpages, mirror videos, etc. It uses a
+plain-text cache file for remembering processed URLs. The match patterns are
+defined in the fetch() function and in the awk script and can be modified to
+handle items differently depending on their context. The arguments for the
+scripts are stdin or files in the sfeed(5) format.
+
+	#!/bin/sh
+	# sfeed_download: Downloader for URLs and enclosures in feed files.
+	# Dependencies: awk, curl, flock, xargs (-P), youtube-dl.
+	
+	cachefile="${SFEED_CACHEFILE:-$HOME/.sfeed/downloaded_urls}"
+	jobs="${SFEED_JOBS:-4}"
+	lockfile="${HOME}/.sfeed/sfeed_download.lock"
+	
+	# log(feedname, s, status)
+	log() {
+		if [ "$1" != "-" ]; then
+			s="[$1] $2"
+		else
+			s="$2"
+		fi
+		printf '[%s]: %s: %s\n' "$(date +'%H:%M:%S')" "${s}" "$3" >&2
+	}
+	
+	# fetch(url, feedname)
+	fetch() {
+		case "$1" in
+		*youtube.com*)
+			youtube-dl "$1";;
+		*.flac|*.ogg|*.m3u|*.m3u8|*.m4a|*.mkv|*.mp3|*.mp4|*.wav|*.webm)
+			# allow 2 redirects, hide User-Agent, connect timeout is 15 seconds.
+			curl -O -L --max-redirs 2 -H "User-Agent:" -f -s --connect-timeout 15 "$1";;
+		esac
+	}
+	
+	# downloader(url, title, feedname)
+	downloader() {
+		url="$1"
+		title="$2"
+		feedname="${3##*/}"
+	
+		msg="${title}: ${url}"
+	
+		# download directory.
+		if [ "${feedname}" != "-" ]; then
+			mkdir -p "${feedname}"
+			if ! cd "${feedname}"; then
+				log "${feedname}" "${msg}: ${feedname}" "DIR FAIL"
+				exit 1
+			fi
+		fi
+	
+		log "${feedname}" "${msg}" "START"
+		fetch "${url}" "${feedname}"
+		if [ $? = 0 ]; then
+			log "${feedname}" "${msg}" "OK"
+	
+			# append it safely in parallel to the cachefile on a
+			# successful download.
+			(flock 9 || exit 1
+			printf '%s\n' "${url}" >> "${cachefile}"
+			) 9>"${lockfile}"
+		else
+			log "${feedname}" "${msg}" "FAIL"
+		fi
+	}
+	
+	if [ "${SFEED_DOWNLOAD_CHILD}" = "1" ]; then
+		# Downloader helper for parallel downloading.
+		# Receives arguments: $1 = URL, $2 = title, $3 = feed filename or "-".
+		# It should write the URI to the cachefile if it is succesful.
+		downloader "$1" "$2" "$3"
+		exit $?
+	fi
+	
+	# ...else parent mode:
+	
+	tmp=$(mktemp)
+	trap "rm -f ${tmp}" EXIT
+	
+	[ -f "${cachefile}" ] || touch "${cachefile}"
+	cat "${cachefile}" > "${tmp}"
+	echo >> "${tmp}" # force it to have one line for awk.
+	
+	LC_ALL=C awk -F '\t' '
+	# fast prefilter what to download or not.
+	function filter(url, field, feedname) {
+		u = tolower(url);
+		return (match(u, "youtube\\.com") ||
+		        match(u, "\\.(flac|ogg|m3u|m3u8|m4a|mkv|mp3|mp4|wav|webm)$"));
+	}
+	function download(url, field, title, filename) {
+		if (!length(url) || urls[url] || !filter(url, field, filename))
+			return;
+		# NUL-separated for xargs -0.
+		printf("%s%c%s%c%s%c", url, 0, title, 0, filename, 0);
+		urls[url] = 1; # print once
+	}
+	{
+		FILENR += (FNR == 1);
+	}
+	# lookup table from cachefile which contains downloaded URLs.
+	FILENR == 1 {
+		urls[$0] = 1;
+	}
+	# feed file(s).
+	FILENR != 1 {
+		download($3, 3, $2, FILENAME); # link
+		download($8, 8, $2, FILENAME); # enclosure
+	}
+	' "${tmp}" "${@:--}" | \
+	SFEED_DOWNLOAD_CHILD="1" xargs -r -0 -L 3 -P "${jobs}" "$(readlink -f "$0")"
+
+- - -
+
 Shellscript to export existing newsboat cached items from sqlite3 to the sfeed
 TSV format.
 
