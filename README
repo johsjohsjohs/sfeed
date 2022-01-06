@@ -133,6 +133,22 @@ Optional run-time dependencies for sfeed_curses
   See the ENVIRONMENT VARIABLES section in the man page to change it.
 
 
+Formats supported
+-----------------
+
+sfeed supports a subset of XML 1.0 and a subset of:
+
+- Atom 1.0 (RFC 4287): https://datatracker.ietf.org/doc/html/rfc4287
+- Atom 0.3 (draft, historic).
+- RSS 0.91+.
+- RDF (when used with RSS).
+- MediaRSS extensions (media:).
+- Dublin Core extensions (dc:).
+
+Other formats like JSONfeed, twtxt or certain RSS/Atom extensions can be
+supported by converting them to RSS/Atom or to the sfeed(5) format directly.
+
+
 OS tested
 ---------
 
