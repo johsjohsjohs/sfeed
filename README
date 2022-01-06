@@ -756,14 +756,14 @@ Shellscript to handle URLs and enclosures in parallel using xargs -P.
 This can be used to download and process URLs for downloading podcasts,
 webcomics, download and convert webpages, mirror videos, etc. It uses a
 plain-text cache file for remembering processed URLs. The match patterns are
-defined in the fetch() function and in the awk script and can be modified to
-handle items differently depending on their context.
+defined in the shellscript fetch() function and in the awk script and can be
+modified to handle items differently depending on their context.
 
 The arguments for the script are files in the sfeed(5) format. If no file
 arguments are specified then the data is read from stdin.
 
 	#!/bin/sh
-	# sfeed_download: Downloader for URLs and enclosures in feed files.
+	# sfeed_download: downloader for URLs and enclosures in sfeed(5) files.
 	# Dependencies: awk, curl, flock, xargs (-P), youtube-dl.
 	
 	cachefile="${SFEED_CACHEFILE:-$HOME/.sfeed/downloaded_urls}"
