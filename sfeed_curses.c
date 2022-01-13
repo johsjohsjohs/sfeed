@@ -1886,7 +1886,8 @@ urls_cmp(const void *v1, const void *v2)
 int
 urls_isnew(const char *url)
 {
-	return bsearch(&url, urls, nurls, sizeof(char *), urls_cmp) == NULL;
+	return (!nurls ||
+	       bsearch(&url, urls, nurls, sizeof(char *), urls_cmp) == NULL);
 }
 
 void
@@ -1928,7 +1929,8 @@ urls_read(void)
 	fclose(fp);
 	free(line);
 
-	qsort(urls, nurls, sizeof(char *), urls_cmp);
+	if (nurls > 0)
+		qsort(urls, nurls, sizeof(char *), urls_cmp);
 }
 
 int
