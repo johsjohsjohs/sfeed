@@ -298,8 +298,9 @@ strtotime(const char *s, time_t *t)
 	l = strtoll(s, &e, 10);
 	if (errno || *s == '\0' || *e)
 		return -1;
-	/* NOTE: assumes time_t is 64-bit on 64-bit platforms:
-	         long long (at least 64-bit) to time_t. */
+
+	/* NOTE: the type long long supports the 64-bit range. If time_t is
+	   64-bit it is "2038-ready", otherwise it is truncated/wrapped. */
 	if (t)
 		*t = (time_t)l;
 
