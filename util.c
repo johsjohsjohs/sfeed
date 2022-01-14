@@ -299,7 +299,7 @@ strtotime(const char *s, time_t *t)
 	if (errno || *s == '\0' || *e)
 		return -1;
 	/* NOTE: assumes time_t is 64-bit on 64-bit platforms:
-	         long long (at least 32-bit) to time_t. */
+	         long long (at least 64-bit) to time_t. */
 	if (t)
 		*t = (time_t)l;
 
