@@ -647,7 +647,7 @@ parsetime(const char *s, time_t *tp)
 	    va[2] < 1 || va[2] > 31 ||
 	    va[3] < 0 || va[3] > 23 ||
 	    va[4] < 0 || va[4] > 59 ||
-	    va[5] < 0 || va[5] > 59)
+	    va[5] < 0 || va[5] > 60) /* allow leap second */
 		return -1;
 
 	if (tp)
