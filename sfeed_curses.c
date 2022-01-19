@@ -1944,10 +1944,9 @@ main(int argc, char *argv[])
 	struct pane *p;
 	struct feed *f;
 	struct row *row;
-	size_t i;
 	char *name, *tmp;
 	char *search = NULL; /* search text */
-	int button, ch, fd, keymask, release, x, y;
+	int button, ch, fd, i, keymask, release, x, y;
 	off_t pos;
 
 #ifdef __OpenBSD__
