@@ -1631,7 +1631,8 @@ mousereport(int button, int release, int keymask, int x, int y)
 {
 	struct pane *p;
 	size_t i;
-	int changedpane, dblclick, pos;
+	off_t pos;
+	int changedpane, dblclick;
 
 	if (!usemouse || release || button == -1)
 		return;
