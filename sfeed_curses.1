@@ -1,4 +1,4 @@
-.Dd August 10, 2021
+.Dd January 19, 2022
 .Dt SFEED_CURSES 1
 .Os
 .Sh NAME
@@ -181,7 +181,9 @@ Switch to the feeds pane.
 .Bl -tag -width Ds
 .It SIGHUP
 Reload all feed files which were specified as arguments on startup.
-.It SIGINT, SIGTERM
+.It SIGINT
+Interrupt: when searching it cancels the line editor, otherwise it quits.
+.It SIGTERM
 Quit
 .It SIGWINCH
 Resize the pane dimensions relative to the terminal size.
