@@ -1000,11 +1000,15 @@ lineeditor(void)
 			switch (sigstate) {
 			case 0:
 			case SIGWINCH:
-				continue; /* process signals later */
+				/* continue editing: process signal later */
+				continue;
 			case SIGINT:
-				sigstate = 0; /* exit prompt, do not quit */
-			case SIGTERM:
-				break; /* exit prompt and quit */
+				/* cancel prompt, but do not quit */
+				sigstate = 0; /* reset: do not handle it */
+				break;
+			default: /* other: SIGHUP, SIGTERM */
+				/* cancel prompt and handle signal after */
+				break;
 			}
 			free(input);
 			return NULL;
@@ -1664,7 +1668,7 @@ mousereport(int button, int release, int keymask, int x, int y)
 		selpane = i;
 		/* relative position on screen */
 		pos = y - p->y + p->pos - (p->pos % p->height);
-		dblclick = (pos == p->pos); /* clicking the same row twice */
+		dblclick = (pos == p->pos); /* clicking the already selected row */
 
 		switch (button) {
 		case 0: /* left-click */
