@@ -1,5 +1,3 @@
-#include <sys/types.h>
-
 #include <ctype.h>
 #include <errno.h>
 #include <stdint.h>
@@ -103,7 +101,7 @@ static FeedTag * gettag(enum FeedType, const char *, size_t);
 static long gettzoffset(const char *);
 static int  isattr(const char *, size_t, const char *, size_t);
 static int  istag(const char *, size_t, const char *, size_t);
-static int  parsetime(const char *, time_t *);
+static int  parsetime(const char *, long long *);
 static void printfields(void);
 static void string_append(String *, const char *, size_t);
 static void string_buffer_realloc(String *, size_t);
@@ -425,13 +423,13 @@ string_print_uri(String *s)
 void
 string_print_timestamp(String *s)
 {
-	time_t t;
+	long long t;
 
 	if (!s->data || !s->len)
 		return;
 
 	if (parsetime(s->data, &t) != -1)
-		printf("%lld", (long long)t);
+		printf("%lld", t);
 }
 
 long long
@@ -541,7 +539,7 @@ gettzoffset(const char *s)
 }
 
 static int
-parsetime(const char *s, time_t *tp)
+parsetime(const char *s, long long *tp)
 {
 	static struct {
 		char *name;
