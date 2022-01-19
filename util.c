@@ -323,7 +323,7 @@ xmlencode(const char *s, FILE *fp)
 	}
 }
 
-/* print `len' columns of characters. If string is shorter pad the rest with
+/* print `len` columns of characters. If string is shorter pad the rest with
  * characters `pad`. */
 void
 printutf8pad(FILE *fp, const char *s, size_t len, int pad)

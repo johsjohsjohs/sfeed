@@ -300,7 +300,7 @@ colw(const char *s)
 	return col;
 }
 
-/* Format `len' columns of characters. If string is shorter pad the rest
+/* Format `len` columns of characters. If string is shorter pad the rest
    with characters `pad`. */
 int
 utf8pad(char *buf, size_t bufsiz, const char *s, size_t len, int pad)
