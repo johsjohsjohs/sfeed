@@ -79,7 +79,7 @@ struct pane {
 	int hidden; /* is visible or not */
 	int dirty; /* needs draw update */
 	/* (optional) callback functions */
-	struct row *(*row_get)(struct pane *, off_t pos);
+	struct row *(*row_get)(struct pane *, off_t);
 	char *(*row_format)(struct pane *, struct row *);
 	int (*row_match)(struct pane *, struct row *, const char *);
 };
