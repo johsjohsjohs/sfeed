@@ -2125,17 +2125,11 @@ main(int argc, char *argv[])
 			break;
 keyup:
 		case 'k':
-		case 'K':
 			pane_scrolln(&panes[selpane], -1);
-			if (ch == 'K')
-				goto openitem;
 			break;
 keydown:
 		case 'j':
-		case 'J':
 			pane_scrolln(&panes[selpane], +1);
-			if (ch == 'J')
-				goto openitem;
 			break;
 keyleft:
 		case 'h':
@@ -2152,6 +2146,28 @@ keyright:
 			selpane = PaneItems;
 			if (layout == LayoutMonocle)
 				updategeom();
+			break;
+		case 'K':
+			p = &panes[selpane];
+			if (!p->nrows)
+				break;
+			for (pos = p->pos - 1; pos >= 0; pos--) {
+				if ((row = pane_row_get(p, pos)) && row->bold) {
+					pane_setpos(p, pos);
+					break;
+				}
+			}
+			break;
+		case 'J':
+			p = &panes[selpane];
+			if (!p->nrows)
+				break;
+			for (pos = p->pos + 1; pos < p->nrows; pos++) {
+				if ((row = pane_row_get(p, pos)) && row->bold) {
+					pane_setpos(p, pos);
+					break;
+				}
+			}
 			break;
 		case '\t':
 			selpane = selpane == PaneFeeds ? PaneItems : PaneFeeds;
@@ -2260,7 +2276,6 @@ nextpage:
 			break;
 		case 'o': /* feeds: load, items: plumb URL */
 		case '\n':
-openitem:
 			if (selpane == PaneFeeds && panes[selpane].nrows)
 				feed_open_selected(&panes[selpane]);
 			else if (selpane == PaneItems && panes[selpane].nrows)
