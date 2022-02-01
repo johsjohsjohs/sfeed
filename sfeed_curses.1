@@ -1,4 +1,4 @@
-.Dd January 22, 2022
+.Dd January 31, 2022
 .Dt SFEED_CURSES 1
 .Os
 .Sh NAME
@@ -192,7 +192,7 @@ Resize the pane dimensions relative to the terminal size.
 .Bl -tag -width Ds
 .It Ev SFEED_AUTOCMD
 Read and process a sequence of keys as input commands from this environment
-variable first, afterwards read from stdin as usual.
+variable first, afterwards it reads from the tty as usual.
 This can be useful to automate certain actions at the start.
 .It Ev SFEED_PIPER
 A program where the whole TAB-Separated Value line is piped to.
