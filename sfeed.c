@@ -648,9 +648,9 @@ parsetime(const char *s, long long *tp)
 	    va[5] < 0 || va[5] > 60) /* allow leap second */
 		return -1;
 
-	if (tp)
-		*tp = datetounix(va[0] - 1900, va[1] - 1, va[2], va[3], va[4], va[5]) -
-		      gettzoffset(s);
+	*tp = datetounix(va[0] - 1900, va[1] - 1, va[2], va[3], va[4], va[5]) -
+	      gettzoffset(s);
+
 	return 0;
 }
 
