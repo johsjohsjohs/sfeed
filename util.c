@@ -66,7 +66,7 @@ strcasestr(const char *h, const char *n)
 	return NULL;
 }
 
-/* check if string has a non-empty scheme / protocol part */
+/* Check if string has a non-empty scheme / protocol part. */
 int
 uri_hasscheme(const char *s)
 {
@@ -79,6 +79,8 @@ uri_hasscheme(const char *s)
 	return (*p == ':' && p != s);
 }
 
+/* Parse URI string `s` into an uri structure `u`.
+   Returns 0 on success or -1 on failure */
 int
 uri_parse(const char *s, struct uri *u)
 {

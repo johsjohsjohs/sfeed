@@ -203,12 +203,12 @@ ttywrite(const char *s)
 	return write(1, s, strlen(s));
 }
 
-/* hint for compilers and static analyzers that a function exits */
+/* Hint for compilers and static analyzers that a function exits. */
 #ifndef __dead
 #define __dead
 #endif
 
-/* print to stderr, call cleanup() and _exit(). */
+/* Print to stderr, call cleanup() and _exit(). */
 __dead void
 die(const char *fmt, ...)
 {
@@ -260,7 +260,7 @@ estrdup(const char *s)
 	return p;
 }
 
-/* wrapper for tparm which allows NULL parameter for str. */
+/* Wrapper for tparm which allows NULL parameter for str. */
 char *
 tparmnull(const char *str, long p1, long p2, long p3, long p4, long p5,
           long p6, long p7, long p8, long p9)
@@ -270,6 +270,7 @@ tparmnull(const char *str, long p1, long p2, long p3, long p4, long p5,
 	return tparm(str, p1, p2, p3, p4, p5, p6, p7, p8, p9);
 }
 
+/* Counts column width of character string. */
 size_t
 colw(const char *s)
 {
@@ -1200,7 +1201,7 @@ updatenewitems(struct feed *f)
 	p = &panes[PaneItems];
 	f->totalnew = 0;
 	for (i = 0; i < p->nrows; i++) {
-		row = &(p->rows[i]); /* do not use pane_row_get */
+		row = &(p->rows[i]); /* do not use pane_row_get() */
 		item = row->data;
 		if (urlfile)
 			item->isnew = urls_isnew(item->matchnew);
@@ -1228,7 +1229,7 @@ feed_load(struct feed *f, FILE *fp)
 	free(p->rows);
 	p->rows = ecalloc(sizeof(p->rows[0]), items.len + 1);
 	for (i = 0; i < items.len; i++)
-		p->rows[i].data = &(items.items[i]); /* do not use pane_row_get */
+		p->rows[i].data = &(items.items[i]); /* do not use pane_row_get() */
 
 	updatenewitems(f);
 
@@ -1844,7 +1845,7 @@ markread(struct pane *p, off_t from, off_t to, int isread)
 			die("popen: %s", cmd);
 
 		for (i = from; i <= to && i < p->nrows; i++) {
-			/* do not use pane_row_get: no need for lazyload */
+			/* do not use pane_row_get(): no need for lazyload */
 			row = &(p->rows[i]);
 			item = row->data;
 			if (item->isnew != isnew) {

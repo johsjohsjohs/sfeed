@@ -360,6 +360,7 @@ string_print_trimmed(String *s)
 	printtrimmed(s->data);
 }
 
+/* Print each field with trimmed whitespace, separated by '|'. */
 void
 string_print_trimmed_multi(String *s)
 {
@@ -383,7 +384,7 @@ string_print_trimmed_multi(String *s)
 	}
 }
 
-/* print URL, if it's a relative URL then it uses global baseurl */
+/* Print URL, if it's a relative URL then it uses the global `baseurl`. */
 void
 printuri(char *s)
 {
@@ -409,7 +410,7 @@ printuri(char *s)
 	*e = c; /* restore NUL byte to original character */
 }
 
-/* print URL, if it's a relative URL then it uses global baseurl */
+/* Print URL, if it's a relative URL then it uses the global `baseurl`. */
 void
 string_print_uri(String *s)
 {
@@ -419,7 +420,7 @@ string_print_uri(String *s)
 	printuri(s->data);
 }
 
-/* print as UNIX timestamp, print nothing if the parsed time is invalid */
+/* Print as UNIX timestamp, print nothing if the time is empty or invalid. */
 void
 string_print_timestamp(String *s)
 {
@@ -432,6 +433,7 @@ string_print_timestamp(String *s)
 		printf("%lld", t);
 }
 
+/* Convert time fields. Returns a UNIX timestamp. */
 long long
 datetounix(long long year, int mon, int day, int hour, int min, int sec)
 {
@@ -538,6 +540,8 @@ gettzoffset(const char *s)
 	return 0;
 }
 
+/* Parse time string `s` into the UNIX timestamp `tp`.
+   Returns 0 on success or -1 on failure. */
 static int
 parsetime(const char *s, long long *tp)
 {
@@ -799,8 +803,6 @@ xmlattrstart(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl)
 		string_clear(&tmpstr); /* use the last value for multiple attribute values */
 }
 
-/* NOTE: this handler can be called multiple times if the data in this
- *       block is bigger than the buffer. */
 static void
 xmldata(XMLParser *p, const char *s, size_t len)
 {
