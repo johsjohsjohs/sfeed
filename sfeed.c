@@ -321,9 +321,9 @@ string_print_encoded(String *s)
 
 	for (; *p && p != e; p++) {
 		switch (*p) {
-		case '\n': fputs("\\n",  stdout); break;
-		case '\\': fputs("\\\\", stdout); break;
-		case '\t': fputs("\\t",  stdout); break;
+		case '\n': putchar('\\'); putchar('n'); break;
+		case '\\': putchar('\\'); putchar('\\'); break;
+		case '\t': putchar('\\'); putchar('t'); break;
 		default:
 			/* ignore control chars */
 			if (!iscntrl((unsigned char)*p))
