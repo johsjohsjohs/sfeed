@@ -213,7 +213,7 @@ static FeedContext ctx;
 static XMLParser parser; /* XML parser state */
 static String attrispermalink, attrrel, attrtype, tmpstr;
 
-int
+static int
 tagcmp(const void *v1, const void *v2)
 {
 	return strcasecmp(((FeedTag *)v1)->name, ((FeedTag *)v2)->name);
@@ -361,7 +361,7 @@ string_print_trimmed(String *s)
 }
 
 /* Print each field with trimmed whitespace, separated by '|'. */
-void
+static void
 string_print_trimmed_multi(String *s)
 {
 	char *p, *e;
@@ -385,7 +385,7 @@ string_print_trimmed_multi(String *s)
 }
 
 /* Print URL, if it's a relative URL then it uses the global `baseurl`. */
-void
+static void
 printuri(char *s)
 {
 	char link[4096], *p, *e;
@@ -411,7 +411,7 @@ printuri(char *s)
 }
 
 /* Print URL, if it's a relative URL then it uses the global `baseurl`. */
-void
+static void
 string_print_uri(String *s)
 {
 	if (!s->data || !s->len)
@@ -421,7 +421,7 @@ string_print_uri(String *s)
 }
 
 /* Print as UNIX timestamp, print nothing if the time is empty or invalid. */
-void
+static void
 string_print_timestamp(String *s)
 {
 	long long t;
@@ -434,7 +434,7 @@ string_print_timestamp(String *s)
 }
 
 /* Convert time fields. Returns a UNIX timestamp. */
-long long
+static long long
 datetounix(long long year, int mon, int day, int hour, int min, int sec)
 {
 	static const int secs_through_month[] = {
