@@ -1414,12 +1414,14 @@ feed_plumb_selected_item(struct pane *p, int field)
 {
 	struct row *row;
 	struct item *item;
+	char *cmd[] = { plumbercmd, NULL, NULL };
 
 	if (!(row = pane_row_get(p, p->pos)))
 		return;
-	item = row->data;
 	markread(p, p->pos, p->pos, 1);
-	forkexec((char *[]) { plumbercmd, item->fields[field], NULL }, plumberia);
+	item = row->data;
+	cmd[1] = item->fields[field]; /* set first argument for plumber */
+	forkexec(cmd, plumberia);
 }
 
 void
