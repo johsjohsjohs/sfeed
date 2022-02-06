@@ -32,12 +32,17 @@
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
-#define PAD_TRUNCATE_SYMBOL    "\xe2\x80\xa6" /* symbol: "ellipsis" */
+#ifndef SFEED_DUMBTERM
 #define SCROLLBAR_SYMBOL_BAR   "\xe2\x94\x82" /* symbol: "light vertical" */
 #define SCROLLBAR_SYMBOL_TICK  " "
 #define LINEBAR_SYMBOL_BAR     "\xe2\x94\x80" /* symbol: "light horizontal" */
 #define LINEBAR_SYMBOL_RIGHT   "\xe2\x94\xa4" /* symbol: "light vertical and left" */
-#define UTF_INVALID_SYMBOL     "\xef\xbf\xbd" /* symbol: "replacement" */
+#else
+#define SCROLLBAR_SYMBOL_BAR   "|" /* symbol: "light vertical" */
+#define SCROLLBAR_SYMBOL_TICK  " "
+#define LINEBAR_SYMBOL_BAR     "-" /* symbol: "light horizontal" */
+#define LINEBAR_SYMBOL_RIGHT   "|" /* symbol: "light vertical and left" */
+#endif
 
 /* color-theme */
 #ifndef SFEED_THEME

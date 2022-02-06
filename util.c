@@ -354,11 +354,11 @@ printutf8pad(FILE *fp, const char *s, size_t len, int pad)
 			}
 
 			if (col + w > len || (col + w == len && s[i + inc])) {
-				fputs("\xe2\x80\xa6", fp); /* ellipsis */
+				fputs(PAD_TRUNCATE_SYMBOL, fp); /* ellipsis */
 				col++;
 				break;
 			} else if (rl < 0) {
-				fputs("\xef\xbf\xbd", fp); /* replacement */
+				fputs(UTF_INVALID_SYMBOL, fp); /* replacement */
 				col++;
 				continue;
 			}
@@ -367,7 +367,7 @@ printutf8pad(FILE *fp, const char *s, size_t len, int pad)
 		} else {
 			/* optimization: simple ASCII character */
 			if (col + 1 > len || (col + 1 == len && s[i + 1])) {
-				fputs("\xe2\x80\xa6", fp); /* ellipsis */
+				fputs(PAD_TRUNCATE_SYMBOL, fp); /* ellipsis */
 				col++;
 				break;
 			}

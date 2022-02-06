@@ -16,6 +16,14 @@ size_t strlcat(char *, const char *, size_t);
 #undef strlcpy
 size_t strlcpy(char *, const char *, size_t);
 
+#ifndef SFEED_DUMBTERM
+#define PAD_TRUNCATE_SYMBOL    "\xe2\x80\xa6" /* symbol: "ellipsis" */
+#define UTF_INVALID_SYMBOL     "\xef\xbf\xbd" /* symbol: "replacement" */
+#else
+#define PAD_TRUNCATE_SYMBOL    "." /* symbol: "ellipsis" */
+#define UTF_INVALID_SYMBOL     "?" /* symbol: "replacement" */
+#endif
+
 /* feed info */
 struct feed {
 	char         *name;     /* feed name */
