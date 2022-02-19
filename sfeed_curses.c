@@ -265,14 +265,15 @@ estrdup(const char *s)
 	return p;
 }
 
-/* Wrapper for tparm which allows NULL parameter for str. */
+/* Wrapper for tparm() which allows NULL parameter for str. */
 char *
-tparmnull(char *str, long p1, long p2, long p3, long p4, long p5, long p6,
+tparmnull(const char *str, long p1, long p2, long p3, long p4, long p5, long p6,
           long p7, long p8, long p9)
 {
 	if (!str)
 		return NULL;
-	return tparm(str, p1, p2, p3, p4, p5, p6, p7, p8, p9);
+	/* some tparm() implementations have char *, some have const char * */
+	return tparm((char *)str, p1, p2, p3, p4, p5, p6, p7, p8, p9);
 }
 
 /* Counts column width of character string. */
