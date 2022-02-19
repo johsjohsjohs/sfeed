@@ -27,7 +27,7 @@ loadconfig() {
 # override feed function to output OPML XML.
 # feed(name, feedurl, [basesiteurl], [encoding])
 feed() {
-	# NOTE: TABs in field values are unsupported, be sane.
+	# TABs, newlines and echo options in field values are not checked.
 	echo "$1	$2"
 }
 
