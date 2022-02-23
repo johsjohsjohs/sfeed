@@ -229,8 +229,8 @@ die(const char *fmt, ...)
 
 	if (saved_errno)
 		fprintf(stderr, ": %s", strerror(saved_errno));
+	putc('\n', stderr);
 	fflush(stderr);
-	write(2, "\n", 1);
 
 	_exit(1);
 }
