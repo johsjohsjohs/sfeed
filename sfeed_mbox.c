@@ -29,10 +29,10 @@ printcontent(const char *s, FILE *fp)
 {
 escapefrom:
 	for (; *s == '>'; s++)
-		fputc('>', fp);
+		putc('>', fp);
 	/* escape "From ", mboxrd-style. */
 	if (!strncmp(s, "From ", 5))
-		fputc('>', fp);
+		putc('>', fp);
 
 	for (; *s; s++) {
 		switch (*s) {
@@ -40,15 +40,15 @@ escapefrom:
 			s++;
 			switch (*s) {
 			case 'n':
-				fputc('\n', fp);
+				putc('\n', fp);
 				s++;
 				goto escapefrom;
-			case '\\': fputc('\\', fp); break;
-			case 't':  fputc('\t', fp); break;
+			case '\\': putc('\\', fp); break;
+			case 't':  putc('\t', fp); break;
 			}
 			break;
 		default:
-			fputc(*s, fp); break;
+			putc(*s, fp); break;
 		}
 	}
 }
