@@ -1205,6 +1205,7 @@ updatenewitems(struct feed *f)
 	size_t i;
 
 	p = &panes[PaneItems];
+	p->dirty = 1;
 	f->totalnew = 0;
 	for (i = 0; i < p->nrows; i++) {
 		row = &(p->rows[i]); /* do not use pane_row_get() */
@@ -1238,8 +1239,6 @@ feed_load(struct feed *f, FILE *fp)
 		p->rows[i].data = &(items.items[i]); /* do not use pane_row_get() */
 
 	updatenewitems(f);
-
-	p->dirty = 1;
 }
 
 void
