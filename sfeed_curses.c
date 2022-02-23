@@ -2112,23 +2112,25 @@ main(int argc, char *argv[])
 			case 'D': goto keyleft;  /* arrow right */
 			case 'F': goto endpos;   /* end */
 			case 'H': goto startpos; /* home */
+			case '1': /* home */
 			case '4': /* end */
-				if ((ch = readch()) < 0)
-					goto event;
-				if (ch == '~')
-					goto endpos;
-				continue;
 			case '5': /* page up */
-				if ((ch = readch()) < 0)
-					goto event;
-				if (ch == '~')
-					goto prevpage;
-				continue;
 			case '6': /* page down */
+			case '7': /* home: urxvt */
+			case '8': /* end: urxvt */
+				i = ch;
 				if ((ch = readch()) < 0)
 					goto event;
-				if (ch == '~')
-					goto nextpage;
+				if (ch == '~') {
+					switch (i) {
+					case '1': goto startpos;
+					case '4': goto endpos;
+					case '5': goto prevpage;
+					case '6': goto nextpage;
+					case '7': goto startpos;
+					case '8': goto endpos;
+					}
+				}
 				continue;
 			}
 			break;
