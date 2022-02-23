@@ -952,7 +952,7 @@ readch(void)
 	struct timeval tv;
 
 	if (cmdenv && *cmdenv)
-		return *(cmdenv++);
+		return *(cmdenv++); /* $SFEED_AUTOCMD */
 
 	for (;;) {
 		FD_ZERO(&readfds);
@@ -2108,8 +2108,8 @@ main(int argc, char *argv[])
 				break;
 			case 'A': goto keyup;    /* arrow up */
 			case 'B': goto keydown;  /* arrow down */
-			case 'C': goto keyright; /* arrow left */
-			case 'D': goto keyleft;  /* arrow right */
+			case 'C': goto keyright; /* arrow right */
+			case 'D': goto keyleft;  /* arrow left */
 			case 'F': goto endpos;   /* end */
 			case 'H': goto startpos; /* home */
 			case '1': /* home */
