@@ -1,4 +1,4 @@
-.Dd February 4, 2022
+.Dd February 24, 2022
 .Dt SFEED_CURSES 1
 .Os
 .Sh NAME
@@ -83,6 +83,9 @@ Go to the next feed in the feeds pane and open it.
 Redraw screen.
 .It R
 Reload all feed files which were specified as arguments on startup.
+If
+.Ev SFEED_URL_FILE
+is set, it will reload the URLs from this file also.
 .It m
 Toggle mouse-mode.
 It supports xterm X10 and extended SGR encoding.
@@ -182,6 +185,9 @@ Switch to the feeds pane.
 .Bl -tag -width Ds
 .It SIGHUP
 Reload all feed files which were specified as arguments on startup.
+If
+.Ev SFEED_URL_FILE
+is set, it will reload the URLs from this file also.
 .It SIGINT
 Interrupt: when searching it cancels the line editor, otherwise it quits.
 .It SIGTERM
