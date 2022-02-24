@@ -951,8 +951,10 @@ readch(void)
 	fd_set readfds;
 	struct timeval tv;
 
-	if (cmdenv && *cmdenv)
-		return *(cmdenv++); /* $SFEED_AUTOCMD */
+	if (cmdenv && *cmdenv) {
+		b = *(cmdenv++); /* $SFEED_AUTOCMD */
+		return (int)b;
+	}
 
 	for (;;) {
 		FD_ZERO(&readfds);
