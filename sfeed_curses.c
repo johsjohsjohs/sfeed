@@ -2130,7 +2130,6 @@ main(int argc, char *argv[])
 					case '8': goto endpos;
 					}
 				}
-				continue;
 			}
 			break;
 keyup:
