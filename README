@@ -1015,8 +1015,8 @@ file:
 
 - - -
 
-Running custom commands inside the program
-------------------------------------------
+Running custom commands inside the sfeed_curses program
+-------------------------------------------------------
 
 Running commands inside the sfeed_curses program can be useful for example to
 sync items or mark all items across all feeds as read. It can be comfortable to
@@ -1035,13 +1035,12 @@ or
 		forkexec((char *[]) { "syncnews.sh", NULL }, 1);
 		break;
 
-The specified script should be in $PATH or an absolute path.
+The specified script should be in $PATH or be an absolute path.
 
 Example of a `markallread.sh` shellscript to mark all URLs as read:
 
 	#!/bin/sh
 	# mark all items/URLs as read.
-
 	tmp=$(mktemp)
 	(cat ~/.sfeed/urls; cut -f 3 ~/.sfeed/feeds/*) | \
 	awk '!x[$0]++' > "$tmp" &&
