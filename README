@@ -963,6 +963,58 @@ TSV format.
 
 - - -
 
+Counting unread and total items
+-------------------------------
+
+It can be useful to show the counts of unread items, for example in a
+windowmanager or statusbar.
+
+The below example script counts the items of the last day in the same way the
+formatting tools do:
+
+	#!/bin/sh
+	# Count the new items of the last day.
+	LC_ALL=C awk -F '\t' -v "old=$(($(date +'%s') - 86400))" '
+	{
+		total++;
+	}
+	int($1) >= old {
+		totalnew++;
+	}
+	END {
+		print "New:   " totalnew;
+		print "Total: " total;
+	}' ~/.sfeed/urls ~/.sfeed/feeds/*
+
+The below example script counts the unread items using the sfeed_curses URL
+file:
+
+	#!/bin/sh
+	# Count the unread and total items from feeds using the URL file.
+	LC_ALL=C awk -F '\t' '
+	# URL file: amount of fields is 1.
+	NF == 1 {
+		u[$0] = 1; # lookup table of URLs.
+		next;
+	}
+	# feed file: check by URL or id.
+	{
+		total++;
+		if (length($3)) {
+			if (u[$3])
+				read++;
+		} else if (length($6)) {
+			if (u[$6])
+				read++;
+		}
+	}
+	END {
+		print "Unread: " (total - read);
+		print "Total:  " total;
+	}' ~/.sfeed/urls ~/.sfeed/feeds/*
+
+- - -
+
 Running custom commands inside the program
 ------------------------------------------
 
