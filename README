@@ -1081,6 +1081,9 @@ testing sfeed_curses.  Some of them might be fixed already upstream:
   middle-button, right-button is incorrect / reversed.
 - putty: the full reset attribute (ESC c, typically `rs1`) does not reset the
   window title.
+- Mouse button encoding for extended buttons (like side-buttons) in some
+  terminals are unsupported or map to the same button: for example side-buttons 7
+  and 8 map to the scroll buttons 4 and 5 in urxvt.
 
 
 License
