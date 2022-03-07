@@ -3,7 +3,7 @@
 # list of feeds to fetch:
 feeds() {
 	# feed <name> <feedurl> [basesiteurl] [encoding]
-	feed "codemadness" "https://www.codemadness.nl/atom.xml"
+	feed "codemadness" "https://www.codemadness.org/atom_content.xml"
 	feed "explosm" "http://feeds.feedburner.com/Explosm"
 	feed "golang github releases" "https://github.com/golang/go/releases.atom"
 	feed "linux kernel" "https://www.kernel.org/feeds/kdist.xml" "https://www.kernel.org"

@@ -245,8 +245,8 @@ Find RSS/Atom feed URLs from a webpage:
 
 output example:
 
-	https://codemadness.org/blog/rss.xml	application/rss+xml
-	https://codemadness.org/blog/atom.xml	application/atom+xml
+	https://codemadness.org/atom.xml	application/atom+xml
+	https://codemadness.org/atom_content.xml	application/atom+xml
 
 - - -
 
