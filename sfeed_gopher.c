@@ -50,7 +50,8 @@ printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 		fprintf(fpitems, "i\t\t%s\t%s\r\n", host, port);
 	}
 
-	while ((linelen = getline(&line, &linesize, fpin)) > 0) {
+	while ((linelen = getline(&line, &linesize, fpin)) > 0 &&
+	       !ferror(fpitems)) {
 		if (line[linelen - 1] == '\n')
 			line[--linelen] = '\0';
 		parseline(line, fields);
@@ -150,6 +151,8 @@ main(int argc, char *argv[])
 	if (argc == 1) {
 		f.name = "";
 		printfeed(stdout, stdin, &f);
+		checkfileerror(stdin, "<stdin>", 'r');
+		checkfileerror(stdout, "<stdout>", 'w');
 	} else {
 		if ((p = getenv("SFEED_GOPHER_PATH")))
 			prefixpath = p;
@@ -172,8 +175,8 @@ main(int argc, char *argv[])
 			if (!(fpitems = fopen(path, "wb")))
 				err(1, "fopen");
 			printfeed(fpitems, fp, &f);
-			if (ferror(fp))
-				err(1, "ferror: %s", argv[i]);
+			checkfileerror(fp, argv[i], 'r');
+			checkfileerror(fpitems, path, 'w');
 			fclose(fp);
 			fclose(fpitems);
 
@@ -186,6 +189,7 @@ main(int argc, char *argv[])
 			fprintf(fpindex, "\t%s\t%s\r\n", host, port);
 		}
 		fputs(".\r\n", fpindex);
+		checkfileerror(fpindex, "index", 'w');
 		fclose(fpindex);
 	}
 

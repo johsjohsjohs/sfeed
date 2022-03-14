@@ -17,7 +17,8 @@ printfeed(FILE *fp, const char *feedname)
 	time_t parsedtime;
 	ssize_t linelen;
 
-	while ((linelen = getline(&line, &linesize, fp)) > 0) {
+	while ((linelen = getline(&line, &linesize, fp)) > 0 &&
+	       !ferror(stdout)) {
 		if (line[linelen - 1] == '\n')
 			line[--linelen] = '\0';
 		parseline(line, fields);
@@ -54,17 +55,19 @@ main(int argc, char *argv[])
 
 	if (argc == 1) {
 		printfeed(stdin, "");
+		checkfileerror(stdin, "<stdin>", 'r');
 	} else {
 		for (i = 1; i < argc; i++) {
 			if (!(fp = fopen(argv[i], "r")))
 				err(1, "fopen: %s", argv[i]);
 			name = ((name = strrchr(argv[i], '/'))) ? name + 1 : argv[i];
 			printfeed(fp, name);
-			if (ferror(fp))
-				err(1, "ferror: %s", argv[i]);
+			checkfileerror(fp, argv[i], 'r');
 			fclose(fp);
 		}
 	}
+
+	checkfileerror(stdout, "<stdout>", 'w');
 
 	return 0;
 }

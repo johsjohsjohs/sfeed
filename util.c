@@ -46,6 +46,16 @@ errx(int exitstatus, const char *fmt, ...)
 	exit(exitstatus);
 }
 
+/* Handle read or write errors for a FILE * stream */
+void
+checkfileerror(FILE *fp, const char *name, int mode)
+{
+	if (mode == 'r' && ferror(fp))
+		errx(1, "read error: %s", name);
+	else if (mode == 'w' && (fflush(fp) || ferror(fp)))
+		errx(1, "write error: %s", name);
+}
+
 /* strcasestr() included for portability */
 char *
 strcasestr(const char *h, const char *n)

@@ -679,6 +679,9 @@ printfields(void)
 	putchar(FieldSeparator);
 	string_print_trimmed_multi(&ctx.fields[FeedFieldCategory].str);
 	putchar('\n');
+
+	if (ferror(stdout)) /* check for errors but do not flush */
+		checkfileerror(stdout, "<stdout>", 'w');
 }
 
 static int
@@ -1058,6 +1061,9 @@ main(int argc, char *argv[])
 
 	/* NOTE: getnext is defined in xml.h for inline optimization */
 	xml_parse(&parser);
+
+	checkfileerror(stdin, "<stdin>", 'r');
+	checkfileerror(stdout, "<stdout>", 'w');
 
 	return 0;
 }

@@ -101,5 +101,8 @@ main(void)
 	xml_parse(&parser);
 	fputs("}\n", stdout);
 
+	checkfileerror(stdin, "<stdin>", 'r');
+	checkfileerror(stdout, "<stdout>", 'w');
+
 	return 0;
 }

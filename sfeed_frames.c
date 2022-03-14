@@ -34,7 +34,8 @@ printfeed(FILE *fpitems, FILE *fpin, struct feed *f)
 	}
 	fputs("<pre>\n", fpitems);
 
-	while ((linelen = getline(&line, &linesize, fpin)) > 0) {
+	while ((linelen = getline(&line, &linesize, fpin)) > 0 &&
+	       !ferror(fpitems)) {
 		if (line[linelen - 1] == '\n')
 			line[--linelen] = '\0';
 		parseline(line, fields);
@@ -114,6 +115,7 @@ main(int argc, char *argv[])
 	if (argc == 1) {
 		feeds[0].name = "";
 		printfeed(fpitems, stdin, &feeds[0]);
+		checkfileerror(stdin, "<stdin>", 'r');
 	} else {
 		for (i = 1; i < argc; i++) {
 			name = ((name = strrchr(argv[i], '/'))) ? name + 1 : argv[i];
@@ -122,8 +124,8 @@ main(int argc, char *argv[])
 			if (!(fp = fopen(argv[i], "r")))
 				err(1, "fopen: %s", argv[i]);
 			printfeed(fpitems, fp, &feeds[i - 1]);
-			if (ferror(fp))
-				err(1, "ferror: %s", argv[i]);
+			checkfileerror(fp, argv[i], 'r');
+			checkfileerror(fpitems, "items.html", 'w');
 			fclose(fp);
 		}
 	}
@@ -174,10 +176,15 @@ main(int argc, char *argv[])
 	      "</frameset>\n"
 	      "</html>\n", fpindex);
 
+	checkfileerror(fpindex, "index.html", 'w');
+	checkfileerror(fpitems, "items.html", 'w');
+
 	fclose(fpindex);
 	fclose(fpitems);
-	if (fpmenu)
+	if (fpmenu) {
+		checkfileerror(fpmenu, "menu.html", 'w');
 		fclose(fpmenu);
+	}
 
 	return 0;
 }

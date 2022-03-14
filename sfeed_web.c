@@ -136,5 +136,8 @@ main(int argc, char *argv[])
 	/* NOTE: getnext is defined in xml.h for inline optimization */
 	xml_parse(&parser);
 
+	checkfileerror(stdin, "<stdin>", 'r');
+	checkfileerror(stdout, "<stdout>", 'w');
+
 	return 0;
 }

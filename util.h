@@ -64,6 +64,7 @@ int uri_hasscheme(const char *);
 int uri_makeabs(struct uri *, struct uri *, struct uri *);
 int uri_parse(const char *, struct uri *);
 
+void checkfileerror(FILE *, const char *, int);
 void parseline(char *, char *[FieldLast]);
 void printutf8pad(FILE *, const char *, size_t, int);
 int  strtotime(const char *, time_t *);
