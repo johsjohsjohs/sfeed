@@ -152,8 +152,8 @@ main(int argc, char *argv[])
 		user = "you";
 	if (gethostname(host, sizeof(host)) == -1)
 		err(1, "gethostname");
-	if ((now = time(NULL)) == -1)
-		err(1, "time");
+	if ((now = time(NULL)) == (time_t)-1)
+		errx(1, "time");
 	if (!gmtime_r(&now, &tmnow))
 		err(1, "gmtime_r: can't get current time");
 	if (!strftime(mtimebuf, sizeof(mtimebuf), "%a %b %d %H:%M:%S %Y", &tmnow))

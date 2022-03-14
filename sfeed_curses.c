@@ -1308,7 +1308,8 @@ feeds_load(struct feed *feeds, size_t nfeeds)
 	struct feed *f;
 	size_t i;
 
-	if ((comparetime = time(NULL)) == -1)
+	errno = 0;
+	if ((comparetime = time(NULL)) == (time_t)-1)
 		die("time");
 	/* 1 day is old news */
 	comparetime -= 86400;

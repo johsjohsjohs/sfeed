@@ -86,8 +86,8 @@ main(int argc, char *argv[])
 
 	if (!(feeds = calloc(argc, sizeof(struct feed))))
 		err(1, "calloc");
-	if ((comparetime = time(NULL)) == -1)
-		err(1, "time");
+	if ((comparetime = time(NULL)) == (time_t)-1)
+		errx(1, "time");
 	/* 1 day is old news */
 	comparetime -= 86400;
 

@@ -124,8 +124,8 @@ main(int argc, char *argv[])
 	if (pledge(argc == 1 ? "stdio" : "stdio rpath", NULL) == -1)
 		err(1, "pledge");
 
-	if ((now = time(NULL)) == -1)
-		err(1, "time");
+	if ((now = time(NULL)) == (time_t)-1)
+		errx(1, "time");
 	if (!(tm = gmtime_r(&now, &tmnow)))
 		err(1, "gmtime_r");
 
