@@ -986,7 +986,7 @@ lineeditor(void)
 	int ch;
 
 	for (;;) {
-		if (nchars + 1 >= cap) {
+		if (nchars + 2 >= cap) {
 			cap = cap ? cap * 2 : 32;
 			input = erealloc(input, cap);
 		}
@@ -999,11 +999,11 @@ lineeditor(void)
 			if (!nchars)
 				continue;
 			input[--nchars] = '\0';
-			write(1, "\b \b", 3); /* back, blank, back */
-			continue;
+			ttywrite("\b \b"); /* back, blank, back */
 		} else if (ch >= ' ') {
 			input[nchars] = ch;
-			write(1, &input[nchars], 1);
+			input[nchars + 1] = '\0';
+			ttywrite(&input[nchars]);
 			nchars++;
 		} else if (ch < 0) {
 			switch (sigstate) {
