@@ -112,7 +112,7 @@ ${OBJ}: ${HDR}
 .c.o:
 	${CC} -o $@ -c $< ${SFEED_CFLAGS} ${SFEED_CPPFLAGS}
 
-sfeed_curses.o: sfeed_curses.c
+sfeed_curses.o: sfeed_curses.c themes/${SFEED_THEME}.h
 	${CC} -o $@ -c sfeed_curses.c ${SFEED_CURSES_CFLAGS} ${SFEED_CURSES_CPPFLAGS}
 
 sfeed_curses: ${LIB} sfeed_curses.o
