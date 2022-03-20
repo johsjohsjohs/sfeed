@@ -150,6 +150,7 @@ main(int argc, char *argv[])
 			name = ((name = strrchr(argv[i], '/'))) ? name + 1 : argv[i];
 			printfeed(fp, name);
 			checkfileerror(fp, argv[i], 'r');
+			checkfileerror(stdout, "<stdout>", 'w');
 			fclose(fp);
 		}
 	}

@@ -119,6 +119,7 @@ main(int argc, char *argv[])
 				err(1, "fopen: %s", argv[i]);
 			printfeed(fp, &feeds[i - 1]);
 			checkfileerror(fp, argv[i], 'r');
+			checkfileerror(stdout, "<stdout>", 'w');
 			fclose(fp);
 		}
 	}
