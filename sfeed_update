@@ -35,6 +35,11 @@ loadconfig() {
 
 # log(name, s)
 log() {
+	printf '[%s] %-50.50s %s\n' "$(date +'%H:%M:%S')" "$1" "$2"
+}
+
+# log_error(name, s)
+log_error() {
 	printf '[%s] %-50.50s %s\n' "$(date +'%H:%M:%S')" "$1" "$2" >&2
 }
 
@@ -97,7 +102,7 @@ _feed() {
 	[ -e "${sfeedfile}" ] || touch "${sfeedfile}" 2>/dev/null
 
 	if ! fetch "${name}" "${feedurl}" "${sfeedfile}" > "${tmpfeedfile}.fetch"; then
-		log "${name}" "FAIL (FETCH)"
+		log_error "${name}" "FAIL (FETCH)"
 		return
 	fi
 
@@ -105,20 +110,20 @@ _feed() {
 	[ "${encoding}" = "" ] && encoding=$(sfeed_xmlenc < "${tmpfeedfile}.fetch")
 
 	if ! convertencoding "${name}" "${encoding}" "utf-8" < "${tmpfeedfile}.fetch" > "${tmpfeedfile}.utf8"; then
-		log "${name}" "FAIL (ENCODING)"
+		log_error "${name}" "FAIL (ENCODING)"
 		return
 	fi
 	rm -f "${tmpfeedfile}.fetch"
 
 	# if baseurl is empty then use feedurl.
 	if ! parse "${name}" "${feedurl}" "${basesiteurl:-${feedurl}}" < "${tmpfeedfile}.utf8" > "${tmpfeedfile}.tsv"; then
-		log "${name}" "FAIL (PARSE)"
+		log_error "${name}" "FAIL (PARSE)"
 		return
 	fi
 	rm -f "${tmpfeedfile}.utf8"
 
 	if ! filter "${name}" < "${tmpfeedfile}.tsv" > "${tmpfeedfile}.filter"; then
-		log "${name}" "FAIL (FILTER)"
+		log_error "${name}" "FAIL (FILTER)"
 		return
 	fi
 	rm -f "${tmpfeedfile}.tsv"
@@ -130,20 +135,20 @@ _feed() {
 	fi
 
 	if ! merge "${name}" "${sfeedfile}" "${tmpfeedfile}.filter" > "${tmpfeedfile}.merge"; then
-		log "${name}" "FAIL (MERGE)"
+		log_error "${name}" "FAIL (MERGE)"
 		return
 	fi
 	rm -f "${tmpfeedfile}.filter"
 
 	if ! order "${name}" < "${tmpfeedfile}.merge" > "${tmpfeedfile}.order"; then
-		log "${name}" "FAIL (ORDER)"
+		log_error "${name}" "FAIL (ORDER)"
 		return
 	fi
 	rm -f "${tmpfeedfile}.merge"
 
 	# copy
 	if ! cp "${tmpfeedfile}.order" "${sfeedfile}"; then
-		log "${name}" "FAIL (COPY)"
+		log_error "${name}" "FAIL (COPY)"
 		return
 	fi
 	rm -f "${tmpfeedfile}.order"
