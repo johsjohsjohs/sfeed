@@ -41,6 +41,8 @@ log() {
 # log_error(name, s)
 log_error() {
 	printf '[%s] %-50.50s %s\n' "$(date +'%H:%M:%S')" "$1" "$2" >&2
+	# set error exit status indicator for parallel jobs.
+	rm -f "${sfeedtmpdir}/ok"
 }
 
 # fetch a feed via HTTP/HTTPS etc.
@@ -96,7 +98,7 @@ _feed() {
 
 	filename="$(printf '%s' "${name}" | tr '/' '_')"
 	sfeedfile="${sfeedpath}/${filename}"
-	tmpfeedfile="${sfeedtmpdir}/${filename}"
+	tmpfeedfile="${sfeedtmpdir}/feeds/${filename}"
 
 	# if file does not exist yet create it.
 	[ -e "${sfeedfile}" ] || touch "${sfeedfile}" 2>/dev/null
@@ -201,17 +203,22 @@ main() {
 	loadconfig "$1"
 	# fetch feeds and store in temporary directory.
 	sfeedtmpdir="$(mktemp -d '/tmp/sfeed_XXXXXX')"
+	mkdir -p "${sfeedtmpdir}/feeds"
+	touch "${sfeedtmpdir}/ok"
 	# make sure path exists.
 	mkdir -p "${sfeedpath}"
 	# fetch feeds specified in config file.
 	feeds
 	# wait till all feeds are fetched (concurrently).
 	[ ${signo} -eq 0 ] && wait
+	# check error exit status indicator for parallel jobs.
+	test -f "${sfeedtmpdir}/ok"
+	status=$?
 	# cleanup temporary files etc.
 	cleanup
 	# on signal SIGINT and SIGTERM exit with signal number + 128.
 	[ ${signo} -ne 0 ] && exit $((signo+128))
-	return 0
+	return ${status}
 }
 
 [ "${SFEED_UPDATE_INCLUDE}" = "1" ] || main "$@"
