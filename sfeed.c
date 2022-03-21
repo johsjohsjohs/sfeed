@@ -127,7 +127,7 @@ static void xmltagstartparsed(XMLParser *, const char *, size_t, int);
 
 /* map tag name to TagId type */
 /* RSS, must be alphabetical order */
-static FeedTag rsstags[] = {
+static const FeedTag rsstags[] = {
 	{ STRP("author"),            RSSTagAuthor            },
 	{ STRP("category"),          RSSTagCategory          },
 	{ STRP("content:encoded"),   RSSTagContentEncoded    },
@@ -144,7 +144,7 @@ static FeedTag rsstags[] = {
 };
 
 /* Atom, must be alphabetical order */
-static FeedTag atomtags[] = {
+static const FeedTag atomtags[] = {
 	{ STRP("author"),            AtomTagAuthor           },
 	{ STRP("category"),          AtomTagCategory         },
 	{ STRP("content"),           AtomTagContent          },
@@ -161,14 +161,14 @@ static FeedTag atomtags[] = {
 };
 
 /* special case: nested <author><name> */
-static FeedTag atomtagauthor = { STRP("author"), AtomTagAuthor };
-static FeedTag atomtagauthorname = { STRP("name"), AtomTagAuthorName };
+static const FeedTag atomtagauthor = { STRP("author"), AtomTagAuthor };
+static const FeedTag atomtagauthorname = { STRP("name"), AtomTagAuthorName };
 
 /* reference to no / unknown tag */
-static FeedTag notag = { STRP(""), TagUnknown };
+static const FeedTag notag = { STRP(""), TagUnknown };
 
 /* map TagId type to RSS/Atom field, all tags must be defined */
-static int fieldmap[TagLast] = {
+static const int fieldmap[TagLast] = {
 	[TagUnknown]               = -1,
 	/* RSS */
 	[RSSTagDcdate]             = FeedFieldTime,
@@ -205,7 +205,7 @@ static int fieldmap[TagLast] = {
 
 static const int FieldSeparator = '\t';
 /* separator for multiple values in a field, separator should be 1 byte */
-static const char *FieldMultiSeparator = "|";
+static const char FieldMultiSeparator[] = "|";
 static struct uri baseuri;
 static const char *baseurl;
 
@@ -497,9 +497,9 @@ datetounix(long long year, int mon, int day, int hour, int min, int sec)
 static long
 gettzoffset(const char *s)
 {
-	static struct {
+	static const struct {
 		char *name;
-		const int offhour;
+		int offhour;
 	} tzones[] = {
 		{ "CDT", -5 * 3600 },
 		{ "CST", -6 * 3600 },
@@ -545,7 +545,7 @@ gettzoffset(const char *s)
 static int
 parsetime(const char *s, long long *tp)
 {
-	static struct {
+	static const struct {
 		char *name;
 		int len;
 	} mons[] = {
@@ -838,7 +838,7 @@ xmldataentity(XMLParser *p, const char *data, size_t datalen)
 static void
 xmltagstart(XMLParser *p, const char *t, size_t tl)
 {
-	FeedTag *f;
+	const FeedTag *f;
 
 	if (ISINCONTENT(ctx)) {
 		if (ctx.contenttype == ContentTypeHTML) {
