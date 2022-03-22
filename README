@@ -815,8 +815,7 @@ arguments are specified then the data is read from stdin.
 		fi
 	
 		log "${feedname}" "${msg}" "START"
-		fetch "${url}" "${feedname}"
-		if [ $? = 0 ]; then
+		if fetch "${url}" "${feedname}"; then
 			log "${feedname}" "${msg}" "OK"
 	
 			# append it safely in parallel to the cachefile on a
