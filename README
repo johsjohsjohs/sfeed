@@ -783,7 +783,7 @@ arguments are specified then the data is read from stdin.
 		else
 			s="$2"
 		fi
-		printf '[%s]: %s: %s\n' "$(date +'%H:%M:%S')" "${s}" "$3" >&2
+		printf '[%s]: %s: %s\n' "$(date +'%H:%M:%S')" "${s}" "$3"
 	}
 	
 	# fetch(url, feedname)
@@ -809,8 +809,8 @@ arguments are specified then the data is read from stdin.
 		if [ "${feedname}" != "-" ]; then
 			mkdir -p "${feedname}"
 			if ! cd "${feedname}"; then
-				log "${feedname}" "${msg}: ${feedname}" "DIR FAIL"
-				exit 1
+				log "${feedname}" "${msg}: ${feedname}" "DIR FAIL" >&2
+				return 1
 			fi
 		fi
 	
@@ -825,8 +825,10 @@ arguments are specified then the data is read from stdin.
 			printf '%s\n' "${url}" >> "${cachefile}"
 			) 9>"${lockfile}"
 		else
-			log "${feedname}" "${msg}" "FAIL"
+			log "${feedname}" "${msg}" "FAIL" >&2
+			return 1
 		fi
+		return 0
 	}
 	
 	if [ "${SFEED_DOWNLOAD_CHILD}" = "1" ]; then
