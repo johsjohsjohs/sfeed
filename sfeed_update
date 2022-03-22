@@ -105,7 +105,7 @@ _feed() {
 
 	if ! fetch "${name}" "${feedurl}" "${sfeedfile}" > "${tmpfeedfile}.fetch"; then
 		log_error "${name}" "FAIL (FETCH)"
-		return
+		return 1
 	fi
 
 	# try to detect encoding (if not specified). if detecting the encoding fails assume utf-8.
@@ -113,50 +113,51 @@ _feed() {
 
 	if ! convertencoding "${name}" "${encoding}" "utf-8" < "${tmpfeedfile}.fetch" > "${tmpfeedfile}.utf8"; then
 		log_error "${name}" "FAIL (ENCODING)"
-		return
+		return 1
 	fi
 	rm -f "${tmpfeedfile}.fetch"
 
 	# if baseurl is empty then use feedurl.
 	if ! parse "${name}" "${feedurl}" "${basesiteurl:-${feedurl}}" < "${tmpfeedfile}.utf8" > "${tmpfeedfile}.tsv"; then
 		log_error "${name}" "FAIL (PARSE)"
-		return
+		return 1
 	fi
 	rm -f "${tmpfeedfile}.utf8"
 
 	if ! filter "${name}" < "${tmpfeedfile}.tsv" > "${tmpfeedfile}.filter"; then
 		log_error "${name}" "FAIL (FILTER)"
-		return
+		return 1
 	fi
 	rm -f "${tmpfeedfile}.tsv"
 
 	# new feed data is empty: no need for below stages.
 	if [ ! -s "${tmpfeedfile}.filter" ]; then
 		log "${name}" "OK"
-		return
+		return 0
 	fi
 
 	if ! merge "${name}" "${sfeedfile}" "${tmpfeedfile}.filter" > "${tmpfeedfile}.merge"; then
 		log_error "${name}" "FAIL (MERGE)"
-		return
+		return 1
 	fi
 	rm -f "${tmpfeedfile}.filter"
 
 	if ! order "${name}" < "${tmpfeedfile}.merge" > "${tmpfeedfile}.order"; then
 		log_error "${name}" "FAIL (ORDER)"
-		return
+		return 1
 	fi
 	rm -f "${tmpfeedfile}.merge"
 
 	# copy
 	if ! cp "${tmpfeedfile}.order" "${sfeedfile}"; then
 		log_error "${name}" "FAIL (COPY)"
-		return
+		return 1
 	fi
 	rm -f "${tmpfeedfile}.order"
 
 	# OK
 	log "${name}" "OK"
+	return 0
 }
 
 # fetch and process a feed in parallel.
