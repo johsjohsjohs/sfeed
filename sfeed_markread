@@ -9,7 +9,7 @@ usage() {
 }
 
 urlfile="${2:-${SFEED_URL_FILE}}"
-if test -z "${urlfile}"; then
+if [ -z "${urlfile}" ]; then
 	usage
 fi
 
@@ -20,7 +20,7 @@ read)
 unread)
 	tmp=$(mktemp)
 	trap "rm -f ${tmp}" EXIT
-	test -f "${urlfile}" || touch "${urlfile}" 2>/dev/null
+	[ -f "${urlfile}" ] || touch "${urlfile}" 2>/dev/null
 	LC_ALL=C awk -F '\t' '
 	{ FILENR += (FNR == 1) }
 	FILENR == 1 { urls[$0] = 1 }

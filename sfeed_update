@@ -213,7 +213,7 @@ main() {
 	# wait till all feeds are fetched (concurrently).
 	[ ${signo} -eq 0 ] && wait
 	# check error exit status indicator for parallel jobs.
-	test -f "${sfeedtmpdir}/ok"
+	[ -f "${sfeedtmpdir}/ok" ]
 	status=$?
 	# cleanup temporary files etc.
 	cleanup
