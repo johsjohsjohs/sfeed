@@ -578,7 +578,7 @@ procmail_maildirs.sh file:
 	mkdir -p "${maildir}/.cache"
 
 	if ! test -r "${procmailconfig}"; then
-		echo "Procmail configuration file \"${procmailconfig}\" does not exist or is not readable." >&2
+		printf "Procmail configuration file \"%s\" does not exist or is not readable.\n" "${procmailconfig}" >&2
 		echo "See procmailrc.example for an example." >&2
 		exit 1
 	fi

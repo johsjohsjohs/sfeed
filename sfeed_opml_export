@@ -18,7 +18,7 @@ loadconfig() {
 	if [ -r "${path}" ]; then
 		. "${path}"
 	else
-		echo "Configuration file \"${config}\" cannot be read." >&2
+		printf "Configuration file \"%s\" cannot be read.\n" "${config}" >&2
 		echo "See sfeedrc.example for an example." >&2
 		exit 1
 	fi
@@ -27,8 +27,8 @@ loadconfig() {
 # override feed function to output OPML XML.
 # feed(name, feedurl, [basesiteurl], [encoding])
 feed() {
-	# TABs, newlines and echo options in field values are not checked.
-	echo "$1	$2"
+	# uses the characters 0x1f and 0x1e as a separator.
+	printf '%s\037%s\036' "$1" "$2"
 }
 
 # load config file.
@@ -43,7 +43,11 @@ cat <<!
 <body>
 !
 
-feeds | awk -F '\t' '{
+feeds | LC_ALL=C awk '
+BEGIN {
+	FS = "\x1f"; RS = "\x1e";
+}
+{
 	gsub("&", "\\&amp;");
 	gsub("\"", "\\&quot;");
 	gsub("'"'"'", "\\&#39;");
