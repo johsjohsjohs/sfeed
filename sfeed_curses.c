@@ -570,7 +570,7 @@ processexit(pid_t pid, int interactive)
 	struct sigaction sa;
 
 	if (interactive) {
-		/* ignore SIGINT (^C) in parent in interactive applications */
+		/* ignore SIGINT (^C) in parent for interactive applications */
 		memset(&sa, 0, sizeof(sa));
 		sigemptyset(&sa.sa_mask);
 		sa.sa_flags = SA_RESTART; /* require BSD signal semantics */
