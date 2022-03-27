@@ -558,6 +558,9 @@ init(void)
 	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGTERM, &sa, NULL);
 	sigaction(SIGWINCH, &sa, NULL);
+	/* ignore SIGCHLD: for non-interactive programs: don't become a zombie */
+	sa.sa_handler = SIG_IGN;
+	sigaction(SIGCHLD, &sa, NULL);
 }
 
 void
