@@ -569,22 +569,20 @@ processexit(pid_t pid, int interactive)
 	pid_t wpid;
 	struct sigaction sa;
 
-	memset(&sa, 0, sizeof(sa));
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_RESTART; /* require BSD signal semantics */
-	sa.sa_handler = SIG_IGN;
-	sigaction(SIGINT, &sa, NULL);
-
 	if (interactive) {
+		/* ignore SIGINT (^C) in parent in interactive applications */
+		memset(&sa, 0, sizeof(sa));
+		sigemptyset(&sa.sa_mask);
+		sa.sa_flags = SA_RESTART; /* require BSD signal semantics */
+		sa.sa_handler = SIG_IGN;
+		sigaction(SIGINT, &sa, NULL);
+		/* wait for process to change state */
 		while ((wpid = wait(NULL)) >= 0 && wpid != pid)
 			;
 		init();
 		updatesidebar();
 		updategeom();
 		updatetitle();
-	} else {
-		sa.sa_handler = sighandler;
-		sigaction(SIGINT, &sa, NULL);
 	}
 }
 
