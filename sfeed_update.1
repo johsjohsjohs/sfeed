@@ -1,4 +1,4 @@
-.Dd March 21, 2022
+.Dd March 28, 2022
 .Dt SFEED_UPDATE 1
 .Os
 .Sh NAME
@@ -62,6 +62,7 @@ stdout in the format:
 .Ed
 .Sh EXIT STATUS
 .Ex -std
+If any of the feeds failed to update then the return status is non-zero.
 .Sh EXAMPLES
 To update your feeds and format them in various formats:
 .Bd -literal

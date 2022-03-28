@@ -1057,7 +1057,8 @@ Example of a `markallread.sh` shellscript to mark all URLs as read:
 Example of a `syncnews.sh` shellscript to update the feeds and reload them:
 
 	#!/bin/sh
-	sfeed_update && pkill -SIGHUP sfeed_curses
+	sfeed_update
+	pkill -SIGHUP sfeed_curses
 
 
 Open an URL directly in the same terminal
