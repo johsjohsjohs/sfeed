@@ -558,9 +558,6 @@ init(void)
 	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGTERM, &sa, NULL);
 	sigaction(SIGWINCH, &sa, NULL);
-	/* ignore SIGCHLD: for non-interactive programs: don't become a zombie */
-	sa.sa_handler = SIG_IGN;
-	sigaction(SIGCHLD, &sa, NULL);
 }
 
 void
@@ -583,6 +580,10 @@ processexit(pid_t pid, int interactive)
 		updatesidebar();
 		updategeom();
 		updatetitle();
+	} else {
+		/* ignore SIGCHLD: for non-interactive programs: don't become a zombie */
+		sa.sa_handler = SIG_IGN;
+		sigaction(SIGCHLD, &sa, NULL);
 	}
 }
 
@@ -1836,7 +1837,7 @@ markread(struct pane *p, off_t from, off_t to, int isread)
 	FILE *fp;
 	off_t i;
 	const char *cmd;
-	int isnew = !isread, pid, wpid, status, visstart;
+	int isnew = !isread, pid, wpid, status = -1, visstart;
 
 	if (!urlfile || !p->nrows)
 		return;
