@@ -326,7 +326,7 @@ string_print_encoded(String *s)
 		case '\t': putchar('\\'); putchar('t'); break;
 		default:
 			/* ignore control chars */
-			if (!iscntrl((unsigned char)*p))
+			if (!ISCNTRL((unsigned char)*p))
 				putchar(*p);
 			break;
 		}
@@ -343,7 +343,7 @@ printtrimmed(const char *s)
 	for (; *p && p != e; p++) {
 		if (isspace((unsigned char)*p))
 			putchar(' '); /* any whitespace to space */
-		else if (!iscntrl((unsigned char)*p))
+		else if (!ISCNTRL((unsigned char)*p))
 			/* ignore other control chars */
 			putchar(*p);
 	}

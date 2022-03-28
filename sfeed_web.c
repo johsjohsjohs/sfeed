@@ -16,7 +16,7 @@ static void
 printvalue(const char *s)
 {
 	for (; *s; s++)
-		if (!iscntrl((unsigned char)*s))
+		if (!ISCNTRL((unsigned char)*s))
 			putchar(*s);
 }
 

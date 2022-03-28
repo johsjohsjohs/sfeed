@@ -12,7 +12,7 @@ static void
 printsafe(const char *s)
 {
 	for (; *s; s++) {
-		if (iscntrl((unsigned char)*s))
+		if (ISCNTRL((unsigned char)*s))
 			continue;
 		else if (*s == '\\')
 			fputs("\\\\", stdout);

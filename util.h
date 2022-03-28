@@ -8,6 +8,9 @@
 #define unveil(p1,p2) 0
 #endif
 
+/* control-character in the ASCII range 0-127: compatible with UTF-8 */
+#define ISCNTRL(c) ((c) < ' ' || (c) == 0x7f)
+
 #undef strcasestr
 char *strcasestr(const char *, const char *);
 #undef strlcat
