@@ -1,4 +1,4 @@
-.Dd November 26, 2021
+.Dd March 29, 2022
 .Dt SFEED 1
 .Os
 .Sh NAME
@@ -54,6 +54,15 @@ Item, categories, multiple values are separated by the '|' character.
 .Sh EXAMPLES
 .Bd -literal
 curl -s 'https://codemadness.org/atom.xml' | sfeed
+.Ed
+.Pp
+To convert the character set from a feed that is not UTF-8 encoded the
+.Xr iconv 1
+tool can be used:
+.Bd -literal
+curl -s 'https://codemadness.org/some_iso-8859-1_feed.xml' | \\
+iconv -f iso-8859-1 -t utf-8 | \\
+sfeed
 .Ed
 .Sh EXAMPLE SETUP
 1. Create a directory for the sfeedrc configuration and the feeds:
