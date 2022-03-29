@@ -8,8 +8,12 @@
 #define unveil(p1,p2) 0
 #endif
 
-/* control-character in the ASCII range 0-127: compatible with UTF-8 */
+/* ctype-like macros, but always compatible with ASCII / UTF-8 */
+#define ISALPHA(c) ((((unsigned)c) | 32) - 'a' < 26)
 #define ISCNTRL(c) ((c) < ' ' || (c) == 0x7f)
+#define ISDIGIT(c) (((unsigned)c) - '0' < 10)
+#define ISSPACE(c) ((c) == ' ' || ((((unsigned)c) - '\t') < 5))
+#define TOLOWER(c) ((((unsigned)c) - 'A' < 26) ? ((c) | 32) : (c))
 
 #undef strcasestr
 char *strcasestr(const char *, const char *);

@@ -246,7 +246,7 @@ gettag(enum FeedType feedtype, const char *name, size_t namelen)
 static char *
 ltrim(const char *s)
 {
-	for (; isspace((unsigned char)*s); s++)
+	for (; ISSPACE((unsigned char)*s); s++)
 		;
 	return (char *)s;
 }
@@ -256,7 +256,7 @@ rtrim(const char *s)
 {
 	const char *e;
 
-	for (e = s + strlen(s); e > s && isspace((unsigned char)*(e - 1)); e--)
+	for (e = s + strlen(s); e > s && ISSPACE((unsigned char)*(e - 1)); e--)
 		;
 	return (char *)e;
 }
@@ -341,7 +341,7 @@ printtrimmed(const char *s)
 	p = ltrim(s);
 	e = rtrim(p);
 	for (; *p && p != e; p++) {
-		if (isspace((unsigned char)*p))
+		if (ISSPACE((unsigned char)*p))
 			putchar(' '); /* any whitespace to space */
 		else if (!ISCNTRL((unsigned char)*p))
 			/* ignore other control chars */
@@ -514,20 +514,20 @@ gettzoffset(const char *s)
 	long tzhour = 0, tzmin = 0;
 	size_t i;
 
-	for (; isspace((unsigned char)*s); s++)
+	for (; ISSPACE((unsigned char)*s); s++)
 		;
 	switch (*s) {
 	case '-': /* offset */
 	case '+':
-		for (i = 0, p = s + 1; i < 2 && isdigit((unsigned char)*p); i++, p++)
+		for (i = 0, p = s + 1; i < 2 && ISDIGIT((unsigned char)*p); i++, p++)
 			tzhour = (tzhour * 10) + (*p - '0');
 		if (*p == ':')
 			p++;
-		for (i = 0; i < 2 && isdigit((unsigned char)*p); i++, p++)
+		for (i = 0; i < 2 && ISDIGIT((unsigned char)*p); i++, p++)
 			tzmin = (tzmin * 10) + (*p - '0');
 		return ((tzhour * 3600) + (tzmin * 60)) * (s[0] == '-' ? -1 : 1);
 	default: /* timezone name */
-		for (i = 0; isalpha((unsigned char)s[i]); i++)
+		for (i = 0; ISALPHA((unsigned char)s[i]); i++)
 			;
 		if (i != 3)
 			return 0;
@@ -565,35 +565,35 @@ parsetime(const char *s, long long *tp)
 	int va[6] = { 0 }, i, j, v, vi;
 	size_t m;
 
-	for (; isspace((unsigned char)*s); s++)
+	for (; ISSPACE((unsigned char)*s); s++)
 		;
-	if (!isdigit((unsigned char)*s) && !isalpha((unsigned char)*s))
+	if (!ISDIGIT((unsigned char)*s) && !ISALPHA((unsigned char)*s))
 		return -1;
 
-	if (isdigit((unsigned char)s[0]) &&
-	    isdigit((unsigned char)s[1]) &&
-	    isdigit((unsigned char)s[2]) &&
-	    isdigit((unsigned char)s[3])) {
+	if (ISDIGIT((unsigned char)s[0]) &&
+	    ISDIGIT((unsigned char)s[1]) &&
+	    ISDIGIT((unsigned char)s[2]) &&
+	    ISDIGIT((unsigned char)s[3])) {
 		/* formats "%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S" or "%Y%m%d%H%M%S" */
 		vi = 0;
 	} else {
 		/* format: "[%a, ]%d %b %Y %H:%M:%S" */
 		/* parse "[%a, ]%d %b %Y " part, then use time parsing as above */
-		for (; isalpha((unsigned char)*s); s++)
+		for (; ISALPHA((unsigned char)*s); s++)
 			;
-		for (; isspace((unsigned char)*s); s++)
+		for (; ISSPACE((unsigned char)*s); s++)
 			;
 		if (*s == ',')
 			s++;
-		for (; isspace((unsigned char)*s); s++)
+		for (; ISSPACE((unsigned char)*s); s++)
 			;
-		for (v = 0, i = 0; i < 2 && isdigit((unsigned char)*s); s++, i++)
+		for (v = 0, i = 0; i < 2 && ISDIGIT((unsigned char)*s); s++, i++)
 			v = (v * 10) + (*s - '0');
 		va[2] = v; /* day */
-		for (; isspace((unsigned char)*s); s++)
+		for (; ISSPACE((unsigned char)*s); s++)
 			;
 		/* end of word month */
-		for (j = 0; isalpha((unsigned char)s[j]); j++)
+		for (j = 0; ISALPHA((unsigned char)s[j]); j++)
 			;
 		/* check month name */
 		if (j < 3 || j > 9)
@@ -609,15 +609,15 @@ parsetime(const char *s, long long *tp)
 		}
 		if (m >= 12)
 			return -1; /* no month found */
-		for (; isspace((unsigned char)*s); s++)
+		for (; ISSPACE((unsigned char)*s); s++)
 			;
-		for (v = 0, i = 0; i < 4 && isdigit((unsigned char)*s); s++, i++)
+		for (v = 0, i = 0; i < 4 && ISDIGIT((unsigned char)*s); s++, i++)
 			v = (v * 10) + (*s - '0');
 		/* obsolete short year: RFC2822 4.3 */
 		if (i <= 3)
 			v += (v >= 0 && v <= 49) ? 2000 : 1900;
 		va[0] = v; /* year */
-		for (; isspace((unsigned char)*s); s++)
+		for (; ISSPACE((unsigned char)*s); s++)
 			;
 		/* parse only regular time part, see below */
 		vi = 3;
@@ -626,20 +626,20 @@ parsetime(const char *s, long long *tp)
 	/* parse time parts (and possibly remaining date parts) */
 	for (; *s && vi < 6; vi++) {
 		for (i = 0, v = 0; i < ((vi == 0) ? 4 : 2) &&
-		                   isdigit((unsigned char)*s); s++, i++) {
+		                   ISDIGIT((unsigned char)*s); s++, i++) {
 			v = (v * 10) + (*s - '0');
 		}
 		va[vi] = v;
 
 		if ((vi < 2 && *s == '-') ||
-		    (vi == 2 && (*s == 'T' || isspace((unsigned char)*s))) ||
+		    (vi == 2 && (*s == 'T' || ISSPACE((unsigned char)*s))) ||
 		    (vi > 2 && *s == ':'))
 			s++;
 	}
 
 	/* skip milliseconds in for example: "%Y-%m-%dT%H:%M:%S.000Z" */
 	if (*s == '.') {
-		for (s++; isdigit((unsigned char)*s); s++)
+		for (s++; ISDIGIT((unsigned char)*s); s++)
 			;
 	}
 

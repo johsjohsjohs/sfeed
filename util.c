@@ -1,4 +1,3 @@
-#include <ctype.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -66,8 +65,8 @@ strcasestr(const char *h, const char *n)
 		return (char *)h;
 
 	for (; *h; ++h) {
-		for (i = 0; n[i] && tolower((unsigned char)n[i]) ==
-		            tolower((unsigned char)h[i]); ++i)
+		for (i = 0; n[i] && TOLOWER((unsigned char)n[i]) ==
+		            TOLOWER((unsigned char)h[i]); ++i)
 			;
 		if (n[i] == '\0')
 			return (char *)h;
@@ -82,7 +81,7 @@ uri_hasscheme(const char *s)
 {
 	const char *p = s;
 
-	for (; isalpha((unsigned char)*p) || isdigit((unsigned char)*p) ||
+	for (; ISALPHA((unsigned char)*p) || ISDIGIT((unsigned char)*p) ||
 		       *p == '+' || *p == '-' || *p == '.'; p++)
 		;
 	/* scheme, except if empty and starts with ":" then it is a path */
@@ -109,7 +108,7 @@ uri_parse(const char *s, struct uri *u)
 	}
 
 	/* scheme / protocol part */
-	for (; isalpha((unsigned char)*p) || isdigit((unsigned char)*p) ||
+	for (; ISALPHA((unsigned char)*p) || ISDIGIT((unsigned char)*p) ||
 		       *p == '+' || *p == '-' || *p == '.'; p++)
 		;
 	/* scheme, except if empty and starts with ":" then it is a path */
