@@ -554,6 +554,7 @@ init(void)
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART; /* require BSD signal semantics */
 	sa.sa_handler = sighandler;
+	sigaction(SIGCHLD, &sa, NULL);
 	sigaction(SIGHUP, &sa, NULL);
 	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGTERM, &sa, NULL);
@@ -563,7 +564,6 @@ init(void)
 void
 processexit(pid_t pid, int interactive)
 {
-	pid_t wpid;
 	struct sigaction sa;
 
 	memset(&sa, 0, sizeof(sa));
@@ -574,17 +574,12 @@ processexit(pid_t pid, int interactive)
 		/* ignore SIGINT (^C) in parent for interactive applications */
 		sa.sa_handler = SIG_IGN;
 		sigaction(SIGINT, &sa, NULL);
-		/* wait for process to change state */
-		while ((wpid = wait(NULL)) >= 0 && wpid != pid)
-			;
+		/* wait for process to change state, ignore errors */
+		waitpid(pid, NULL, 0);
 		init();
 		updatesidebar();
 		updategeom();
 		updatetitle();
-	} else {
-		/* ignore SIGCHLD: for non-interactive programs: don't become a zombie */
-		sa.sa_handler = SIG_IGN;
-		sigaction(SIGCHLD, &sa, NULL);
 	}
 }
 
@@ -1010,6 +1005,7 @@ lineeditor(void)
 		} else if (ch < 0) {
 			switch (sigstate) {
 			case 0:
+			case SIGCHLD:
 			case SIGWINCH:
 				/* continue editing: process signal later */
 				continue;
@@ -1582,6 +1578,7 @@ void
 sighandler(int signo)
 {
 	switch (signo) {
+	case SIGCHLD:
 	case SIGHUP:
 	case SIGINT:
 	case SIGTERM:
@@ -1838,7 +1835,7 @@ markread(struct pane *p, off_t from, off_t to, int isread)
 	FILE *fp;
 	off_t i;
 	const char *cmd;
-	int isnew = !isread, pid, wpid, status = -1, visstart;
+	int isnew = !isread, pid, status = -1, visstart;
 
 	if (!urlfile || !p->nrows)
 		return;
@@ -1869,11 +1866,9 @@ markread(struct pane *p, off_t from, off_t to, int isread)
 		status = WIFEXITED(status) ? WEXITSTATUS(status) : 127;
 		_exit(status);
 	default:
-		while ((wpid = wait(&status)) >= 0 && wpid != pid)
-			;
-
-		/* fail: exit statuscode was non-zero */
-		if (status)
+		/* waitpid() and block on process status change,
+		   fail if exit statuscode was unavailable or non-zero */
+		if (waitpid(pid, &status, 0) <= 0 || status)
 			break;
 
 		visstart = p->pos - (p->pos % p->height); /* visible start */
@@ -2343,6 +2338,14 @@ event:
 			continue; /* just a time-out, nothing to do */
 
 		switch (sigstate) {
+		case SIGCHLD:
+			/* wait on child processes so they don't become a zombie,
+			   do not block the parent process if there is no status,
+			   ignore errors */
+			while (waitpid((pid_t)-1, NULL, WNOHANG) > 0)
+				;
+			sigstate = 0;
+			break;
 		case SIGHUP:
 			feeds_reloadall();
 			sigstate = 0;
