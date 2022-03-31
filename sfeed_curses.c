@@ -172,7 +172,8 @@ static time_t comparetime;
 static char *urlfile, **urls;
 static size_t nurls;
 
-volatile sig_atomic_t sigstate = 0;
+enum Signals { SigChld = 1, SigHup = 2, SigInt = 4, SigTerm = 8, SigWinch = 16 };
+volatile sig_atomic_t sigstate = 0; /* bitmask state of received signals */
 
 static char *plumbercmd = "xdg-open"; /* env variable: $SFEED_PLUMBER */
 static char *pipercmd = "sfeed_content"; /* env variable: $SFEED_PIPER */
@@ -1003,22 +1004,12 @@ lineeditor(void)
 			ttywrite(&input[nchars]);
 			nchars++;
 		} else if (ch < 0) {
-			switch (sigstate) {
-			case 0:
-			case SIGCHLD:
-			case SIGWINCH:
-				/* continue editing: process signal later */
-				continue;
-			case SIGINT:
-				/* cancel prompt, but do not quit */
-				sigstate = 0; /* reset: do not handle it */
-				break;
-			default: /* other: SIGHUP, SIGTERM */
-				/* cancel prompt and handle signal after */
-				break;
-			}
+			if (sigstate & SigInt)
+				sigstate &= ~SigInt; /* reset: do not handle it later */
+			else if (!sigstate || (sigstate & (SigChld | SigWinch)))
+				continue; /* do not cancel: process signal later */
 			free(input);
-			return NULL;
+			return NULL; /* cancel prompt */
 		}
 	}
 	return input;
@@ -1578,15 +1569,11 @@ void
 sighandler(int signo)
 {
 	switch (signo) {
-	case SIGCHLD:
-	case SIGHUP:
-	case SIGINT:
-	case SIGTERM:
-	case SIGWINCH:
-		/* SIGTERM is more important, do not override it */
-		if (sigstate != SIGTERM)
-			sigstate = signo;
-		break;
+	case SIGCHLD:  sigstate |= SigChld; break;
+	case SIGHUP:   sigstate |= SigHup; break;
+	case SIGINT:   sigstate |= SigInt; break;
+	case SIGTERM:  sigstate |= SigTerm; break;
+	case SIGWINCH: sigstate |= SigWinch; break;
 	}
 }
 
@@ -2337,28 +2324,27 @@ event:
 		else if (ch == -3 && sigstate == 0)
 			continue; /* just a time-out, nothing to do */
 
-		switch (sigstate) {
-		case SIGCHLD:
+		/* handle signals, in order of importance */
+		if (sigstate & SigChld) {
+			sigstate &= ~SigChld;
 			/* wait on child processes so they don't become a zombie,
 			   do not block the parent process if there is no status,
 			   ignore errors */
 			while (waitpid((pid_t)-1, NULL, WNOHANG) > 0)
 				;
-			sigstate = 0;
-			break;
-		case SIGHUP:
-			feeds_reloadall();
-			sigstate = 0;
-			break;
-		case SIGINT:
-		case SIGTERM:
+		}
+		if (sigstate & (SigInt | SigTerm)) {
 			cleanup();
-			_exit(128 + sigstate);
-		case SIGWINCH:
+			_exit(128 + (sigstate & SigTerm ? SIGTERM : SIGINT));
+		}
+		if (sigstate & SigHup) {
+			sigstate &= ~SigHup;
+			feeds_reloadall();
+		}
+		if (sigstate & SigWinch) {
+			sigstate &= ~SigWinch;
 			resizewin();
 			updategeom();
-			sigstate = 0;
-			break;
 		}
 
 		draw();
