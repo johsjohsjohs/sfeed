@@ -1569,10 +1569,10 @@ void
 sighandler(int signo)
 {
 	switch (signo) {
-	case SIGCHLD:  sigstate |= SigChld; break;
-	case SIGHUP:   sigstate |= SigHup; break;
-	case SIGINT:   sigstate |= SigInt; break;
-	case SIGTERM:  sigstate |= SigTerm; break;
+	case SIGCHLD:  sigstate |= SigChld;  break;
+	case SIGHUP:   sigstate |= SigHup;   break;
+	case SIGINT:   sigstate |= SigInt;   break;
+	case SIGTERM:  sigstate |= SigTerm;  break;
 	case SIGWINCH: sigstate |= SigWinch; break;
 	}
 }
@@ -2324,7 +2324,7 @@ event:
 		else if (ch == -3 && sigstate == 0)
 			continue; /* just a time-out, nothing to do */
 
-		/* handle signals, in order of importance */
+		/* handle signals in a particular order */
 		if (sigstate & SigChld) {
 			sigstate &= ~SigChld;
 			/* wait on child processes so they don't become a zombie,
