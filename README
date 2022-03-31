@@ -76,6 +76,7 @@ HTML view (no frames), copy style.css for a default style:
 HTML view with the menu as frames, copy style.css for a default style:
 
 	mkdir -p "$HOME/.sfeed/frames"
+	cp style.css "$HOME/.sfeed/frames/style.css"
 	cd "$HOME/.sfeed/frames" && sfeed_frames $HOME/.sfeed/feeds/*
 
 To automatically update your feeds periodically and format them in a way you
