@@ -983,6 +983,8 @@ lineeditor(void)
 	size_t cap = 0, nchars = 0;
 	int ch;
 
+	if (usemouse)
+		mousemode(0);
 	for (;;) {
 		if (nchars + 2 >= cap) {
 			cap = cap ? cap * 2 : 32;
@@ -1011,9 +1013,12 @@ lineeditor(void)
 			else /* no signal, time-out or SIGCHLD or SIGWINCH */
 				continue; /* do not cancel: process signal later */
 			free(input);
-			return NULL; /* cancel prompt */
+			input = NULL;
+			break; /* cancel prompt */
 		}
 	}
+	if (usemouse)
+		mousemode(usemouse);
 	return input;
 }
 
