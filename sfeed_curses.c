@@ -1006,12 +1006,19 @@ lineeditor(void)
 			ttywrite(&input[nchars]);
 			nchars++;
 		} else if (ch < 0) {
+			if (state_sigchld) {
+				state_sigchld = 0;
+				/* wait on child processes so they don't become a zombie */
+				while (waitpid((pid_t)-1, NULL, WNOHANG) > 0)
+					;
+			}
 			if (state_sigint)
-				state_sigint = 0; /* reset: do not handle it later */
+				state_sigint = 0; /* cancel prompt and don't handle this signal */
 			else if (state_sighup || state_sigterm)
 				; /* cancel prompt and handle these signals */
 			else /* no signal, time-out or SIGCHLD or SIGWINCH */
 				continue; /* do not cancel: process signal later */
+
 			free(input);
 			input = NULL;
 			break; /* cancel prompt */
