@@ -172,8 +172,8 @@ static time_t comparetime;
 static char *urlfile, **urls;
 static size_t nurls;
 
-enum Signals { SigChld = 1, SigHup = 2, SigInt = 4, SigTerm = 8, SigWinch = 16 };
-volatile sig_atomic_t sigstate = 0; /* bitmask state of received signals */
+volatile sig_atomic_t state_sigchld = 0, state_sighup = 0, state_sigint = 0;
+volatile sig_atomic_t state_sigterm = 0, state_sigwinch = 0;
 
 static char *plumbercmd = "xdg-open"; /* env variable: $SFEED_PLUMBER */
 static char *pipercmd = "sfeed_content"; /* env variable: $SFEED_PIPER */
@@ -1004,9 +1004,11 @@ lineeditor(void)
 			ttywrite(&input[nchars]);
 			nchars++;
 		} else if (ch < 0) {
-			if (sigstate & SigInt)
-				sigstate &= ~SigInt; /* reset: do not handle it later */
-			else if (!sigstate || (sigstate & (SigChld | SigWinch)))
+			if (state_sigint)
+				state_sigint = 0; /* reset: do not handle it later */
+			else if (state_sighup || state_sigterm)
+				; /* cancel prompt and handle these signals */
+			else /* no signal, time-out or SIGCHLD or SIGWINCH */
 				continue; /* do not cancel: process signal later */
 			free(input);
 			return NULL; /* cancel prompt */
@@ -1569,11 +1571,11 @@ void
 sighandler(int signo)
 {
 	switch (signo) {
-	case SIGCHLD:  sigstate |= SigChld;  break;
-	case SIGHUP:   sigstate |= SigHup;   break;
-	case SIGINT:   sigstate |= SigInt;   break;
-	case SIGTERM:  sigstate |= SigTerm;  break;
-	case SIGWINCH: sigstate |= SigWinch; break;
+	case SIGCHLD:  state_sigchld = 1;  break;
+	case SIGHUP:   state_sighup = 1;   break;
+	case SIGINT:   state_sigint = 1;   break;
+	case SIGTERM:  state_sigterm = 1;  break;
+	case SIGWINCH: state_sigwinch = 1; break;
 	}
 }
 
@@ -2321,28 +2323,33 @@ nextpage:
 event:
 		if (ch == EOF)
 			goto end;
-		else if (ch == -3 && sigstate == 0)
+		else if (ch == -3 && !state_sigchld && !state_sighup &&
+		         !state_sigint && !state_sigterm && !state_sigwinch)
 			continue; /* just a time-out, nothing to do */
 
 		/* handle signals in a particular order */
-		if (sigstate & SigChld) {
-			sigstate &= ~SigChld;
+		if (state_sigchld) {
+			state_sigchld = 0;
 			/* wait on child processes so they don't become a zombie,
 			   do not block the parent process if there is no status,
 			   ignore errors */
 			while (waitpid((pid_t)-1, NULL, WNOHANG) > 0)
 				;
 		}
-		if (sigstate & (SigInt | SigTerm)) {
+		if (state_sigterm) {
 			cleanup();
-			_exit(128 + (sigstate & SigTerm ? SIGTERM : SIGINT));
+			_exit(128 + SIGTERM);
 		}
-		if (sigstate & SigHup) {
-			sigstate &= ~SigHup;
+		if (state_sigint) {
+			cleanup();
+			_exit(128 + SIGINT);
+		}
+		if (state_sighup) {
+			state_sighup = 0;
 			feeds_reloadall();
 		}
-		if (sigstate & SigWinch) {
-			sigstate &= ~SigWinch;
+		if (state_sigwinch) {
+			state_sigwinch = 0;
 			resizewin();
 			updategeom();
 		}
