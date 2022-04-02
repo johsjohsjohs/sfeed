@@ -549,7 +549,7 @@ init(void)
 	cursormode(0);
 
 	if (usemouse)
-		mousemode(usemouse);
+		mousemode(1);
 
 	memset(&sa, 0, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
@@ -1025,7 +1025,7 @@ lineeditor(void)
 		}
 	}
 	if (usemouse)
-		mousemode(usemouse);
+		mousemode(1);
 	return input;
 }
 
