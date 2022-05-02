@@ -160,7 +160,7 @@ file:
 # fetch(name, url, feedfile)
 fetch() {
 	# allow for 1 redirect, hide User-Agent, timeout is 15 seconds.
-	curl -L --max-redirs 1 -H "User-Agent:" -f -s -m 15 \\
+	curl -L --max-redirs 1 -H "User-Agent:" -f -s -m 15 \e
 		"$2" 2>/dev/null
 }
 .Ed
