@@ -1,4 +1,4 @@
-.Dd March 29, 2022
+.Dd May 2, 2022
 .Dt SFEED 1
 .Os
 .Sh NAME
@@ -60,8 +60,8 @@ To convert the character set from a feed that is not UTF-8 encoded the
 .Xr iconv 1
 tool can be used:
 .Bd -literal
-curl -s 'https://codemadness.org/some_iso-8859-1_feed.xml' | \\
-iconv -f iso-8859-1 -t utf-8 | \\
+curl -s 'https://codemadness.org/some_iso-8859-1_feed.xml' | \e
+iconv -f iso-8859-1 -t utf-8 | \e
 sfeed
 .Ed
 .Sh EXAMPLE SETUP
