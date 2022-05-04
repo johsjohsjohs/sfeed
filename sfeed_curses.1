@@ -1,4 +1,4 @@
-.Dd February 24, 2022
+.Dd May 4, 2022
 .Dt SFEED_CURSES 1
 .Os
 .Sh NAME
@@ -102,7 +102,7 @@ Reset the sidebar size to automatically adjust for the current layout.
 With the vertical layout the width is the longest feed name with the item
 counts right-aligned.
 With the horizontal layout the height is half of the window height (minus the
-statusbar) or otherwise the total amount of visible feeds, whichever fits the
+status bar) or otherwise the total amount of visible feeds, whichever fits the
 best.
 .It t
 Toggle showing only feeds with new items in the sidebar.
@@ -188,13 +188,19 @@ Reload all feed files which were specified as arguments on startup.
 If
 .Ev SFEED_URL_FILE
 is set, it will reload the URLs from this file also.
+Cancels the line editor and handles the signal if received during a search.
 .It SIGINT
-Interrupt: when searching it cancels the line editor, otherwise it quits.
+Interrupt: quit.
+When searching, it only cancels the line editor and doesn't quit.
 .It SIGTERM
 Quit
 .It SIGWINCH
 Resize the pane dimensions relative to the terminal size.
+When searching, it handles the signal after closing the line editor.
 .El
+.Pp
+Signals are handled in the following order: SIGCHLD, SIGTERM, SIGINT, SIGHUP,
+SIGWINCH.
 .Sh ENVIRONMENT VARIABLES
 .Bl -tag -width Ds
 .It Ev SFEED_AUTOCMD
@@ -206,22 +212,13 @@ A program where the whole TAB-Separated Value line is piped to.
 By default this is "sfeed_content".
 .It Ev SFEED_PIPER_INTERACTIVE
 Handle the program interactively in the same terminal or not.
-If set to "1" then before execution it restores the terminal attributes and
-.Nm
-will wait until the program is finished.
-If set to "0" then it will suppress stdout and stderr output.
 By default this is set to "1".
 .It Ev SFEED_PLUMBER
 A program that receives the link URL or enclosure URL as a parameter.
 By default this is "xdg-open".
 .It Ev SFEED_PLUMBER_INTERACTIVE
 Handle the program interactively in the same terminal or not.
-If set to "1" then before execution it restores the terminal attributes and
-.Nm
-will wait until the program is finished.
-If set to "0" then it will suppress stdout and stderr output.
-For example this option is useful to open a text-mode browser in the same
-terminal.
+This option can be useful to open a text-mode browser in the same terminal.
 By default this is set to "0".
 .It Ev SFEED_YANKER
 A program where the URL or enclosure field is piped to, to copy it to a
@@ -229,10 +226,6 @@ clipboard.
 By default this is "xclip -r".
 .It Ev SFEED_YANKER_INTERACTIVE
 Handle the program interactively in the same terminal or not.
-If set to "1" then before execution it restores the terminal attributes and
-.Nm
-will wait until the program is finished.
-If set to "0" then it will suppress stdout and stderr output.
 By default this is set to "0".
 .It Ev SFEED_URL_FILE
 If this variable is set then a different mode is used to mark items as read,
@@ -267,10 +260,10 @@ It can also cause a race-condition issue if the feed data on disk is changed
 while having the UI open and offsets for the lines are different.
 A workaround for the race-condition issue is by sending the SIGHUP signal to
 .Nm
-directly after the data was updated.
-This forces
+after the data was updated.
+This makes
 .Nm
-to reload the latest feed data and update the correct line offsets.
+reload the latest feed data and update the correct line offsets.
 By default this is set to "0".
 .It Ev SFEED_FEED_PATH
 This variable is set by
@@ -279,8 +272,27 @@ when a feed is loaded.
 If the data was read from stdin this variable is unset.
 It can be used by the plumb or pipe program for scripting purposes.
 .El
+.Sh INTERACTIVE AND NON-INTERACTIVE PROGRAMS
+.Nm
+can pipe content, plumb and yank interactively or in a non-interactive manner.
+In interactive mode
+.Nm
+waits until the process exits.
+Stdout and stderr of the program are written as output.
+It stores and restores the terminal attributes before and after executing the
+program.
+The signals SIGHUP and SIGWINCH will be handled after
+.Nm
+has waited on the program.
+SIGINT is ignored while waiting on the program.
+.Pp
+In non-interactive mode
+.Nm
+doesn't wait until the process exits.
+Stdout and stderr of the program are not written as output.
 .Sh EXIT STATUS
 .Ex -std
+The exit status is 130 on SIGINT and 143 on SIGTERM.
 .Sh EXAMPLES
 .Bd -literal
 sfeed_curses ~/.sfeed/feeds/*
