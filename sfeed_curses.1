@@ -1,4 +1,4 @@
-.Dd May 4, 2022
+.Dd May 5, 2022
 .Dt SFEED_CURSES 1
 .Os
 .Sh NAME
@@ -290,6 +290,7 @@ In non-interactive mode
 .Nm
 doesn't wait until the process exits.
 Stdout and stderr of the program are not written as output.
+When plumbing an URL then stdin is closed also.
 .Sh EXIT STATUS
 .Ex -std
 The exit status is 130 on SIGINT and 143 on SIGTERM.

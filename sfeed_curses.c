@@ -604,8 +604,8 @@ pipeitem(const char *cmd, struct item *item, int field, int interactive)
 		die("fork");
 	case 0:
 		if (!interactive) {
-			dup2(devnullfd, 1);
-			dup2(devnullfd, 2);
+			dup2(devnullfd, 1); /* stdout */
+			dup2(devnullfd, 2); /* stderr */
 		}
 
 		errno = 0;
@@ -642,8 +642,9 @@ forkexec(char *argv[], int interactive)
 		die("fork");
 	case 0:
 		if (!interactive) {
-			dup2(devnullfd, 1);
-			dup2(devnullfd, 2);
+			dup2(devnullfd, 0); /* stdin */
+			dup2(devnullfd, 1); /* stdout */
+			dup2(devnullfd, 2); /* stderr */
 		}
 		if (execvp(argv[0], argv) == -1)
 			_exit(1);
@@ -1847,8 +1848,8 @@ markread(struct pane *p, off_t from, off_t to, int isread)
 	case -1:
 		die("fork");
 	case 0:
-		dup2(devnullfd, 1);
-		dup2(devnullfd, 2);
+		dup2(devnullfd, 1); /* stdout */
+		dup2(devnullfd, 2); /* stderr */
 
 		errno = 0;
 		if (!(fp = popen(cmd, "w")))
