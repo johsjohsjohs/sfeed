@@ -576,7 +576,7 @@ processexit(pid_t pid, int interactive)
 		sa.sa_handler = SIG_IGN;
 		sigaction(SIGINT, &sa, NULL);
 
-		sa.sa_flags = 0; /* do not restart SIGTERM: this interrupts waitpid() */
+		sa.sa_flags = 0; /* SIGTERM: interrupt waitpid(), no SA_RESTART */
 		sa.sa_handler = sighandler;
 		sigaction(SIGTERM, &sa, NULL);
 
