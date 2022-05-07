@@ -575,8 +575,14 @@ processexit(pid_t pid, int interactive)
 		/* ignore SIGINT (^C) in parent for interactive applications */
 		sa.sa_handler = SIG_IGN;
 		sigaction(SIGINT, &sa, NULL);
+
+		sa.sa_flags = 0; /* do not restart SIGTERM: this interrupts waitpid() */
+		sa.sa_handler = sighandler;
+		sigaction(SIGTERM, &sa, NULL);
+
 		/* wait for process to change state, ignore errors */
 		waitpid(pid, NULL, 0);
+
 		init();
 		updatesidebar();
 		updategeom();
