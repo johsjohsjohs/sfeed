@@ -971,6 +971,53 @@ TSV format.
 
 - - -
 
+Progress indicator
+------------------
+
+The below sfeed_update wrapper script counts the amount of feeds in a sfeedrc
+config.  It then calls sfeed_update and pipes the output lines to a function
+that counts the current progress. It writes the total progress to stderr.
+Alternative: pv -l -s totallines
+
+	#!/bin/sh
+	# Progress indicator script.
+	
+	# Pass lines as input to stdin and write progress status to stderr.
+	# progress(totallines)
+	progress() {
+		total="$(($1 + 0))" # must be a number, no divide by zero.
+		test "${total}" -le 0 -o "$1" != "${total}" && return
+	LC_ALL=C awk -v "total=${total}" '
+	{
+		counter++;
+		percent = (counter * 100) / total;
+		printf("\033[K") > "/dev/stderr"; # clear EOL
+		print $0;
+		printf("[%s/%s] %.0f%%\r", counter, total, percent) > "/dev/stderr";
+		fflush(); # flush all buffers per line.
+	}
+	END {
+		printf("\033[K") > "/dev/stderr";
+	}'
+	}
+	
+	# Counts the feeds from the sfeedrc config.
+	countfeeds() {
+		count=0
+	. "$1"
+	feed() {
+		count=$((count + 1))
+	}
+		feeds
+		echo "${count}"
+	}
+	
+	config="${1:-$HOME/.sfeed/sfeedrc}"
+	total=$(countfeeds "${config}")
+	sfeed_update "${config}" | progress "${total}"
+
+- - -
+
 Counting unread and total items
 -------------------------------
 
