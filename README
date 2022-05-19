@@ -1014,7 +1014,7 @@ Alternative: pv -l -s totallines
 	
 	config="${1:-$HOME/.sfeed/sfeedrc}"
 	total=$(countfeeds "${config}")
-	sfeed_update "${config}" | progress "${total}"
+	sfeed_update "${config}" 2>&1 | progress "${total}"
 
 - - -
 
