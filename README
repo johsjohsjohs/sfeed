@@ -1039,7 +1039,7 @@ formatting tools do:
 	END {
 		print "New:   " totalnew;
 		print "Total: " total;
-	}' ~/.sfeed/urls ~/.sfeed/feeds/*
+	}' ~/.sfeed/feeds/*
 
 The below example script counts the unread items using the sfeed_curses URL
 file:
