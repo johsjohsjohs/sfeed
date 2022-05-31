@@ -1,5 +1,3 @@
-#include <sys/ioctl.h>
-
 #undef  OK
 #define OK  (0)
 
