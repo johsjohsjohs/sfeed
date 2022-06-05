@@ -567,11 +567,11 @@ processexit(pid_t pid, int interactive)
 {
 	struct sigaction sa;
 
-	memset(&sa, 0, sizeof(sa));
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_RESTART; /* require BSD signal semantics */
-
 	if (interactive) {
+		memset(&sa, 0, sizeof(sa));
+		sigemptyset(&sa.sa_mask);
+		sa.sa_flags = SA_RESTART; /* require BSD signal semantics */
+
 		/* ignore SIGINT (^C) in parent for interactive applications */
 		sa.sa_handler = SIG_IGN;
 		sigaction(SIGINT, &sa, NULL);
