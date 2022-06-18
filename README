@@ -1109,6 +1109,21 @@ Example of a `syncnews.sh` shellscript to update the feeds and reload them:
 	pkill -SIGHUP sfeed_curses
 
 
+Running programs in a new session
+---------------------------------
+
+By default processes are spawned in the same session and process group as
+sfeed_curses.  When sfeed_curses is closed this can also close the spawned
+process in some cases.
+
+When the setsid command-line program is available the following wrapper command
+can be used to run the program in a new session, for a plumb program:
+
+	setsid -f xdg-open "$@"
+
+Alternatively the code can be changed to call setsid() before execvp().
+
+
 Open an URL directly in the same terminal
 -----------------------------------------
 
