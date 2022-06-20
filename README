@@ -834,7 +834,7 @@ arguments are specified then the data is read from stdin.
 	if [ "${SFEED_DOWNLOAD_CHILD}" = "1" ]; then
 		# Downloader helper for parallel downloading.
 		# Receives arguments: $1 = URL, $2 = title, $3 = feed filename or "-".
-		# It should write the URI to the cachefile if it is succesful.
+		# It should write the URI to the cachefile if it is successful.
 		downloader "$1" "$2" "$3"
 		exit $?
 	fi

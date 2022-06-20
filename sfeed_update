@@ -182,7 +182,7 @@ sighandler() {
 	signo="$1"
 	# ignore TERM signal for myself.
 	trap -- "" TERM
-	# kill all running childs >:D
+	# kill all running children >:D
 	kill -TERM -$$
 }
 
