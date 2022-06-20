@@ -757,7 +757,7 @@ xmlattrentity(XMLParser *p, const char *t, size_t tl, const char *n, size_t nl,
 		return;
 
 	/* try to translate entity, else just pass as data to
-	 * xmldata handler. */
+	 * xmlattr handler. */
 	if ((len = xml_entitytostr(data, buf, sizeof(buf))) > 0)
 		xmlattr(p, t, tl, n, nl, buf, (size_t)len);
 	else
