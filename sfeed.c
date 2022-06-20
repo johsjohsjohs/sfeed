@@ -966,7 +966,7 @@ xmltagend(XMLParser *p, const char *t, size_t tl, int isshort)
 		return;
 
 	if (ISINCONTENT(ctx)) {
-		/* not close content field */
+		/* not a closed content field */
 		if (!istag(ctx.tag.name, ctx.tag.len, t, tl)) {
 			if (!isshort && ctx.contenttype == ContentTypeHTML) {
 				xmldata(p, "</", 2);
